@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -21,7 +22,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,6 +40,7 @@ import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.domain.enums.SessionStatus
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroTimer
+import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import org.koin.compose.viewmodel.koinViewModel
@@ -64,6 +69,11 @@ fun PomodoroScreen(
     onEvent: (PomodoroEvent) -> Unit
 ) {
 
+    val pomodoroSettingBottomSheet = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -86,14 +96,21 @@ fun PomodoroScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = {}
+
+                        onClick = {
+                            onEvent(PomodoroEvent.OnShowPomodoroSettingBottomSheet(true))
+                        }
                     ) {
                         Icon(
+                            modifier = Modifier.size(20.dp),
                             painter = painterResource(id = R.drawable.outline_settings_24),
                             contentDescription = null
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { innerPadding ->
@@ -106,7 +123,7 @@ fun PomodoroScreen(
                 verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                
+
                 BoxWithConstraints(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
@@ -195,6 +212,26 @@ fun PomodoroScreen(
 
             }
         }
+    }
+
+
+    LaunchedEffect(uiState.showPomodoroSettingBottomSheet) {
+
+        if (uiState.showPomodoroSettingBottomSheet) {
+            pomodoroSettingBottomSheet.expand()
+        } else {
+            pomodoroSettingBottomSheet.hide()
+        }
+    }
+
+    if (uiState.showPomodoroSettingBottomSheet) {
+
+        PomodoroSettingBottomSheet(
+            sheetState = pomodoroSettingBottomSheet,
+            onDismissRequest = {
+                onEvent(PomodoroEvent.OnShowPomodoroSettingBottomSheet(false))
+            }
+        )
     }
 }
 

@@ -8,5 +8,6 @@ data class PomodoroUiState(
     val time: Int = TIME_SESSION,
     val timeSession: Int = TIME_SESSION,
     val isPlay: Boolean = false,
+    val showPomodoroSettingBottomSheet: Boolean = false,
     val sessionStatus: SessionStatus = SessionStatus.START
 )

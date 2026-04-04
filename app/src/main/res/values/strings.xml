@@ -8,4 +8,7 @@
     <string name="retomar">Retomar</string>
     <string name="recomecar">Recomeçar</string>
     <string name="pomodoro">Pomodoro</string>
+    <string name="label_pomodoro">Pomodoro</string>
+    <string name="label_pausa_curta">Pausa curta</string>
+    <string name="label_pausa_longa">Pausa longa</string>
 </resources>

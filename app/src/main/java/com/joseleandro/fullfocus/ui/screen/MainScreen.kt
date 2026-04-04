@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,7 +49,8 @@ fun MainScreen(
     Scaffold(
         bottomBar = {
             MainBottomAppBar()
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
 
         Box(
@@ -76,8 +78,14 @@ fun MainScreen(
 
 @Composable
 fun MainBottomAppBar(modifier: Modifier = Modifier) {
-    BottomAppBar() {
-        NavigationBar() {
+    BottomAppBar(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
+
+        NavigationBar(
+            containerColor = Color.Transparent
+        ) {
 
             NavigationBarItem(
                 selected = true,
@@ -103,13 +111,32 @@ fun MainBottomAppBar(modifier: Modifier = Modifier) {
                 onClick = { /*TODO*/ },
                 icon = {
                     Icon(
-                        painter = painterResource(id = R.drawable.round_check_circle_outline_24),
+                        painter = painterResource(id = R.drawable.round_check_circle_24),
                         contentDescription = null
                     )
                 },
                 label = {
                     Text(
                         text = "Tarefas",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                }
+            )
+
+            NavigationBarItem(
+                selected = false,
+                onClick = { /*TODO*/ },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.rounded_bar_chart_24),
+                        contentDescription = null
+                    )
+                },
+                label = {
+                    Text(
+                        text = "Relatório",
                         style = MaterialTheme.typography.labelSmall.copy(
                             color = MaterialTheme.colorScheme.onSurface
                         )

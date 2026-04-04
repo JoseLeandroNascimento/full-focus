@@ -8,4 +8,6 @@ sealed interface PomodoroEvent {
 
     data object OnRestart : PomodoroEvent
 
+    data class OnShowPomodoroSettingBottomSheet(val show: Boolean) : PomodoroEvent
+
 }

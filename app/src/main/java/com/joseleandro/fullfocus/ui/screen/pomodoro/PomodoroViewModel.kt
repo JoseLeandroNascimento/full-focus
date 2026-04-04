@@ -25,6 +25,9 @@ class PomodoroViewModel : ViewModel() {
             PomodoroEvent.OnPlay -> play()
             PomodoroEvent.OnPause -> pause()
             PomodoroEvent.OnRestart -> restart()
+            is PomodoroEvent.OnShowPomodoroSettingBottomSheet -> changeVisibilityPomodoroBottomSheet(
+                event.show
+            )
         }
     }
 
@@ -79,6 +82,14 @@ class PomodoroViewModel : ViewModel() {
                 isPlay = false,
                 time = PomodoroUiState().time,
                 sessionStatus = SessionStatus.START
+            )
+        }
+    }
+
+    private fun changeVisibilityPomodoroBottomSheet(show: Boolean) {
+        _uiState.update { uiState ->
+            uiState.copy(
+                showPomodoroSettingBottomSheet = show
             )
         }
     }
