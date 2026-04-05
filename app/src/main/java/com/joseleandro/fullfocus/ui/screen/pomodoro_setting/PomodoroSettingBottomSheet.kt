@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,6 +18,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -154,8 +156,26 @@ fun PomodoroSettingBottomSheet(
                         }
                     )
 
+                    ListItem(
+                        modifier = Modifier.padding(horizontal = 0.dp),
+                        headlineContent = {
+                            Text(
+                                text = "Pausa longo a cada",
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = .7f)
+                                )
+                            )
+                        },
+                        trailingContent = {
+                            TimerInput(
+                                modifier = Modifier.width(100.dp),
+                                value = "4",
+                                onValueChange = {}
+                            )
+                        }
+                    )
                 }
-
             }
         }
     }

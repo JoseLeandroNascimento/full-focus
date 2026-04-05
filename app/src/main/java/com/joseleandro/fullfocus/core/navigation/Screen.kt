@@ -5,6 +5,5 @@ import kotlinx.serialization.Serializable
 sealed interface Screen {
 
     @Serializable
-    data object PomodoroScreen: Screen
-
+    data object MainScreen : Screen
 }

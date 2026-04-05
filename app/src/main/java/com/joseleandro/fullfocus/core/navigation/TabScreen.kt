@@ -5,7 +5,14 @@ import kotlinx.serialization.Serializable
 sealed interface TabScreen {
 
     @Serializable
-    data object PomodoroScreen: TabScreen
+    data object PomodoroScreen : TabScreen
+
+    @Serializable
+    data object ListTasksScreen : TabScreen
+
+
+    @Serializable
+    data object ReportScreen : TabScreen
 
 
 }

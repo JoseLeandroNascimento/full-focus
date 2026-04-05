@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.joseleandro.fullfocus.ui.screen.MainScreen
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 class MainActivity : ComponentActivity() {
@@ -15,9 +14,10 @@ class MainActivity : ComponentActivity() {
             FullFocusTheme(
                 dynamicColor = false
             ) {
-                MainScreen()
+                Routes()
             }
         }
     }
 }
+
 

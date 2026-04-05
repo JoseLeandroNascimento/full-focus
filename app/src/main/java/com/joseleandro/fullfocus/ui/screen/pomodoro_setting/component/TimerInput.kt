@@ -43,31 +43,45 @@ fun TimerInput(
             )
         )
 
-        BasicTextField(
-            modifier = Modifier.fillMaxWidth(),
+        TimerInput(
             value = value,
-            textStyle = TextStyle(
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            ),
             onValueChange = onValueChange
-        ) { innerTextField ->
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = .1f),
-                        shape = MaterialTheme.shapes.medium
-                    )
-                    .height(48.dp)
-                    .padding(horizontal = 16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                innerTextField()
-            }
+        )
+    }
+}
+
+@Composable
+fun TimerInput(
+    modifier: Modifier = Modifier,
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+
+    BasicTextField(
+        modifier = modifier.fillMaxWidth(),
+        value = value,
+        textStyle = TextStyle(
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+        ),
+        onValueChange = onValueChange
+    ) { innerTextField ->
+        Box(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = .05f),
+                    shape = MaterialTheme.shapes.medium
+                )
+                .height(48.dp)
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            innerTextField()
         }
     }
+
 }
 
 @Preview(showBackground = true)

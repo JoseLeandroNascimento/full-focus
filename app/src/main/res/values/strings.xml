@@ -11,4 +11,9 @@
     <string name="label_pomodoro">Pomodoro</string>
     <string name="label_pausa_curta">Pausa curta</string>
     <string name="label_pausa_longa">Pausa longa</string>
+    <string name="tarefas">Tarefas</string>
+    <string name="relat_rio">Relatório</string>
+    <string name="minhas_tarefas">Minhas tarefas</string>
+    <string name="todas">Todas</string>
+    <string name="filtrar_por">Filtrar por</string>
 </resources>

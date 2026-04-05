@@ -16,12 +16,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.core.navigation.Screen
+import com.joseleandro.fullfocus.core.navigation.ETabScreen
+import com.joseleandro.fullfocus.core.navigation.TabScreen
+import com.joseleandro.fullfocus.ui.screen.list_tasks.ListTasksScreen
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import org.koin.compose.viewmodel.koinViewModel
@@ -30,25 +32,33 @@ import org.koin.compose.viewmodel.koinViewModel
 fun MainScreen() {
 
     val navigationViewModel: NavigationViewModel = koinViewModel()
-    val backStack by navigationViewModel.backStack.collectAsStateWithLifecycle()
+    val backStack by navigationViewModel.tabBackStack.collectAsStateWithLifecycle()
+    val currentTab = navigationViewModel.currentTab
 
     MainScreen(
         backStack = backStack,
-        onBack = navigationViewModel::onBack
+        onBack = {},
+        onNavigate = navigationViewModel::selectedTab,
+        currentTab = currentTab
     )
 }
 
 @Composable
 fun MainScreen(
-    backStack: List<Screen>,
-    onBack: () -> Unit
+    backStack: List<TabScreen>,
+    onBack: () -> Unit,
+    currentTab: TabScreen,
+    onNavigate: (TabScreen)-> Unit
 ) {
 
     val isPreview = LocalInspectionMode.current
 
     Scaffold(
         bottomBar = {
-            MainBottomAppBar()
+            MainBottomAppBar(
+                currentTab = currentTab,
+                onNavigate = onNavigate
+            )
         },
         containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
@@ -65,8 +75,12 @@ fun MainScreen(
                     onBack = onBack,
                     entryProvider = entryProvider {
 
-                        entry<Screen.PomodoroScreen> {
+                        entry<TabScreen.PomodoroScreen> {
                             PomodoroScreen()
+                        }
+
+                        entry<TabScreen.ListTasksScreen> {
+                            ListTasksScreen()
                         }
 
                     }
@@ -77,7 +91,11 @@ fun MainScreen(
 }
 
 @Composable
-fun MainBottomAppBar(modifier: Modifier = Modifier) {
+fun MainBottomAppBar(
+    modifier: Modifier = Modifier,
+    currentTab: TabScreen,
+    onNavigate: (TabScreen)-> Unit
+) {
     BottomAppBar(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surface
@@ -86,63 +104,27 @@ fun MainBottomAppBar(modifier: Modifier = Modifier) {
         NavigationBar(
             containerColor = Color.Transparent
         ) {
+            ETabScreen.entries.forEach { tabScreen ->
 
-            NavigationBarItem(
-                selected = true,
-                onClick = { /*TODO*/ },
-                icon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_access_time_filled_24),
-                        contentDescription = null
-                    )
-                },
-                label = {
-                    Text(
-                        text = "Pomodoro",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.onSurface
+                NavigationBarItem(
+                    selected = tabScreen.route == currentTab,
+                    onClick = { onNavigate(tabScreen.route) },
+                    icon = {
+                        Icon(
+                            painter = painterResource(id = tabScreen.iconRes),
+                            contentDescription = null
                         )
-                    )
-                }
-            )
-
-            NavigationBarItem(
-                selected = false,
-                onClick = { /*TODO*/ },
-                icon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.round_check_circle_24),
-                        contentDescription = null
-                    )
-                },
-                label = {
-                    Text(
-                        text = "Tarefas",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.onSurface
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(id = tabScreen.label),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         )
-                    )
-                }
-            )
-
-            NavigationBarItem(
-                selected = false,
-                onClick = { /*TODO*/ },
-                icon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.rounded_bar_chart_24),
-                        contentDescription = null
-                    )
-                },
-                label = {
-                    Text(
-                        text = "Relatório",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    )
-                }
-            )
+                    }
+                )
+            }
 
         }
     }
@@ -156,8 +138,10 @@ private fun MainScreenLightPreview() {
         darkTheme = false
     ) {
         MainScreen(
-            backStack = listOf(Screen.PomodoroScreen),
-            onBack = {}
+            backStack = listOf(TabScreen.PomodoroScreen),
+            onBack = {},
+            currentTab = TabScreen.PomodoroScreen,
+            onNavigate = {}
         )
     }
 }
@@ -170,8 +154,10 @@ private fun MainScreenDarkPreview() {
         darkTheme = true
     ) {
         MainScreen(
-            backStack = listOf(Screen.PomodoroScreen),
-            onBack = {}
+            backStack = listOf(TabScreen.PomodoroScreen),
+            onBack = {},
+            currentTab = TabScreen.PomodoroScreen,
+            onNavigate = {}
         )
     }
 }
