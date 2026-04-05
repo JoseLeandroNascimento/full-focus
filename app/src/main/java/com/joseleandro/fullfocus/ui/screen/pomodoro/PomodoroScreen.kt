@@ -25,8 +25,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -43,6 +43,7 @@ import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroTimer
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -72,6 +73,8 @@ fun PomodoroScreen(
     val pomodoroSettingBottomSheet = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
+
+    val scope = rememberCoroutineScope()
 
 
     Scaffold(
@@ -215,21 +218,15 @@ fun PomodoroScreen(
     }
 
 
-    LaunchedEffect(uiState.showPomodoroSettingBottomSheet) {
-
-        if (uiState.showPomodoroSettingBottomSheet) {
-            pomodoroSettingBottomSheet.expand()
-        } else {
-            pomodoroSettingBottomSheet.hide()
-        }
-    }
-
     if (uiState.showPomodoroSettingBottomSheet) {
 
         PomodoroSettingBottomSheet(
             sheetState = pomodoroSettingBottomSheet,
             onDismissRequest = {
                 onEvent(PomodoroEvent.OnShowPomodoroSettingBottomSheet(false))
+                scope.launch {
+                    pomodoroSettingBottomSheet.hide()
+                }
             }
         )
     }
