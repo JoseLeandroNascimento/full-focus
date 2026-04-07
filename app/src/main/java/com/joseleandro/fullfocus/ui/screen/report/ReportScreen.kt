@@ -14,7 +14,7 @@ import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReportScreen(modifier: Modifier = Modifier) {
+fun ReportScreen() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(

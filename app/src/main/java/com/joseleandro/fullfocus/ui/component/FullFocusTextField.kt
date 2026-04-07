@@ -23,6 +23,7 @@ fun FullFocusTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
+    error: String? = null,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
     maxLines: Int = 1
@@ -41,6 +42,17 @@ fun FullFocusTextField(
                 text = label,
                 style = MaterialTheme.typography.labelLarge
             )
+        },
+        isError = error != null,
+        supportingText = error?.let { errorMessage ->
+            {
+                Text(
+                    text = errorMessage,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.error
+                    )
+                )
+            }
         },
         maxLines = maxLines,
         colors = TextFieldDefaults.colors(
@@ -61,6 +73,7 @@ private fun FullFocusTextFieldLightPreview() {
         FullFocusTextField(
             label = stringResource(R.string.nome_da_tag),
             value = "",
+            error = "Campo obrigatório",
             onValueChange = {},
             leadingIcon = {
                 Icon(

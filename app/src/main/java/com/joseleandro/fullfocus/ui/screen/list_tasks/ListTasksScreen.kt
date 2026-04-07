@@ -1,6 +1,7 @@
 package com.joseleandro.fullfocus.ui.screen.list_tasks
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -21,11 +23,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -33,30 +33,52 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.domain.data.TagDomain
-import com.joseleandro.fullfocus.domain.data.tagsListMock
 import com.joseleandro.fullfocus.domain.data.tasksListMock
 import com.joseleandro.fullfocus.ui.component.FullFocusFloatingActionButton
-import com.joseleandro.fullfocus.ui.screen.create_task.CreateTaskBottomSheet
 import com.joseleandro.fullfocus.ui.component.FullFocusTagFilterChip
+import com.joseleandro.fullfocus.ui.event.ListTasksEvent
 import com.joseleandro.fullfocus.ui.screen.create_tag.CreateTagBottomSheet
+import com.joseleandro.fullfocus.ui.screen.create_task.CreateTaskBottomSheet
 import com.joseleandro.fullfocus.ui.screen.list_tasks.component.TaskCard
+import com.joseleandro.fullfocus.ui.state.ListTasksFilter
+import com.joseleandro.fullfocus.ui.state.ListTasksUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
+@Composable
+fun ListTasksScreen() {
+
+    val viewModel: ListTasksViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.onEvent(ListTasksEvent.OnLoad)
+    }
+
+    ListTasksScreen(
+        uiState = uiState,
+        onEvent = viewModel::onEvent
+    )
+
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListTasksScreen() {
+fun ListTasksScreen(
+    uiState: ListTasksUiState,
+    onEvent: (ListTasksEvent) -> Unit
+) {
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     val createTaskBottomSheetState = rememberModalBottomSheetState()
-    var createTaskBottomSheetShow by remember { mutableStateOf(false) }
 
     val createTagBottomSheetState = rememberModalBottomSheetState()
-    var createTagBottomSheetShow by remember { mutableStateOf(false) }
+//    var createTagBottomSheetShow by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -103,59 +125,90 @@ fun ListTasksScreen() {
 
             FullFocusFloatingActionButton(
                 onClick = {
-                    createTaskBottomSheetShow = true
+                    onEvent(ListTasksEvent.OnChangeVisibilityCreateTaskBottomSheetShow(true))
                 },
                 iconRes = R.drawable.outline_add_24
             )
         },
-        containerColor = MaterialTheme.colorScheme.surface,
+        containerColor = MaterialTheme.colorScheme.surface
 
-        ) { innerPadding ->
+    ) { innerPadding ->
 
-        LazyColumn(
+        Box(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(bottom = 100.dp)
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
         ) {
 
-            item {
-
-                Column() {
-                    Text(
-                        text = stringResource(R.string.filtrar_por),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = .7f)
-                        ),
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                    TagsFilterRow(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        tags = tagsListMock,
-                        onNewTag = {
-                            createTagBottomSheetShow = true
-                        }
-                    )
+            when {
+                uiState.isLoading -> {
+                    CircularProgressIndicator()
                 }
-            }
 
-            items(items = tasksListMock, key = { it.id }) { task ->
-                TaskCard(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    task = task
-                )
+                else -> {
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(bottom = 100.dp)
+                    ) {
+
+                        item {
+
+                            Column() {
+
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    text = stringResource(R.string.filtrar_por),
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = .7f)
+                                    ),
+                                )
+
+                                TagsFilterRow(
+                                    modifier = Modifier.padding(vertical = 8.dp),
+                                    tags = uiState.tags,
+                                    currentTag = uiState.filter.tag,
+                                    onChangeValue = {
+                                        onEvent(
+                                            ListTasksEvent.OnFilter(
+                                                ListTasksFilter(tag = it?.id)
+                                            )
+                                        )
+                                    },
+                                    onNewTag = {
+                                        onEvent(
+                                            ListTasksEvent.OnChangeVisibilityCreateTagBottomSheetShow(
+                                                true
+                                            )
+                                        )
+                                    }
+                                )
+                            }
+                        }
+
+                        items(items = tasksListMock, key = { it.id }) { task ->
+                            TaskCard(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                task = task
+                            )
+                        }
+
+                    }
+                }
             }
 
         }
 
     }
 
-    if(createTagBottomSheetShow){
+    if (uiState.createTagBottomSheetShow) {
         CreateTagBottomSheet(
             sheetState = createTagBottomSheetState,
             onDismissRequest = {
-                createTagBottomSheetShow = false
+                onEvent(ListTasksEvent.OnChangeVisibilityCreateTagBottomSheetShow(false))
                 scope.launch {
                     createTagBottomSheetState.hide()
                 }
@@ -163,12 +216,12 @@ fun ListTasksScreen() {
         )
     }
 
-    if (createTaskBottomSheetShow) {
+    if (uiState.createTaskBottomSheetShow) {
 
         CreateTaskBottomSheet(
             sheetState = createTaskBottomSheetState,
             onDismissRequest = {
-                createTaskBottomSheetShow = false
+                onEvent(ListTasksEvent.OnChangeVisibilityCreateTaskBottomSheetShow(false))
                 scope.launch {
                     createTaskBottomSheetState.hide()
                 }
@@ -181,6 +234,8 @@ fun ListTasksScreen() {
 @Composable
 fun TagsFilterRow(
     modifier: Modifier = Modifier, tags: List<TagDomain>,
+    currentTag: Int? = null,
+    onChangeValue: (TagDomain?) -> Unit,
     onNewTag: () -> Unit
 ) {
 
@@ -195,8 +250,10 @@ fun TagsFilterRow(
         item {
 
             FullFocusTagFilterChip(
-                selected = true,
-                onClick = {},
+                selected = currentTag == null,
+                onClick = {
+                    onChangeValue(null)
+                },
                 label = stringResource(R.string.todas)
             )
         }
@@ -206,8 +263,10 @@ fun TagsFilterRow(
             key = { it.id }
         ) { tag ->
             FullFocusTagFilterChip(
-                selected = false,
-                onClick = {},
+                selected = currentTag == tag.id,
+                onClick = {
+                    onChangeValue(tag)
+                },
                 label = tag.name
             )
         }
@@ -236,7 +295,12 @@ private fun ListTasksScreenLightPreview() {
         dynamicColor = false,
         darkTheme = false
     ) {
-        ListTasksScreen()
+        ListTasksScreen(
+            uiState = ListTasksUiState(
+                isLoading = false
+            ),
+            onEvent = {}
+        )
     }
 }
 
@@ -247,6 +311,9 @@ private fun ListTasksScreenDarkPreview() {
         dynamicColor = false,
         darkTheme = true
     ) {
-        ListTasksScreen()
+        ListTasksScreen(
+            uiState = ListTasksUiState(),
+            onEvent = {}
+        )
     }
 }

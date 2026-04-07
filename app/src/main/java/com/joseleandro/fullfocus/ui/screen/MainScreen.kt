@@ -8,6 +8,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
@@ -110,9 +112,17 @@ fun MainBottomAppBar(
         ) {
             ETabScreen.entries.forEach { tabScreen ->
 
+                val selected = tabScreen.route == currentTab
+
                 NavigationBarItem(
-                    selected = tabScreen.route == currentTab,
+                    selected = selected,
                     onClick = { onNavigate(tabScreen.route) },
+                    colors = NavigationBarItemDefaults.colors(
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .1f)
+                    ),
                     icon = {
                         Icon(
                             painter = painterResource(id = tabScreen.iconRes),
@@ -123,7 +133,7 @@ fun MainBottomAppBar(
                         Text(
                             text = stringResource(id = tabScreen.label),
                             style = MaterialTheme.typography.labelSmall.copy(
-                                color = MaterialTheme.colorScheme.onSurface
+                                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
                             )
                         )
                     }

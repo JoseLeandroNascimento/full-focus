@@ -1,8 +1,10 @@
 package com.joseleandro.fullfocus.ui.screen.create_tag
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -11,21 +13,57 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheet
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheetHeader
 import com.joseleandro.fullfocus.ui.component.FullFocusTextField
+import com.joseleandro.fullfocus.ui.event.CreateTagEvent
+import com.joseleandro.fullfocus.ui.state.CreateTagUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateTagBottomSheet(
     modifier: Modifier = Modifier,
+    idTag: Int? = null,
+    sheetState: SheetState,
+    onDismissRequest: () -> Unit
+) {
+
+    val viewModel: CreateTagViewModel = koinViewModel()
+    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.onEvent(CreateTagEvent.OnLoad(id = idTag))
+    }
+
+    CreateTagBottomSheet(
+        modifier = modifier,
+        sheetState = sheetState,
+        uiState = uiState.value,
+        onEvent = viewModel::onEvent,
+        onDismissRequest = {
+            viewModel.onEvent(CreateTagEvent.OnReset)
+            onDismissRequest()
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateTagBottomSheet(
+    modifier: Modifier = Modifier,
+    uiState: CreateTagUiState,
+    onEvent: (CreateTagEvent) -> Unit,
     sheetState: SheetState,
     onDismissRequest: () -> Unit
 ) {
@@ -53,7 +91,13 @@ fun CreateTagBottomSheet(
                 },
                 trailingIcon = {
                     TextButton(
-                        onClick = {}
+                        onClick = {
+                            onEvent(
+                                CreateTagEvent.OnSave(onSuccess = {
+                                    onDismissRequest()
+                                })
+                            )
+                        }
                     ) {
                         Text(
                             text = stringResource(R.string.salvar)
@@ -63,38 +107,52 @@ fun CreateTagBottomSheet(
             )
         }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp)
+
+        Box(
+            contentAlignment = Alignment.Center
         ) {
 
-            FullFocusTextField(
-                label = stringResource(R.string.nome_da_tag),
-                value = "",
-                onValueChange = {},
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.round_bookmarks_24),
-                        contentDescription = null
-                    )
-                },
-                trailingIcon = {
-                    IconButton(
-                        onClick = {}
-                    ) {
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 32.dp)
+            ) {
+
+                FullFocusTextField(
+                    label = stringResource(R.string.nome_da_tag),
+                    value = uiState.form.name.value,
+                    onValueChange = { value ->
+                        onEvent(CreateTagEvent.OnNameChange(value))
+                    },
+                    error = uiState.form.name.messageError?.getMessage(),
+                    leadingIcon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.outline_palette_24),
+                            painter = painterResource(id = R.drawable.round_bookmarks_24),
                             contentDescription = null
                         )
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {}
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.outline_palette_24),
+                                contentDescription = null
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
+
+            if (uiState.isLoading)
+                CircularProgressIndicator()
+
         }
     }
-
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -106,6 +164,8 @@ private fun CreateTagBottomSheetLightPreview() {
     ) {
         CreateTagBottomSheet(
             sheetState = rememberModalBottomSheetState(),
+            uiState = CreateTagUiState(),
+            onEvent = {},
             onDismissRequest = {}
         )
     }
@@ -121,6 +181,8 @@ private fun CreateTagBottomSheetDarkPreview() {
     ) {
         CreateTagBottomSheet(
             sheetState = rememberModalBottomSheetState(),
+            uiState = CreateTagUiState(),
+            onEvent = {},
             onDismissRequest = {}
         )
     }
