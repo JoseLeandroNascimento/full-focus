@@ -40,6 +40,7 @@ import com.joseleandro.fullfocus.domain.data.tasksListMock
 import com.joseleandro.fullfocus.ui.component.FullFocusFloatingActionButton
 import com.joseleandro.fullfocus.ui.screen.create_task.CreateTaskBottomSheet
 import com.joseleandro.fullfocus.ui.component.FullFocusTagFilterChip
+import com.joseleandro.fullfocus.ui.screen.create_tag.CreateTagBottomSheet
 import com.joseleandro.fullfocus.ui.screen.list_tasks.component.TaskCard
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import kotlinx.coroutines.launch
@@ -50,8 +51,12 @@ import kotlinx.coroutines.launch
 fun ListTasksScreen() {
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+
     val createTaskBottomSheetState = rememberModalBottomSheetState()
     var createTaskBottomSheetShow by remember { mutableStateOf(false) }
+
+    val createTagBottomSheetState = rememberModalBottomSheetState()
+    var createTagBottomSheetShow by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -127,7 +132,10 @@ fun ListTasksScreen() {
                     )
                     TagsFilterRow(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        tags = tagsListMock
+                        tags = tagsListMock,
+                        onNewTag = {
+                            createTagBottomSheetShow = true
+                        }
                     )
                 }
             }
@@ -141,6 +149,18 @@ fun ListTasksScreen() {
 
         }
 
+    }
+
+    if(createTagBottomSheetShow){
+        CreateTagBottomSheet(
+            sheetState = createTagBottomSheetState,
+            onDismissRequest = {
+                createTagBottomSheetShow = false
+                scope.launch {
+                    createTagBottomSheetState.hide()
+                }
+            }
+        )
     }
 
     if (createTaskBottomSheetShow) {
@@ -159,7 +179,10 @@ fun ListTasksScreen() {
 
 
 @Composable
-fun TagsFilterRow(modifier: Modifier = Modifier, tags: List<TagDomain>) {
+fun TagsFilterRow(
+    modifier: Modifier = Modifier, tags: List<TagDomain>,
+    onNewTag: () -> Unit
+) {
 
     LazyRow(
         modifier = modifier.fillMaxWidth(),
@@ -199,7 +222,7 @@ fun TagsFilterRow(modifier: Modifier = Modifier, tags: List<TagDomain>) {
                         contentDescription = null
                     )
                 },
-                onClick = {}
+                onClick = onNewTag
             )
         }
 

@@ -25,6 +25,7 @@ import com.joseleandro.fullfocus.core.navigation.ETabScreen
 import com.joseleandro.fullfocus.core.navigation.TabScreen
 import com.joseleandro.fullfocus.ui.screen.list_tasks.ListTasksScreen
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
+import com.joseleandro.fullfocus.ui.screen.report.ReportScreen
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -48,7 +49,7 @@ fun MainScreen(
     backStack: List<TabScreen>,
     onBack: () -> Unit,
     currentTab: TabScreen,
-    onNavigate: (TabScreen)-> Unit
+    onNavigate: (TabScreen) -> Unit
 ) {
 
     val isPreview = LocalInspectionMode.current
@@ -83,6 +84,9 @@ fun MainScreen(
                             ListTasksScreen()
                         }
 
+                        entry<TabScreen.ReportScreen> {
+                            ReportScreen()
+                        }
                     }
                 )
             }
@@ -94,7 +98,7 @@ fun MainScreen(
 fun MainBottomAppBar(
     modifier: Modifier = Modifier,
     currentTab: TabScreen,
-    onNavigate: (TabScreen)-> Unit
+    onNavigate: (TabScreen) -> Unit
 ) {
     BottomAppBar(
         modifier = modifier,

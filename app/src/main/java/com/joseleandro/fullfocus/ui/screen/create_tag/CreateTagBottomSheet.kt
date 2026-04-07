@@ -1,49 +1,46 @@
-package com.joseleandro.fullfocus.ui.screen.create_task
+package com.joseleandro.fullfocus.ui.screen.create_tag
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheet
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheetHeader
 import com.joseleandro.fullfocus.ui.component.FullFocusTextField
-import com.joseleandro.fullfocus.ui.screen.create_task.component.PomodoroNumberSelect
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateTaskBottomSheet(
+fun CreateTagBottomSheet(
+    modifier: Modifier = Modifier,
     sheetState: SheetState,
     onDismissRequest: () -> Unit
 ) {
 
-    var pomoNumber by remember { mutableStateOf<Int?>(null) }
-
     FullFocusBottomSheet(
+        modifier = modifier,
         sheetState = sheetState,
+        onDismissRequest = onDismissRequest,
         header = {
             FullFocusBottomSheetHeader(
+                title = {
+                    Text(
+                        text = stringResource(R.string.nova_tag),
+                    )
+                },
                 leadingIcon = {
                     IconButton(
                         onClick = onDismissRequest
@@ -54,69 +51,46 @@ fun CreateTaskBottomSheet(
                         )
                     }
                 },
-                title = {
-                    Text(
-                        text = stringResource(R.string.nova_tarefa),
-                    )
-                },
                 trailingIcon = {
                     TextButton(
                         onClick = {}
                     ) {
                         Text(
-                            text = stringResource(id = R.string.salvar),
+                            text = stringResource(R.string.salvar)
                         )
                     }
-                }
+                },
             )
-        },
-        onDismissRequest = onDismissRequest
+        }
     ) {
         Column(
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(bottom = 32.dp)
         ) {
 
             FullFocusTextField(
+                label = stringResource(R.string.nome_da_tag),
                 value = "",
                 onValueChange = {},
-                label = stringResource(R.string.nome_da_tarefa)
-            )
-
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-
-                Text(
-                    text = stringResource(R.string.n_mero_de_pomodoros),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = .4f),
-                        fontWeight = FontWeight.SemiBold
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.round_bookmarks_24),
+                        contentDescription = null
                     )
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    (1..8).forEach { numberPomo ->
-
-                        PomodoroNumberSelect(
-                            label = numberPomo.toString(),
-                            selected = pomoNumber?.let { it == numberPomo } ?: false,
-                            onClick = {
-                                pomoNumber = numberPomo
-                            }
+                },
+                trailingIcon = {
+                    IconButton(
+                        onClick = {}
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.outline_palette_24),
+                            contentDescription = null
                         )
-
                     }
                 }
-
-            }
-
+            )
         }
     }
 
@@ -125,12 +99,12 @@ fun CreateTaskBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-private fun CreateTaskBottomSheetLightPreview() {
+private fun CreateTagBottomSheetLightPreview() {
     FullFocusTheme(
         dynamicColor = false,
         darkTheme = false
     ) {
-        CreateTaskBottomSheet(
+        CreateTagBottomSheet(
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {}
         )
@@ -140,12 +114,12 @@ private fun CreateTaskBottomSheetLightPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
-private fun CreateTaskBottomSheetDarkPreview() {
+private fun CreateTagBottomSheetDarkPreview() {
     FullFocusTheme(
         dynamicColor = false,
         darkTheme = true
     ) {
-        CreateTaskBottomSheet(
+        CreateTagBottomSheet(
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {}
         )
