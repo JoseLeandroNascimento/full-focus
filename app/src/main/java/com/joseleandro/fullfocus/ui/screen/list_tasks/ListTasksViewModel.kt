@@ -3,16 +3,19 @@ package com.joseleandro.fullfocus.ui.screen.list_tasks
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.usecase.TagFindAllUseCase
+import com.joseleandro.fullfocus.domain.usecase.TaskFindAllUseCase
 import com.joseleandro.fullfocus.ui.event.ListTasksEvent
 import com.joseleandro.fullfocus.ui.state.ListTasksFilter
 import com.joseleandro.fullfocus.ui.state.ListTasksUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ListTasksViewModel(
-    private val tagFindAllUseCase: TagFindAllUseCase
+    private val tagFindAllUseCase: TagFindAllUseCase,
+    private val taskFindAllUseCase: TaskFindAllUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListTasksUiState())
@@ -41,12 +44,20 @@ class ListTasksViewModel(
 
         viewModelScope.launch {
 
-            tagFindAllUseCase().collect { tags ->
+            combine(
+                tagFindAllUseCase(),
+                taskFindAllUseCase()
+            ) { tags, tasks ->
+                tags to tasks
+            }.collect { (tags, tasks) ->
+
                 _uiState.update { state ->
                     state.copy(
-                        tags = tags
+                        tags = tags,
+                        tasks = tasks
                     )
                 }
+
                 changeVisibilityLoading(isLoading = false)
             }
         }

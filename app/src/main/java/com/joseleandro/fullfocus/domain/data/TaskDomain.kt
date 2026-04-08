@@ -1,11 +1,9 @@
 package com.joseleandro.fullfocus.domain.data
 
-import java.util.UUID
-
 data class TaskDomain(
-    val id: UUID = UUID.randomUUID(),
+    val id: Int = 0,
     val title: String,
-    val pomodorosTotal: Int,
-    val pomodorosCheck: Int,
+    val pomodoros: Int,
+    val progress: Int = 0,
     val isDone: Boolean = false
 )

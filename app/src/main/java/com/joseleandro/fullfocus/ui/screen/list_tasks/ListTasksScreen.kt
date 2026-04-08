@@ -78,7 +78,6 @@ fun ListTasksScreen(
     val createTaskBottomSheetState = rememberModalBottomSheetState()
 
     val createTagBottomSheetState = rememberModalBottomSheetState()
-//    var createTagBottomSheetShow by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -189,19 +188,16 @@ fun ListTasksScreen(
                             }
                         }
 
-                        items(items = tasksListMock, key = { it.id }) { task ->
+                        items(items = uiState.tasks, key = { it.id }) { task ->
                             TaskCard(
                                 modifier = Modifier.padding(horizontal = 16.dp),
                                 task = task
                             )
                         }
-
                     }
                 }
             }
-
         }
-
     }
 
     if (uiState.createTagBottomSheetShow) {

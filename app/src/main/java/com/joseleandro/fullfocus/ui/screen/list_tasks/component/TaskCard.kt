@@ -53,6 +53,7 @@ fun TaskCard(
                 style = MaterialTheme.typography.titleSmall.copy(
                     color = MaterialTheme.colorScheme.onSurface
                 ),
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
 
@@ -61,7 +62,7 @@ fun TaskCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(
-                    text = "${task.pomodorosCheck}/${task.pomodorosTotal}",
+                    text = "${task.progress}/${task.pomodoros}",
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = .4f

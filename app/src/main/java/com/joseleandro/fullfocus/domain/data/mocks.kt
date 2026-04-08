@@ -4,49 +4,58 @@ import androidx.compose.ui.graphics.Color
 
 val tasksListMock: List<TaskDomain> = listOf(
     TaskDomain(
+        id = 1,
         title = "Estudar matemática",
-        pomodorosCheck = 1,
-        pomodorosTotal = 2
+        progress = 1,
+        pomodoros = 2
     ),
     TaskDomain(
+        id = 2,
         title = "Enviar email",
-        pomodorosCheck = 0,
-        pomodorosTotal = 4
+        progress = 0,
+        pomodoros = 4
     ),
     TaskDomain(
+        id = 3,
         title = "Estudar geografia",
-        pomodorosCheck = 1,
-        pomodorosTotal = 6
+        progress = 1,
+        pomodoros = 6
     ),
     TaskDomain(
+        id = 4,
         title = "Estudar português",
-        pomodorosCheck = 4,
-        pomodorosTotal = 8
+        progress = 4,
+        pomodoros = 8
     ),
     TaskDomain(
+        id = 5,
         title = "Estudar inglês",
-        pomodorosCheck = 1,
-        pomodorosTotal = 2
+        progress = 1,
+        pomodoros = 2
     ),
     TaskDomain(
+        id = 6,
         title = "Estudar química",
-        pomodorosCheck = 1,
-        pomodorosTotal = 2
+        progress = 1,
+        pomodoros = 2
     ),
     TaskDomain(
+        id = 7,
         title = "Estudar física",
-        pomodorosCheck = 1,
-        pomodorosTotal = 2
+        progress = 1,
+        pomodoros = 2
     ),
     TaskDomain(
+        id = 8,
         title = "Estudar biologia",
-        pomodorosCheck = 1,
-        pomodorosTotal = 2
+        progress = 1,
+        pomodoros = 2
     ),
     TaskDomain(
+        id = 9,
         title = "Estudar ciências",
-        pomodorosCheck = 1,
-        pomodorosTotal = 2
+        progress = 1,
+        pomodoros = 2
     )
 )
 

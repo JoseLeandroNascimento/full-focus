@@ -14,8 +14,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,6 +32,7 @@ import com.joseleandro.fullfocus.ui.component.FullFocusTextField
 import com.joseleandro.fullfocus.ui.event.CreateTagEvent
 import com.joseleandro.fullfocus.ui.state.CreateTagUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
+import kotlinx.coroutines.flow.filter
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +72,17 @@ fun CreateTagBottomSheet(
     sheetState: SheetState,
     onDismissRequest: () -> Unit
 ) {
+
+    val nameFocus = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+
+        snapshotFlow { sheetState.isVisible }
+            .filter { it }
+            .collect {
+                nameFocus.requestFocus()
+            }
+    }
 
     FullFocusBottomSheet(
         modifier = modifier,
@@ -121,6 +137,7 @@ fun CreateTagBottomSheet(
             ) {
 
                 FullFocusTextField(
+                    modifier = Modifier.focusRequester(nameFocus),
                     label = stringResource(R.string.nome_da_tag),
                     value = uiState.form.name.value,
                     onValueChange = { value ->
@@ -132,16 +149,6 @@ fun CreateTagBottomSheet(
                             painter = painterResource(id = R.drawable.round_bookmarks_24),
                             contentDescription = null
                         )
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = {}
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.outline_palette_24),
-                                contentDescription = null
-                            )
-                        }
                     }
                 )
             }

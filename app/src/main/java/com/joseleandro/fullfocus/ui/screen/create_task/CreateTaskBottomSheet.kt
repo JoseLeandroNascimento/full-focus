@@ -14,22 +14,30 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheet
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheetHeader
 import com.joseleandro.fullfocus.ui.component.FullFocusTextField
+import com.joseleandro.fullfocus.ui.event.CreateTaskEvent
 import com.joseleandro.fullfocus.ui.screen.create_task.component.PomodoroNumberSelect
+import com.joseleandro.fullfocus.ui.state.CreateTaskUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
+import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,7 +46,37 @@ fun CreateTaskBottomSheet(
     onDismissRequest: () -> Unit
 ) {
 
-    var pomoNumber by remember { mutableStateOf<Int?>(null) }
+    val viewModel: CreateTaskViewModel = koinViewModel()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    CreateTaskBottomSheet(
+        sheetState = sheetState,
+        uiState = uiState,
+        onEvent = viewModel::onEvent,
+        onDismissRequest = onDismissRequest
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CreateTaskBottomSheet(
+    sheetState: SheetState,
+    uiState: CreateTaskUiState,
+    onEvent: (CreateTaskEvent) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+
+    val titleFocus = remember {
+        FocusRequester()
+    }
+
+    LaunchedEffect(Unit) {
+        snapshotFlow { sheetState.isVisible }
+            .filter { it }
+            .collectLatest {
+                titleFocus.requestFocus()
+            }
+    }
 
     FullFocusBottomSheet(
         sheetState = sheetState,
@@ -61,7 +99,13 @@ fun CreateTaskBottomSheet(
                 },
                 trailingIcon = {
                     TextButton(
-                        onClick = {}
+                        onClick = {
+                            onEvent(
+                                CreateTaskEvent.OnSave {
+                                    onDismissRequest()
+                                }
+                            )
+                        }
                     ) {
                         Text(
                             text = stringResource(id = R.string.salvar),
@@ -80,8 +124,16 @@ fun CreateTaskBottomSheet(
         ) {
 
             FullFocusTextField(
-                value = "",
-                onValueChange = {},
+                modifier = Modifier.focusRequester(titleFocus),
+                value = uiState.form.title.value,
+                error = uiState.form.title.messageError?.getMessage(),
+                onValueChange = {
+                    onEvent(
+                        CreateTaskEvent.OnTitleChange(
+                            value = it
+                        )
+                    )
+                },
                 label = stringResource(R.string.nome_da_tarefa)
             )
 
@@ -106,9 +158,9 @@ fun CreateTaskBottomSheet(
 
                         PomodoroNumberSelect(
                             label = numberPomo.toString(),
-                            selected = pomoNumber?.let { it == numberPomo } ?: false,
+                            selected = uiState.form.pomodoros.value == numberPomo,
                             onClick = {
-                                pomoNumber = numberPomo
+                                onEvent(CreateTaskEvent.OnPomodorosChange(value = numberPomo))
                             }
                         )
 
@@ -132,6 +184,8 @@ private fun CreateTaskBottomSheetLightPreview() {
     ) {
         CreateTaskBottomSheet(
             sheetState = rememberModalBottomSheetState(),
+            uiState = CreateTaskUiState(),
+            onEvent = {},
             onDismissRequest = {}
         )
     }
@@ -147,6 +201,8 @@ private fun CreateTaskBottomSheetDarkPreview() {
     ) {
         CreateTaskBottomSheet(
             sheetState = rememberModalBottomSheetState(),
+            uiState = CreateTaskUiState(),
+            onEvent = {},
             onDismissRequest = {}
         )
     }
