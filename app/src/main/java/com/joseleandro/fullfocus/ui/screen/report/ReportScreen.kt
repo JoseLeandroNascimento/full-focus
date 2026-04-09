@@ -14,7 +14,9 @@ import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReportScreen() {
+fun ReportScreen(
+    openDrawer: () -> Unit
+) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -41,7 +43,9 @@ private fun ReportScreenLightPreview() {
         dynamicColor = false,
         darkTheme = false
     ) {
-        ReportScreen()
+        ReportScreen(
+            openDrawer = {}
+        )
     }
 }
 
@@ -52,6 +56,8 @@ private fun ReportScreenDarkPreview() {
         dynamicColor = false,
         darkTheme = true
     ) {
-        ReportScreen()
+        ReportScreen(
+            openDrawer = {}
+        )
     }
 }

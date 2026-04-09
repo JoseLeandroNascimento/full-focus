@@ -2,17 +2,22 @@ package com.joseleandro.fullfocus.ui.screen
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -25,10 +30,12 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.joseleandro.fullfocus.core.navigation.ETabScreen
 import com.joseleandro.fullfocus.core.navigation.TabScreen
+import com.joseleandro.fullfocus.ui.component.FullFocusModalDrawerSheet
 import com.joseleandro.fullfocus.ui.screen.list_tasks.ListTasksScreen
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
 import com.joseleandro.fullfocus.ui.screen.report.ReportScreen
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -55,42 +62,67 @@ fun MainScreen(
 ) {
 
     val isPreview = LocalInspectionMode.current
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-    Scaffold(
-        bottomBar = {
-            MainBottomAppBar(
-                currentTab = currentTab,
-                onNavigate = onNavigate
+    val onDrawerOpen: () -> Unit = {
+        scope.launch {
+            drawerState.open()
+        }
+    }
+
+
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            FullFocusModalDrawerSheet(
+                modifier = Modifier.fillMaxWidth(.8f),
+                drawerState = drawerState
             )
-        },
-        containerColor = MaterialTheme.colorScheme.surface
-    ) { innerPadding ->
-
-        Box(
-            modifier = Modifier
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding)
-        ) {
-
-            if (!isPreview) {
-                NavDisplay(
-                    backStack = backStack,
-                    onBack = onBack,
-                    entryProvider = entryProvider {
-
-                        entry<TabScreen.PomodoroScreen> {
-                            PomodoroScreen()
-                        }
-
-                        entry<TabScreen.ListTasksScreen> {
-                            ListTasksScreen()
-                        }
-
-                        entry<TabScreen.ReportScreen> {
-                            ReportScreen()
-                        }
-                    }
+        }
+    ) {
+        Scaffold(
+            bottomBar = {
+                MainBottomAppBar(
+                    currentTab = currentTab,
+                    onNavigate = onNavigate
                 )
+            },
+            containerColor = MaterialTheme.colorScheme.surface
+        ) { innerPadding ->
+
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding)
+            ) {
+
+                if (!isPreview) {
+                    NavDisplay(
+                        backStack = backStack,
+                        onBack = onBack,
+                        entryProvider = entryProvider {
+
+                            entry<TabScreen.PomodoroScreen> {
+                                PomodoroScreen(
+                                    openDrawer = onDrawerOpen
+                                )
+                            }
+
+                            entry<TabScreen.ListTasksScreen> {
+                                ListTasksScreen(
+                                    openDrawer = onDrawerOpen
+                                )
+                            }
+
+                            entry<TabScreen.ReportScreen> {
+                                ReportScreen(
+                                    openDrawer = onDrawerOpen
+                                )
+                            }
+                        }
+                    )
+                }
             }
         }
     }

@@ -58,10 +58,6 @@ fun FullFocusBottomSheet(
 
     val dragColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .3f)
 
-    LaunchedEffect(sheetState) {
-        sheetState.show()
-    }
-
     ModalBottomSheet(
         modifier = modifier,
         sheetState = sheetState,

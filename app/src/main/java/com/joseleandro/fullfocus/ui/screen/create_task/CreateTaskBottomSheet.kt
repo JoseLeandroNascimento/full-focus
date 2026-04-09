@@ -99,10 +99,14 @@ fun CreateTaskBottomSheet(
 
     LaunchedEffect(uiState.createTagBottomSheetShow) {
         if (uiState.createTagBottomSheetShow) {
-            sheetState.hide()
+            if (sheetState.isVisible) {
+                sheetState.hide()
+            }
             createTagSheetState.show()
         } else {
-            createTagSheetState.hide()
+            if (createTagSheetState.isVisible) {
+                createTagSheetState.hide()
+            }
             sheetState.show()
         }
     }

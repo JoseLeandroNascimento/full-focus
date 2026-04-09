@@ -50,7 +50,10 @@ import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
-fun PomodoroScreen(modifier: Modifier = Modifier) {
+fun PomodoroScreen(
+    modifier: Modifier = Modifier,
+    openDrawer: () -> Unit
+) {
 
     val viewModel: PomodoroViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -59,7 +62,8 @@ fun PomodoroScreen(modifier: Modifier = Modifier) {
     PomodoroScreen(
         modifier = modifier,
         uiState = uiState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        openDrawer = openDrawer
     )
 
 }
@@ -69,7 +73,8 @@ fun PomodoroScreen(modifier: Modifier = Modifier) {
 fun PomodoroScreen(
     modifier: Modifier = Modifier,
     uiState: PomodoroUiState,
-    onEvent: (PomodoroEvent) -> Unit
+    onEvent: (PomodoroEvent) -> Unit,
+    openDrawer: () -> Unit
 ) {
 
     val pomodoroSettingBottomSheet = rememberModalBottomSheetState(
@@ -91,7 +96,7 @@ fun PomodoroScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = {}
+                        onClick = openDrawer
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.outline_menu_24),
@@ -281,6 +286,7 @@ private fun PomodoroScreenLightPreview() {
     ) {
         PomodoroScreen(
             uiState = PomodoroUiState(),
+            openDrawer = {},
             onEvent = {}
         )
     }
@@ -297,6 +303,7 @@ private fun PomodoroScreenDarkPreview() {
     ) {
         PomodoroScreen(
             uiState = PomodoroUiState(),
+            openDrawer = {},
             onEvent = {}
         )
     }

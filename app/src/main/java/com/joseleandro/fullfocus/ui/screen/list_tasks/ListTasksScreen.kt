@@ -53,7 +53,9 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ListTasksScreen() {
+fun ListTasksScreen(
+    openDrawer: () -> Unit
+) {
 
     val viewModel: ListTasksViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,7 +66,8 @@ fun ListTasksScreen() {
 
     ListTasksScreen(
         uiState = uiState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        openDrawer = openDrawer
     )
 
 }
@@ -73,7 +76,8 @@ fun ListTasksScreen() {
 @Composable
 fun ListTasksScreen(
     uiState: ListTasksUiState,
-    onEvent: (ListTasksEvent) -> Unit
+    onEvent: (ListTasksEvent) -> Unit,
+    openDrawer: () -> Unit
 ) {
 
     var showConfirmActionDialog by rememberSaveable {
@@ -101,7 +105,7 @@ fun ListTasksScreen(
                 },
                 navigationIcon = {
                     IconButton(
-                        onClick = {}
+                        onClick = openDrawer
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.outline_menu_24),
@@ -221,9 +225,12 @@ fun ListTasksScreen(
         CreateTagBottomSheet(
             sheetState = createTagBottomSheetState,
             onDismissRequest = {
-                onEvent(ListTasksEvent.OnChangeVisibilityCreateTagBottomSheetShow(false))
                 scope.launch {
                     createTagBottomSheetState.hide()
+                }.invokeOnCompletion {
+                    if (!createTagBottomSheetState.isVisible) {
+                        onEvent(ListTasksEvent.OnChangeVisibilityCreateTagBottomSheetShow(false))
+                    }
                 }
             }
         )
@@ -234,9 +241,12 @@ fun ListTasksScreen(
         CreateTaskBottomSheet(
             sheetState = createTaskBottomSheetState,
             onDismissRequest = {
-                onEvent(ListTasksEvent.OnChangeVisibilityCreateTaskBottomSheetShow(false))
                 scope.launch {
                     createTaskBottomSheetState.hide()
+                }.invokeOnCompletion {
+                    if (!createTaskBottomSheetState.isVisible) {
+                        onEvent(ListTasksEvent.OnChangeVisibilityCreateTaskBottomSheetShow(false))
+                    }
                 }
             }
         )
@@ -298,6 +308,7 @@ private fun ListTasksScreenLightPreview() {
                 isLoading = false,
                 tasks = tasksListMock
             ),
+            openDrawer = {},
             onEvent = {}
         )
     }
@@ -312,6 +323,7 @@ private fun ListTasksScreenDarkPreview() {
     ) {
         ListTasksScreen(
             uiState = ListTasksUiState(),
+            openDrawer = {},
             onEvent = {}
         )
     }
