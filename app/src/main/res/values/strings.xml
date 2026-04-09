@@ -24,4 +24,13 @@
     <string name="n_mero_de_pomodoros">Número de pomodoros</string>
     <string name="campo_obrigat_rio">Campo obrigatório</string>
     <string name="nome_da_tag_obrigat_rio">Nome da tag é obrigatório</string>
+    <string name="informe_o_valor_m_nimo">Informe o valor mínimo</string>
+    <string name="informe_o_numero_de_pomodoros">Informe o número de pomodoros</string>
+    <string name="icone_de_tag">icone de tag</string>
+    <string name="tag">Tag</string>
+    <string name="o_que_voce_deseja_criar">O que você deseja criar?</string>
+    <string name="criar_tarefa">Criar tarefa</string>
+    <string name="adicione_uma_nova_tarefa">Adicione uma nova tarefa</string>
+    <string name="organize_suas_tarefas_por_categoria">Organize suas tarefas por categoria</string>
+    <string name="criar_tag">Criar tag</string>
 </resources>

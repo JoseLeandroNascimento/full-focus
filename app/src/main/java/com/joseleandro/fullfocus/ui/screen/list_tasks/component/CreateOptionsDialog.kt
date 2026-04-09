@@ -1,0 +1,131 @@
+package com.joseleandro.fullfocus.ui.screen.list_tasks.component
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.joseleandro.fullfocus.R
+import com.joseleandro.fullfocus.ui.component.FullFocusDialog
+import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
+
+@Composable
+fun CreateOptionsDialog(
+    onCreateTask: () -> Unit,
+    onCreateTag: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    FullFocusDialog(
+        title = stringResource(R.string.o_que_voce_deseja_criar),
+        onDismissRequest = onDismiss
+    ) {
+
+        CreateOptionItem(
+            icon = R.drawable.boxicons_seal_check_filled,
+            title = stringResource(R.string.criar_tarefa),
+            description = stringResource(R.string.adicione_uma_nova_tarefa),
+            onClick = onCreateTask
+        )
+
+        CreateOptionItem(
+            icon = R.drawable.round_bookmarks_24,
+            title = stringResource(R.string.criar_tag),
+            description = stringResource(R.string.organize_suas_tarefas_por_categoria),
+            onClick = onCreateTag
+        )
+    }
+}
+
+@Composable
+fun CreateOptionItem(
+    icon: Int,
+    title: String,
+    description: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        onClick = onClick,
+        shape = MaterialTheme.shapes.large,
+        tonalElevation = 1.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .size(20.dp),
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun CreateOptionsDialogLightPreview() {
+    FullFocusTheme(dynamicColor = false, darkTheme = false) {
+        CreateOptionsDialog(
+            onCreateTask = {},
+            onCreateTag = {},
+            onDismiss = {}
+        )
+
+    }
+}
+
+@Preview
+@Composable
+private fun CreateOptionsDialogDarkPreview() {
+    FullFocusTheme(dynamicColor = false, darkTheme = true) {
+        CreateOptionsDialog(
+            onCreateTask = {},
+            onCreateTag = {},
+            onDismiss = {}
+        )
+
+    }
+}

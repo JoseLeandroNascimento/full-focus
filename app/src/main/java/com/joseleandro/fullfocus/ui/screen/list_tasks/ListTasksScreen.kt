@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +24,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -42,6 +44,7 @@ import com.joseleandro.fullfocus.ui.component.FullFocusTagFilterChip
 import com.joseleandro.fullfocus.ui.event.ListTasksEvent
 import com.joseleandro.fullfocus.ui.screen.create_tag.CreateTagBottomSheet
 import com.joseleandro.fullfocus.ui.screen.create_task.CreateTaskBottomSheet
+import com.joseleandro.fullfocus.ui.screen.list_tasks.component.CreateOptionsDialog
 import com.joseleandro.fullfocus.ui.screen.list_tasks.component.TaskCard
 import com.joseleandro.fullfocus.ui.state.ListTasksFilter
 import com.joseleandro.fullfocus.ui.state.ListTasksUiState
@@ -72,6 +75,10 @@ fun ListTasksScreen(
     uiState: ListTasksUiState,
     onEvent: (ListTasksEvent) -> Unit
 ) {
+
+    var showConfirmActionDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
@@ -124,7 +131,7 @@ fun ListTasksScreen(
 
             FullFocusFloatingActionButton(
                 onClick = {
-                    onEvent(ListTasksEvent.OnChangeVisibilityCreateTaskBottomSheetShow(true))
+                    showConfirmActionDialog = true
                 },
                 iconRes = R.drawable.outline_add_24
             )
@@ -176,13 +183,6 @@ fun ListTasksScreen(
                                                 ListTasksFilter(tag = it?.id)
                                             )
                                         )
-                                    },
-                                    onNewTag = {
-                                        onEvent(
-                                            ListTasksEvent.OnChangeVisibilityCreateTagBottomSheetShow(
-                                                true
-                                            )
-                                        )
                                     }
                                 )
                             }
@@ -199,6 +199,23 @@ fun ListTasksScreen(
             }
         }
     }
+
+    if (showConfirmActionDialog) {
+        CreateOptionsDialog(
+            onCreateTask = {
+                showConfirmActionDialog = false
+                onEvent(ListTasksEvent.OnChangeVisibilityCreateTaskBottomSheetShow(true))
+            },
+            onCreateTag = {
+                showConfirmActionDialog = false
+                onEvent(ListTasksEvent.OnChangeVisibilityCreateTagBottomSheetShow(true))
+            },
+            onDismiss = {
+                showConfirmActionDialog = false
+            }
+        )
+    }
+
 
     if (uiState.createTagBottomSheetShow) {
         CreateTagBottomSheet(
@@ -232,13 +249,12 @@ fun TagsFilterRow(
     modifier: Modifier = Modifier, tags: List<TagDomain>,
     currentTag: Int? = null,
     onChangeValue: (TagDomain?) -> Unit,
-    onNewTag: () -> Unit
 ) {
 
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
 
@@ -267,20 +283,6 @@ fun TagsFilterRow(
             )
         }
 
-        item {
-            FilterChip(
-                shape = MaterialTheme.shapes.extraLarge,
-                selected = false,
-                label = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.outline_add_24),
-                        contentDescription = null
-                    )
-                },
-                onClick = onNewTag
-            )
-        }
-
     }
 }
 
@@ -293,7 +295,8 @@ private fun ListTasksScreenLightPreview() {
     ) {
         ListTasksScreen(
             uiState = ListTasksUiState(
-                isLoading = false
+                isLoading = false,
+                tasks = tasksListMock
             ),
             onEvent = {}
         )

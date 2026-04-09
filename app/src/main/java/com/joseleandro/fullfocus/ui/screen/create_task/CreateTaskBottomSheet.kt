@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -17,7 +20,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -28,15 +33,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
+import com.joseleandro.fullfocus.domain.data.tagsListMock
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheet
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheetHeader
+import com.joseleandro.fullfocus.ui.component.FullFocusTagFilterChip
 import com.joseleandro.fullfocus.ui.component.FullFocusTextField
 import com.joseleandro.fullfocus.ui.event.CreateTaskEvent
+import com.joseleandro.fullfocus.ui.screen.create_tag.CreateTagBottomSheet
 import com.joseleandro.fullfocus.ui.screen.create_task.component.PomodoroNumberSelect
 import com.joseleandro.fullfocus.ui.state.CreateTaskUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,11 +58,18 @@ fun CreateTaskBottomSheet(
     val viewModel: CreateTaskViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(Unit) {
+        viewModel.onEvent(CreateTaskEvent.OnLoad)
+    }
+
     CreateTaskBottomSheet(
         sheetState = sheetState,
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = {
+            viewModel.onEvent(CreateTaskEvent.OnReset)
+            onDismissRequest()
+        }
     )
 }
 
@@ -70,12 +86,25 @@ fun CreateTaskBottomSheet(
         FocusRequester()
     }
 
+    val createTagSheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(Unit) {
         snapshotFlow { sheetState.isVisible }
             .filter { it }
             .collectLatest {
                 titleFocus.requestFocus()
             }
+    }
+
+    LaunchedEffect(uiState.createTagBottomSheetShow) {
+        if (uiState.createTagBottomSheetShow) {
+            sheetState.hide()
+            createTagSheetState.show()
+        } else {
+            createTagSheetState.hide()
+            sheetState.show()
+        }
     }
 
     FullFocusBottomSheet(
@@ -119,7 +148,7 @@ fun CreateTaskBottomSheet(
         Column(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
-                .padding(bottom = 32.dp),
+                .padding(bottom = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
@@ -138,41 +167,131 @@ fun CreateTaskBottomSheet(
             )
 
             Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(
+                    space = 8.dp,
+                    alignment = Alignment.CenterVertically
+                )
             ) {
 
-                Text(
-                    text = stringResource(R.string.n_mero_de_pomodoros),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = .4f),
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    (1..8).forEach { numberPomo ->
 
-                        PomodoroNumberSelect(
-                            label = numberPomo.toString(),
-                            selected = uiState.form.pomodoros.value == numberPomo,
-                            onClick = {
-                                onEvent(CreateTaskEvent.OnPomodorosChange(value = numberPomo))
-                            }
+                    Text(
+                        text = stringResource(R.string.n_mero_de_pomodoros),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = .4f),
+                            fontWeight = FontWeight.SemiBold
                         )
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        (1..8).forEach { numberPomo ->
+
+                            PomodoroNumberSelect(
+                                label = numberPomo.toString(),
+                                selected = uiState.form.pomodoros.value == numberPomo,
+                                onClick = {
+                                    onEvent(CreateTaskEvent.OnPomodorosChange(value = numberPomo))
+                                }
+                            )
+
+                        }
+                    }
+
+                    uiState.form.pomodoros.messageError?.let { message ->
+                        Text(
+                            text = message.getMessage(),
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        )
+                    }
+
+                }
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+
+                    Text(
+                        text = stringResource(R.string.tag),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = .4f),
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+
+                    LazyRow(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        items(
+                            items = uiState.tags,
+                            key = { it.id }
+                        ) { tag ->
+                            FullFocusTagFilterChip(
+                                label = tag.name,
+                                selected = tag.id == uiState.form.tag.value,
+                                onClick = {
+                                    val tagId = if (tag.id == uiState.form.tag.value) 0 else tag.id
+
+                                    onEvent(CreateTaskEvent.OnTagToggle(tagId))
+                                }
+                            )
+                        }
+
+                        item {
+                            FullFocusTagFilterChip(
+                                label = stringResource(id = R.string.nova_tag),
+                                leadingIcon = {
+                                    Icon(
+                                        modifier = Modifier.size(16.dp),
+                                        painter = painterResource(id = R.drawable.outline_add_24),
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                selected = false,
+                                onClick = {
+                                    onEvent(
+                                        CreateTaskEvent.OnChangeVisibilityCreateTagBottomSheetShow(
+                                            visible = true
+                                        )
+                                    )
+                                }
+                            )
+                        }
 
                     }
                 }
-
             }
 
         }
     }
 
+    if (uiState.createTagBottomSheetShow) {
+
+        CreateTagBottomSheet(
+            sheetState = createTagSheetState,
+            onDismissRequest = {
+                onEvent(CreateTaskEvent.OnChangeVisibilityCreateTagBottomSheetShow(visible = false))
+                scope.launch {
+                    createTagSheetState.hide()
+                }
+            }
+        )
+    }
+
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
@@ -184,7 +303,9 @@ private fun CreateTaskBottomSheetLightPreview() {
     ) {
         CreateTaskBottomSheet(
             sheetState = rememberModalBottomSheetState(),
-            uiState = CreateTaskUiState(),
+            uiState = CreateTaskUiState(
+                tags = tagsListMock
+            ),
             onEvent = {},
             onDismissRequest = {}
         )
