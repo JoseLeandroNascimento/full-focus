@@ -1,12 +1,12 @@
 package com.joseleandro.fullfocus.domain.usecase
 
-import com.joseleandro.fullfocus.domain.repository.UserPreferencesRepository
+import com.joseleandro.fullfocus.domain.repository.TaskFilterPreferencesRepository
 
 class FilterTaskUseCase(
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val taskFilterPreferencesRepository: TaskFilterPreferencesRepository
 ) {
 
     suspend operator fun invoke(tagId: Int?) {
-        userPreferencesRepository.updateTaskFilter(tagId)
+        taskFilterPreferencesRepository.updateTaskFilter(tagId)
     }
 }

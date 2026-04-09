@@ -6,9 +6,9 @@ import com.joseleandro.fullfocus.data.local.preferences.data.TaskFilterPreferenc
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class UserLocalPreferencesDataSourceImpl(
+class TaskFilterLocalPreferencesDataSourceImpl(
     private val dataStore: DataStore<UserPreferences>
-) : UserLocalPreferencesDataSource {
+) : TaskFilterLocalPreferencesDataSource {
 
     override val taskFilter: Flow<TaskFilterPreferences>
         get() = dataStore.data.map { it.taskFilter }

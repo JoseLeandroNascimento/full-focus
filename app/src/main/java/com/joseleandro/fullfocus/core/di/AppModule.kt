@@ -7,8 +7,8 @@ import com.joseleandro.fullfocus.data.datasource.TagLocalDataSource
 import com.joseleandro.fullfocus.data.datasource.TagLocalDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.TaskLocalDataSource
 import com.joseleandro.fullfocus.data.datasource.TaskLocalDataSourceImpl
-import com.joseleandro.fullfocus.data.datasource.UserLocalPreferencesDataSource
-import com.joseleandro.fullfocus.data.datasource.UserLocalPreferencesDataSourceImpl
+import com.joseleandro.fullfocus.data.datasource.TaskFilterLocalPreferencesDataSource
+import com.joseleandro.fullfocus.data.datasource.TaskFilterLocalPreferencesDataSourceImpl
 import com.joseleandro.fullfocus.data.local.database.FULL_FOCUS_DATABASE_NAME
 import com.joseleandro.fullfocus.data.local.database.FullFocusDatabase
 import com.joseleandro.fullfocus.data.local.database.dao.TagDao
@@ -17,10 +17,10 @@ import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
 import com.joseleandro.fullfocus.data.local.preferences.userPreferencesDataStore
 import com.joseleandro.fullfocus.data.repository.TagRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TaskRepositoryImpl
-import com.joseleandro.fullfocus.data.repository.UserPreferencesRepositoryImpl
+import com.joseleandro.fullfocus.data.repository.TaskFilterPreferencesRepositoryImpl
 import com.joseleandro.fullfocus.domain.repository.TagRepository
 import com.joseleandro.fullfocus.domain.repository.TaskRepository
-import com.joseleandro.fullfocus.domain.repository.UserPreferencesRepository
+import com.joseleandro.fullfocus.domain.repository.TaskFilterPreferencesRepository
 import com.joseleandro.fullfocus.domain.usecase.FilterTaskUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetArgumentFiltersTasks
 import com.joseleandro.fullfocus.domain.usecase.GetFilteredTasksUseCase
@@ -69,7 +69,7 @@ object AppModule {
         single<TaskLocalDataSource> {
             TaskLocalDataSourceImpl(
                 taskDao = get(),
-                userLocalPreferencesDataSource = get()
+                taskFilterLocalPreferencesDataSource = get()
             )
         }
 
@@ -85,15 +85,15 @@ object AppModule {
             )
         }
 
-        single<UserLocalPreferencesDataSource> {
-            UserLocalPreferencesDataSourceImpl(
+        single<TaskFilterLocalPreferencesDataSource> {
+            TaskFilterLocalPreferencesDataSourceImpl(
                 dataStore = get()
             )
         }
 
-        single<UserPreferencesRepository> {
-            UserPreferencesRepositoryImpl(
-                userLocalPreferencesDataSource = get()
+        single<TaskFilterPreferencesRepository> {
+            TaskFilterPreferencesRepositoryImpl(
+                taskFilterLocalPreferencesDataSource = get()
             )
         }
 
@@ -128,13 +128,13 @@ object AppModule {
 
         factory {
             FilterTaskUseCase(
-                userPreferencesRepository = get()
+                taskFilterPreferencesRepository = get()
             )
         }
 
         factory {
             GetArgumentFiltersTasks(
-                userPreferencesRepository = get()
+                taskFilterPreferencesRepository = get()
             )
         }
 

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.map
 
 class TaskLocalDataSourceImpl(
     private val taskDao: TaskDao,
-    private val userLocalPreferencesDataSource: UserLocalPreferencesDataSource
+    private val taskFilterLocalPreferencesDataSource: TaskFilterLocalPreferencesDataSource
 ) : TaskLocalDataSource {
 
     override val tasksAll: Flow<List<TaskDomain>>
@@ -21,7 +21,7 @@ class TaskLocalDataSourceImpl(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override val tasksFiltered: Flow<List<TaskDomain>> =
-        userLocalPreferencesDataSource.taskFilter
+        taskFilterLocalPreferencesDataSource.taskFilter
             .map { it.tagFilter }
             .distinctUntilChanged()
             .flatMapLatest { tagId ->
