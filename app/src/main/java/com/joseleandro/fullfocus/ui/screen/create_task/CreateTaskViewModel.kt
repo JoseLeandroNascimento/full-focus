@@ -3,7 +3,7 @@ package com.joseleandro.fullfocus.ui.screen.create_task
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.usecase.SaveTaskUseCase
-import com.joseleandro.fullfocus.domain.usecase.TagFindAllUseCase
+import com.joseleandro.fullfocus.domain.usecase.GetTagFindAllUseCase
 import com.joseleandro.fullfocus.ui.event.CreateTaskEvent
 import com.joseleandro.fullfocus.ui.state.CreateTaskUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 
 
 class CreateTaskViewModel(
-    private val saveTaskUseCase: SaveTaskUseCase, private val tagFindAllUseCase: TagFindAllUseCase
+    private val saveTaskUseCase: SaveTaskUseCase, private val getTagFindAllUseCase: GetTagFindAllUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateTaskUiState())
@@ -44,7 +44,7 @@ class CreateTaskViewModel(
     private fun load() {
 
         viewModelScope.launch {
-            tagFindAllUseCase().collect { tags ->
+            getTagFindAllUseCase().collect { tags ->
                 _uiState.update { state ->
                     state.copy(tags = tags)
                 }
@@ -64,26 +64,28 @@ class CreateTaskViewModel(
 
         _uiState.update { state ->
 
-            val tagSelected = tag?.let { state.form.tag.update(value = tag) } ?: state.form.tag
+            val tagSelected = if (tag != null) {
+                val newValue = if (state.form.tag.value == tag) null else tag
+                state.form.tag.update(value = newValue)
+            } else {
+                state.form.tag
+            }
 
-            val title = title?.let {
+            val titleField = title?.let {
                 state.form.title.update(
                     value = title
-
                 )
             } ?: state.form.title
 
-            val pomodoros = pomodoros?.let {
+            val pomodorosField = pomodoros?.let {
                 state.form.pomodoros.update(
                     value = pomodoros
                 )
             } ?: state.form.pomodoros
 
-
-
             state.copy(
                 form = state.form.copy(
-                    title = title, pomodoros = pomodoros, tag = tagSelected
+                    title = titleField, pomodoros = pomodorosField, tag = tagSelected
                 )
             )
         }
@@ -104,7 +106,9 @@ class CreateTaskViewModel(
                 if (isValid()) {
                     val title = title.value
                     val pomodoros = pomodoros.value
-                    saveTaskUseCase(title = title, pomodoros = pomodoros)
+                    val tag = tag.value
+
+                    saveTaskUseCase(title = title, pomodoros = pomodoros, tag =  tag)
                     onSuccess()
                 } else {
                     _uiState.update { state ->

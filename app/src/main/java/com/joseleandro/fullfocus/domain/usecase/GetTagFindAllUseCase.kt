@@ -4,7 +4,7 @@ import com.joseleandro.fullfocus.domain.data.TagDomain
 import com.joseleandro.fullfocus.domain.repository.TagRepository
 import kotlinx.coroutines.flow.Flow
 
-class TagFindAllUseCase(
+class GetTagFindAllUseCase(
     private val tagRepository: TagRepository
 ) {
 

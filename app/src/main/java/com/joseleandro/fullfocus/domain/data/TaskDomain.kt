@@ -5,5 +5,6 @@ data class TaskDomain(
     val title: String,
     val pomodoros: Int,
     val progress: Int = 0,
+    val tag: Int? = null,
     val isDone: Boolean = false
 )

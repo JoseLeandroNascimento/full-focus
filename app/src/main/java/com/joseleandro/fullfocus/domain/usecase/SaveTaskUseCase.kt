@@ -7,11 +7,12 @@ class SaveTaskUseCase(
     private val taskRepository: TaskRepository
 ) {
 
-    suspend operator fun invoke(title: String, pomodoros: Int) {
+    suspend operator fun invoke(title: String, pomodoros: Int, tag: Int? = null) {
 
         val task = TaskDomain(
             title = title,
-            pomodoros = pomodoros
+            pomodoros = pomodoros,
+            tag = tag
         )
 
         taskRepository.save(task)

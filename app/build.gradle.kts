@@ -44,6 +44,9 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.datastore)
+    implementation(libs.kotlinx.serialization.json)
+
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
 

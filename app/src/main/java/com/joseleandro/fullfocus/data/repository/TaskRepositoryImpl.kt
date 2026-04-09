@@ -9,8 +9,11 @@ class TaskRepositoryImpl(
     private val taskLocalDataSource: TaskLocalDataSource
 ) : TaskRepository {
 
-    override val tasks: Flow<List<TaskDomain>>
-        get() = taskLocalDataSource.tasks
+    override val tasksAll: Flow<List<TaskDomain>>
+        get() = taskLocalDataSource.tasksAll
+
+    override val tasksFiltered: Flow<List<TaskDomain>>
+        get() = taskLocalDataSource.tasksFiltered
 
     override suspend fun save(task: TaskDomain) {
         taskLocalDataSource.save(task)

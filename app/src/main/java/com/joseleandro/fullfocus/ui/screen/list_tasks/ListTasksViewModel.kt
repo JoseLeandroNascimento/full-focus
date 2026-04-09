@@ -1,9 +1,12 @@
 package com.joseleandro.fullfocus.ui.screen.list_tasks
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joseleandro.fullfocus.domain.usecase.TagFindAllUseCase
-import com.joseleandro.fullfocus.domain.usecase.TaskFindAllUseCase
+import com.joseleandro.fullfocus.domain.usecase.FilterTaskUseCase
+import com.joseleandro.fullfocus.domain.usecase.GetArgumentFiltersTasks
+import com.joseleandro.fullfocus.domain.usecase.GetFilteredTasksUseCase
+import com.joseleandro.fullfocus.domain.usecase.GetTagFindAllUseCase
 import com.joseleandro.fullfocus.ui.event.ListTasksEvent
 import com.joseleandro.fullfocus.ui.state.ListTasksFilter
 import com.joseleandro.fullfocus.ui.state.ListTasksUiState
@@ -14,8 +17,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ListTasksViewModel(
-    private val tagFindAllUseCase: TagFindAllUseCase,
-    private val taskFindAllUseCase: TaskFindAllUseCase
+    private val getTagFindAllUseCase: GetTagFindAllUseCase,
+    private val getFilteredTasksUseCase: GetFilteredTasksUseCase,
+    private val filterTaskUseCase: FilterTaskUseCase,
+    private val getArgumentFiltersTasks: GetArgumentFiltersTasks,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListTasksUiState())
@@ -45,19 +50,23 @@ class ListTasksViewModel(
         viewModelScope.launch {
 
             combine(
-                tagFindAllUseCase(),
-                taskFindAllUseCase()
-            ) { tags, tasks ->
-                tags to tasks
-            }.collect { (tags, tasks) ->
-
+                getTagFindAllUseCase(),
+                getFilteredTasksUseCase(),
+                getArgumentFiltersTasks()
+            ) { tags, tasks, argumentFilter ->
+                Triple(tags, tasks, argumentFilter)
+            }.collect { (tags, tasks, argumentFilter) ->
                 _uiState.update { state ->
                     state.copy(
                         tags = tags,
-                        tasks = tasks
+                        tasks = tasks,
+                        filter = ListTasksFilter(
+                            tag = argumentFilter.tagFilter
+                        )
                     )
                 }
 
+                Log.d("tag filter", argumentFilter.tagFilter.toString())
                 changeVisibilityLoading(isLoading = false)
             }
         }
@@ -65,10 +74,8 @@ class ListTasksViewModel(
 
     private fun filter(value: ListTasksFilter) {
 
-        _uiState.update { state ->
-            state.copy(
-                filter = value
-            )
+        viewModelScope.launch {
+            filterTaskUseCase(tagId = value.tag)
         }
     }
 

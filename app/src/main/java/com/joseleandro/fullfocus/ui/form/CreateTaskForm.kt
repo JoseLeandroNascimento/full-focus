@@ -25,8 +25,8 @@ data class CreateTaskForm(
             )
         )
     ),
-    val tag: Field<Int> = Field(
-        value = 0
+    val tag: Field<Int?> = Field(
+        value = null
     )
 ) : Form {
     override fun isValid(): Boolean {
@@ -36,7 +36,8 @@ data class CreateTaskForm(
     override fun validateForm(): CreateTaskForm {
         return copy(
             title = title.validate(),
-            pomodoros = pomodoros.validate()
+            pomodoros = pomodoros.validate(),
+            tag = tag.validate()
         )
     }
 }

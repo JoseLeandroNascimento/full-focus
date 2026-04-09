@@ -5,7 +5,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {
 
-    val tasks: Flow<List<TaskDomain>>
+    val tasksAll: Flow<List<TaskDomain>>
+
+    val tasksFiltered: Flow<List<TaskDomain>>
 
     suspend fun save(task: TaskDomain)
 

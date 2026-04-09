@@ -17,12 +17,13 @@ fun List<TaskEntity>.toDomain(): List<TaskDomain> {
     return map { it.toDomain() }
 }
 
-fun TaskDomain.toEntity(): TaskEntity{
+fun TaskDomain.toEntity(): TaskEntity {
     return TaskEntity(
         id = id,
         title = title,
         pomodoros = pomodoros,
         isDone = isDone,
+        tagId = tag,
         progress = progress
     )
 }

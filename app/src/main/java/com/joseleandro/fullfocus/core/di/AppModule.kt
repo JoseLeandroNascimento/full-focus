@@ -1,22 +1,32 @@
 package com.joseleandro.fullfocus.core.di
 
+import android.content.Context
+import androidx.datastore.core.DataStore
 import androidx.room.Room
 import com.joseleandro.fullfocus.data.datasource.TagLocalDataSource
 import com.joseleandro.fullfocus.data.datasource.TagLocalDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.TaskLocalDataSource
 import com.joseleandro.fullfocus.data.datasource.TaskLocalDataSourceImpl
+import com.joseleandro.fullfocus.data.datasource.UserLocalPreferencesDataSource
+import com.joseleandro.fullfocus.data.datasource.UserLocalPreferencesDataSourceImpl
 import com.joseleandro.fullfocus.data.local.database.FULL_FOCUS_DATABASE_NAME
 import com.joseleandro.fullfocus.data.local.database.FullFocusDatabase
 import com.joseleandro.fullfocus.data.local.database.dao.TagDao
 import com.joseleandro.fullfocus.data.local.database.dao.TaskDao
+import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
+import com.joseleandro.fullfocus.data.local.preferences.userPreferencesDataStore
 import com.joseleandro.fullfocus.data.repository.TagRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TaskRepositoryImpl
+import com.joseleandro.fullfocus.data.repository.UserPreferencesRepositoryImpl
 import com.joseleandro.fullfocus.domain.repository.TagRepository
 import com.joseleandro.fullfocus.domain.repository.TaskRepository
+import com.joseleandro.fullfocus.domain.repository.UserPreferencesRepository
+import com.joseleandro.fullfocus.domain.usecase.FilterTaskUseCase
+import com.joseleandro.fullfocus.domain.usecase.GetArgumentFiltersTasks
+import com.joseleandro.fullfocus.domain.usecase.GetFilteredTasksUseCase
+import com.joseleandro.fullfocus.domain.usecase.GetTagFindAllUseCase
 import com.joseleandro.fullfocus.domain.usecase.SaveTagUseCase
 import com.joseleandro.fullfocus.domain.usecase.SaveTaskUseCase
-import com.joseleandro.fullfocus.domain.usecase.TagFindAllUseCase
-import com.joseleandro.fullfocus.domain.usecase.TaskFindAllUseCase
 import com.joseleandro.fullfocus.ui.screen.NavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.create_tag.CreateTagViewModel
 import com.joseleandro.fullfocus.ui.screen.create_task.CreateTaskViewModel
@@ -52,9 +62,14 @@ object AppModule {
             )
         }
 
+        single<DataStore<UserPreferences>> {
+            get<Context>().userPreferencesDataStore
+        }
+
         single<TaskLocalDataSource> {
             TaskLocalDataSourceImpl(
-                taskDao = get()
+                taskDao = get(),
+                userLocalPreferencesDataSource = get()
             )
         }
 
@@ -69,6 +84,19 @@ object AppModule {
                 taskLocalDataSource = get()
             )
         }
+
+        single<UserLocalPreferencesDataSource> {
+            UserLocalPreferencesDataSourceImpl(
+                dataStore = get()
+            )
+        }
+
+        single<UserPreferencesRepository> {
+            UserPreferencesRepositoryImpl(
+                userLocalPreferencesDataSource = get()
+            )
+        }
+
     }
 
 
@@ -81,7 +109,7 @@ object AppModule {
         }
 
         factory {
-            TagFindAllUseCase(
+            GetTagFindAllUseCase(
                 tagRepository = get()
             )
         }
@@ -93,10 +121,23 @@ object AppModule {
         }
 
         factory {
-            TaskFindAllUseCase(
+            GetFilteredTasksUseCase(
                 taskRepository = get()
             )
         }
+
+        factory {
+            FilterTaskUseCase(
+                userPreferencesRepository = get()
+            )
+        }
+
+        factory {
+            GetArgumentFiltersTasks(
+                userPreferencesRepository = get()
+            )
+        }
+
     }
 
     val uiModule = module {
