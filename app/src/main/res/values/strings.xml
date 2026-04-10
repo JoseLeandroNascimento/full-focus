@@ -33,4 +33,7 @@
     <string name="adicione_uma_nova_tarefa">Adicione uma nova tarefa</string>
     <string name="organize_suas_tarefas_por_categoria">Organize suas tarefas por categoria</string>
     <string name="criar_tag">Criar tag</string>
+    <string name="minhas_tags">Minhas tags</string>
+    <string name="editar">Editar</string>
+    <string name="excluir">Excluir</string>
 </resources>

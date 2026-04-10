@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.joseleandro.fullfocus.core.navigation.ETabScreen
+import com.joseleandro.fullfocus.core.navigation.Screen
 import com.joseleandro.fullfocus.core.navigation.TabScreen
 import com.joseleandro.fullfocus.ui.component.FullFocusModalDrawerSheet
 import com.joseleandro.fullfocus.ui.screen.list_tasks.ListTasksScreen
@@ -48,8 +49,9 @@ fun MainScreen() {
     MainScreen(
         backStack = backStack,
         onBack = {},
-        onNavigate = navigationViewModel::selectedTab,
-        currentTab = currentTab
+        onNavigateTab = navigationViewModel::selectedTab,
+        currentTab = currentTab,
+        onNavigateScreen = navigationViewModel::navigateTo
     )
 }
 
@@ -58,7 +60,8 @@ fun MainScreen(
     backStack: List<TabScreen>,
     onBack: () -> Unit,
     currentTab: TabScreen,
-    onNavigate: (TabScreen) -> Unit
+    onNavigateTab: (TabScreen) -> Unit,
+    onNavigateScreen: (Screen) -> Unit
 ) {
 
     val isPreview = LocalInspectionMode.current
@@ -77,7 +80,13 @@ fun MainScreen(
         drawerContent = {
             FullFocusModalDrawerSheet(
                 modifier = Modifier.fillMaxWidth(.8f),
-                drawerState = drawerState
+                drawerState = drawerState,
+                onNavigate = { screen ->
+                    onNavigateScreen(screen)
+                    scope.launch {
+                        drawerState.close()
+                    }
+                }
             )
         }
     ) {
@@ -85,7 +94,7 @@ fun MainScreen(
             bottomBar = {
                 MainBottomAppBar(
                     currentTab = currentTab,
-                    onNavigate = onNavigate
+                    onNavigate = onNavigateTab
                 )
             },
             containerColor = MaterialTheme.colorScheme.surface
@@ -187,7 +196,8 @@ private fun MainScreenLightPreview() {
             backStack = listOf(TabScreen.PomodoroScreen),
             onBack = {},
             currentTab = TabScreen.PomodoroScreen,
-            onNavigate = {}
+            onNavigateTab = {},
+            onNavigateScreen = {}
         )
     }
 }
@@ -203,7 +213,8 @@ private fun MainScreenDarkPreview() {
             backStack = listOf(TabScreen.PomodoroScreen),
             onBack = {},
             currentTab = TabScreen.PomodoroScreen,
-            onNavigate = {}
+            onNavigateTab = {},
+            onNavigateScreen = {}
         )
     }
 }

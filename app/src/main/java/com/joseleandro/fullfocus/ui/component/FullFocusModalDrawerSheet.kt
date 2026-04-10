@@ -30,12 +30,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.joseleandro.fullfocus.R
+import com.joseleandro.fullfocus.core.navigation.Screen
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 @Composable
 fun FullFocusModalDrawerSheet(
     modifier: Modifier = Modifier,
-    drawerState: DrawerState
+    drawerState: DrawerState,
+    onNavigate: (Screen) -> Unit
 ) {
     ModalDrawerSheet(
         drawerState = drawerState,
@@ -105,7 +107,9 @@ fun FullFocusModalDrawerSheet(
                 },
                 label = { Text(text = "Tags", style = MaterialTheme.typography.labelLarge) },
                 selected = false,
-                onClick = {}
+                onClick = {
+                    onNavigate(Screen.ManageTagScreen)
+                }
             )
 
             NavigationDrawerItem(
@@ -353,7 +357,8 @@ private fun FullFocusModalDrawerSheetLightPreview() {
         darkTheme = false
     ) {
         FullFocusModalDrawerSheet(
-            drawerState = rememberDrawerState(DrawerValue.Open)
+            drawerState = rememberDrawerState(DrawerValue.Open),
+            onNavigate = {}
         )
     }
 }
@@ -367,7 +372,8 @@ private fun FullFocusModalDrawerSheetDarkPreview() {
         darkTheme = true
     ) {
         FullFocusModalDrawerSheet(
-            drawerState = rememberDrawerState(DrawerValue.Open)
+            drawerState = rememberDrawerState(DrawerValue.Open),
+            onNavigate = {}
         )
     }
 }

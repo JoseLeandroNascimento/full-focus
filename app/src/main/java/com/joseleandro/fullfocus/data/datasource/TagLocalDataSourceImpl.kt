@@ -5,6 +5,7 @@ import com.joseleandro.fullfocus.data.local.database.mapper.toDomain
 import com.joseleandro.fullfocus.data.local.database.mapper.toEntity
 import com.joseleandro.fullfocus.data.local.database.model.TagEntity
 import com.joseleandro.fullfocus.domain.data.TagDomain
+import com.joseleandro.fullfocus.domain.data.TagWithTasksDetailsDomain
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -14,6 +15,9 @@ class TagLocalDataSourceImpl(
 
     override val tagsAll: Flow<List<TagDomain>>
         get() = tagDao.getAll().map { it.toDomain() }
+
+    override val tagsAllWithDetailsCount: Flow<List<TagWithTasksDetailsDomain>>
+        get() = tagDao.getAllWithTasksCount().map { it.toDomain() }
 
 
     override suspend fun save(tag: TagDomain) {
@@ -30,5 +34,9 @@ class TagLocalDataSourceImpl(
                 updatedAt = System.currentTimeMillis()
             )
         }
+    }
+
+    override suspend fun deleteById(id: Int) {
+        tagDao.deleteById(id)
     }
 }

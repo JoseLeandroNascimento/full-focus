@@ -1,5 +1,7 @@
 package com.joseleandro.fullfocus.ui.screen.list_tasks
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -194,7 +196,12 @@ fun ListTasksScreen(
 
                         items(items = uiState.tasks, key = { it.id }) { task ->
                             TaskCard(
-                                modifier = Modifier.padding(horizontal = 16.dp),
+                                modifier = Modifier
+                                    .padding(horizontal = 16.dp)
+                                    .animateItem(
+                                        fadeInSpec = tween(300),
+                                        fadeOutSpec = tween(300)
+                                    ),
                                 task = task
                             )
                         }

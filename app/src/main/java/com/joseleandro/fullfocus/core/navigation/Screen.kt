@@ -6,4 +6,9 @@ sealed interface Screen {
 
     @Serializable
     data object MainScreen : Screen
+
+
+    @Serializable
+    data object ManageTagScreen : Screen
+
 }
