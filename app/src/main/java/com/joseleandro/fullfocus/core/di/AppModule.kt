@@ -15,9 +15,11 @@ import com.joseleandro.fullfocus.data.local.database.dao.TagDao
 import com.joseleandro.fullfocus.data.local.database.dao.TaskDao
 import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
 import com.joseleandro.fullfocus.data.local.preferences.userPreferencesDataStore
+import com.joseleandro.fullfocus.data.repository.PomodoroRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TagRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TaskFilterPreferencesRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TaskRepositoryImpl
+import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import com.joseleandro.fullfocus.domain.repository.TagRepository
 import com.joseleandro.fullfocus.domain.repository.TaskFilterPreferencesRepository
 import com.joseleandro.fullfocus.domain.repository.TaskRepository
@@ -98,6 +100,14 @@ object AppModule {
             TaskFilterPreferencesRepositoryImpl(
                 taskFilterLocalPreferencesDataSource = get()
             )
+        }
+
+        single<PomodoroRepository> {
+
+            PomodoroRepositoryImpl(
+                dataStore = get()
+            )
+
         }
 
     }

@@ -1,38 +1,20 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro
 
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.domain.enums.SessionStatus
+import com.joseleandro.fullfocus.service.*
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroTimer
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
@@ -54,10 +37,8 @@ fun PomodoroScreen(
     modifier: Modifier = Modifier,
     openDrawer: () -> Unit
 ) {
-
     val viewModel: PomodoroViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
 
     PomodoroScreen(
         modifier = modifier,
@@ -65,7 +46,6 @@ fun PomodoroScreen(
         onEvent = viewModel::onEvent,
         openDrawer = openDrawer
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,169 +57,170 @@ fun PomodoroScreen(
     openDrawer: () -> Unit
 ) {
 
-    val pomodoroSettingBottomSheet = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
-
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.pomodoro),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                },
+                title = { Text(stringResource(R.string.pomodoro)) },
                 navigationIcon = {
-                    IconButton(
-                        onClick = openDrawer
-                    ) {
+                    IconButton(onClick = openDrawer) {
                         Icon(
-                            painter = painterResource(id = R.drawable.outline_menu_24),
+                            painterResource(R.drawable.outline_menu_24),
                             contentDescription = null
                         )
                     }
                 },
                 actions = {
                     IconButton(
-
                         onClick = {
                             onEvent(PomodoroEvent.OnShowPomodoroSettingBottomSheet(true))
                         }
                     ) {
                         Icon(
-                            modifier = Modifier.size(20.dp),
-                            painter = painterResource(id = R.drawable.outline_settings_24),
+                            painterResource(R.drawable.outline_settings_24),
                             contentDescription = null
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
-                )
+                }
             )
         }
-    ) { innerPadding ->
-        Surface(
-            modifier = Modifier.padding(innerPadding),
-            color = MaterialTheme.colorScheme.surface
+    ) { padding ->
+
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(state = rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally
+
+            BoxWithConstraints(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                val size = (maxWidth * .8f).coerceAtMost(340.dp)
+
+                PomodoroTimer(
+                    size = size,
+                    timeProgress = uiState.time,
+                    timeMax = uiState.timeSession,
+                    supportText = "1/4 sessões"
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
 
-                BoxWithConstraints(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                // ⏭️ SKIP
+                IconButton(
+                    onClick = {
+                        context.startPomodoroService(ACTION_SKIP)
+                    }
                 ) {
-
-                    val width = this.maxWidth
-
-                    PomodoroTimer(
-                        size = (width * .8f).coerceAtMost(340.dp),
-                        timeProgress = uiState.time,
-                        timeMax = uiState.timeSession,
-                        supportText = "1/4 sessões"
+                    Icon(
+                        painterResource(R.drawable.rounded_skip_next_24),
+                        contentDescription = "Pular"
                     )
                 }
 
+                // ▶️ BOTÃO PRINCIPAL
+                PomodoroButtonPrimary(
+                    label = getButtonLabel(uiState),
+                    iconRes = getButtonIcon(uiState),
+                    onClick = {
+                        when (uiState.sessionStatus) {
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(
-                        space = 8.dp,
-                        alignment = Alignment.CenterHorizontally
-                    )
+                            SessionStatus.START -> {
+                                context.startPomodoroService(ACTION_START)
+                            }
+
+                            SessionStatus.PROGRESS -> {
+                                if (uiState.isPlay) {
+                                    context.startPomodoroService(ACTION_PAUSE)
+                                } else {
+                                    context.startPomodoroService(ACTION_RESUME)
+                                }
+                            }
+
+                            SessionStatus.FINISHED -> {
+                                context.startPomodoroService(ACTION_START)
+                            }
+                        }
+                    }
+                )
+
+                // 🔄 RESTART
+                IconButton(
+                    onClick = {
+                        context.startPomodoroService(ACTION_RESET)
+                    },
+                    enabled = uiState.sessionStatus != SessionStatus.START
                 ) {
-
-                    IconButton(
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary.copy(
-                                alpha = .1f
-                            )
-                        ),
-                        onClick = {}
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_skip_next_24),
-                            contentDescription = null
-                        )
-                    }
-
-                    val labelButton = when (uiState.sessionStatus) {
-                        SessionStatus.START -> R.string.iniciar
-                        SessionStatus.PROGRESS -> {
-                            if (uiState.isPlay) {
-                                R.string.pausar
-                            } else {
-                                R.string.retomar
-                            }
-                        }
-
-                        SessionStatus.FINISHED -> R.string.recomecar
-                    }
-
-                    PomodoroButtonPrimary(
-                        label = stringResource(
-                            id = labelButton
-                        ),
-                        iconRes = if (uiState.isPlay) R.drawable.baseline_pause_24 else R.drawable.round_play_arrow_24,
-                        onClick = {
-
-                            if (uiState.isPlay) {
-                                onEvent(PomodoroEvent.OnPause)
-                            } else {
-                                onEvent(PomodoroEvent.OnPlay)
-                            }
-
-                        }
+                    Icon(
+                        painterResource(R.drawable.outline_restart_alt_24),
+                        contentDescription = "Reiniciar"
                     )
-
-
-                    IconButton(
-                        colors = IconButtonDefaults.iconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary.copy(
-                                alpha = .1f
-                            )
-                        ),
-                        onClick = {
-                            onEvent(PomodoroEvent.OnRestart)
-                        }
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.outline_restart_alt_24),
-                            contentDescription = null
-                        )
-                    }
                 }
-
             }
         }
     }
 
-
     if (uiState.showPomodoroSettingBottomSheet) {
-
         PomodoroSettingBottomSheet(
-            sheetState = pomodoroSettingBottomSheet,
+            sheetState = bottomSheetState,
             onDismissRequest = {
                 onEvent(PomodoroEvent.OnShowPomodoroSettingBottomSheet(false))
-                scope.launch {
-                    pomodoroSettingBottomSheet.hide()
-                }
+                scope.launch { bottomSheetState.hide() }
             }
         )
     }
 }
+
+// ---------------- HELPERS ----------------
+
+fun getButtonLabel(uiState: PomodoroUiState): String {
+    return when (uiState.sessionStatus) {
+        SessionStatus.START -> "Iniciar"
+        SessionStatus.PROGRESS -> if (uiState.isPlay) "Pausar" else "Retomar"
+        SessionStatus.FINISHED -> "Recomeçar"
+    }
+}
+
+@DrawableRes
+fun getButtonIcon(uiState: PomodoroUiState): Int {
+    return when (uiState.sessionStatus) {
+        SessionStatus.START -> R.drawable.round_play_arrow_24
+        SessionStatus.PROGRESS -> {
+            if (uiState.isPlay) R.drawable.baseline_pause_24
+            else R.drawable.round_play_arrow_24
+        }
+
+        SessionStatus.FINISHED -> R.drawable.outline_restart_alt_24
+    }
+}
+
+// ---------------- SERVICE CALL ----------------
+
+fun Context.startPomodoroService(action: String) {
+    val intent = Intent(this, PomodoroService::class.java).apply {
+        this.action = action
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        startForegroundService(intent)
+    } else {
+        startService(intent)
+    }
+}
+
+// ---------------- BUTTON ----------------
 
 @Composable
 fun PomodoroButtonPrimary(
@@ -248,11 +229,10 @@ fun PomodoroButtonPrimary(
     @DrawableRes iconRes: Int,
     onClick: () -> Unit,
 ) {
-
     Button(
         modifier = modifier.background(
             brush = Brush.linearGradient(
-                colors = listOf(
+                listOf(
                     MaterialTheme.colorScheme.primary,
                     MaterialTheme.colorScheme.secondary
                 )
@@ -260,19 +240,12 @@ fun PomodoroButtonPrimary(
             shape = MaterialTheme.shapes.extraLarge
         ),
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent
-        ),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp)
     ) {
-        Icon(
-            painter = painterResource(id = iconRes),
-            contentDescription = null
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge
-        )
+        Icon(painterResource(iconRes), contentDescription = null)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(label)
     }
 }
 

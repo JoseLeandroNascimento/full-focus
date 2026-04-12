@@ -5,6 +5,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
+import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
@@ -41,3 +42,13 @@ val Context.userPreferencesDataStore: DataStore<UserPreferences> by dataStore(
     fileName = USER_PREFERENCES_NAME,
     serializer = UserPreferencesSerializer
 )
+
+suspend fun Context.updatePomodoro(
+    update: (PomodoroPreferences) -> PomodoroPreferences
+) {
+    userPreferencesDataStore.updateData { current ->
+        current.copy(
+            pomodoro = update(current.pomodoro)
+        )
+    }
+}
