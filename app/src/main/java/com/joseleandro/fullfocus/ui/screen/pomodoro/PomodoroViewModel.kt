@@ -27,7 +27,6 @@ class PomodoroViewModel(
         startTicker()
     }
 
-    // 🔥 observa o estado real vindo do DataStore
     private fun observePomodoro() {
         viewModelScope.launch {
             repository.pomodoroFlow.collect { state ->
@@ -46,7 +45,6 @@ class PomodoroViewModel(
         }
     }
 
-    // 🔥 ticker pra atualizar o tempo a cada segundo
     private fun startTicker() {
         viewModelScope.launch {
             while (true) {

@@ -38,6 +38,7 @@ import com.joseleandro.fullfocus.ui.screen.list_tasks.ListTasksViewModel
 import com.joseleandro.fullfocus.ui.screen.manage_tag.ManageTagViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroViewModel
 import org.koin.android.ext.koin.androidApplication
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -109,6 +110,7 @@ object AppModule {
             )
 
         }
+
 
     }
 

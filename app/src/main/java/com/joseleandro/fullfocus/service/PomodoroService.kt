@@ -12,13 +12,14 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroPreferences
-import com.joseleandro.fullfocus.data.local.preferences.userPreferencesDataStore
-import com.joseleandro.fullfocus.data.repository.PomodoroRepositoryImpl
+import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 const val ACTION_START = "ACTION_START"
 const val ACTION_PAUSE = "ACTION_PAUSE"
@@ -27,12 +28,12 @@ const val ACTION_RESUME = "ACTION_RESUME"
 const val ACTION_SKIP = "ACTION_SKIP"
 
 
-class PomodoroService : Service() {
+class PomodoroService : Service(), KoinComponent {
 
     private val TAG = "PomodoroService"
     private val CHANNEL_ID = "pomodoro_channel"
 
-    private lateinit var repository: PomodoroRepositoryImpl
+    private val repository: PomodoroRepository by inject()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -45,9 +46,6 @@ class PomodoroService : Service() {
 
         createNotificationChannel()
 
-        repository = PomodoroRepositoryImpl(
-            applicationContext.userPreferencesDataStore
-        )
     }
 
 

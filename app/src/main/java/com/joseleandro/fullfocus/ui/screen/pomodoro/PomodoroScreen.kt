@@ -65,7 +65,12 @@ fun PomodoroScreen(
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.pomodoro)) },
+                title = {
+                    Text(
+                        stringResource(R.string.pomodoro),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = openDrawer) {
                         Icon(
@@ -87,7 +92,8 @@ fun PomodoroScreen(
                     }
                 }
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
 
         Column(
@@ -206,7 +212,6 @@ fun getButtonIcon(uiState: PomodoroUiState): Int {
     }
 }
 
-// ---------------- SERVICE CALL ----------------
 
 fun Context.startPomodoroService(action: String) {
     val intent = Intent(this, PomodoroService::class.java).apply {
@@ -220,7 +225,6 @@ fun Context.startPomodoroService(action: String) {
     }
 }
 
-// ---------------- BUTTON ----------------
 
 @Composable
 fun PomodoroButtonPrimary(
