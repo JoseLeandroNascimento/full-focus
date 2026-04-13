@@ -40,8 +40,8 @@ import java.util.Locale
 @Composable
 fun PomodoroTimer(
     modifier: Modifier = Modifier,
-    timeProgress: Int,
-    timeMax: Int,
+    time: Int,
+    timeSession: Int,
     statusSession: StatusSession = StatusSession.FOCUS,
     supportText: String,
     size: Dp = 340.dp
@@ -52,7 +52,7 @@ fun PomodoroTimer(
     val progressBar = MaterialTheme.colorScheme.surfaceVariant
     val backGround = MaterialTheme.colorScheme.background
 
-    val progress = (360f * (timeProgress.toFloat() / timeMax)).coerceAtMost(360f)
+    val progress = (360f * (time.toFloat() / timeSession)).coerceAtMost(360f)
 
     val progressAnimated by animateFloatAsState(
         targetValue = progress,
@@ -61,7 +61,7 @@ fun PomodoroTimer(
     )
 
     val timeAnimated by animateIntAsState(
-        targetValue = timeProgress,
+        targetValue = time,
         animationSpec = tween(durationMillis = 300, easing = LinearEasing)
     )
 
@@ -207,8 +207,8 @@ private fun PomodoroTimerLightPreview() {
     ) {
         PomodoroTimer(
             size = 340.dp,
-            timeProgress = 60 * 4,
-            timeMax = 60 * 25,
+            time = 60 * 4,
+            timeSession = 60 * 25,
             supportText = "1/4 sessões"
         )
     }
@@ -223,8 +223,8 @@ private fun PomodoroTimerDarkPreview() {
     ) {
         PomodoroTimer(
             size = 340.dp,
-            timeProgress = 60 * 4,
-            timeMax = 60 * 25,
+            time = 60 * 4,
+            timeSession = 60 * 25,
             supportText = "1/4 sessões"
         )
     }

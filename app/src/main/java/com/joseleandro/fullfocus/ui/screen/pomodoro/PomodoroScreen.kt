@@ -5,11 +5,31 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -22,7 +42,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.domain.enums.SessionStatus
-import com.joseleandro.fullfocus.service.*
+import com.joseleandro.fullfocus.service.ACTION_PAUSE
+import com.joseleandro.fullfocus.service.ACTION_RESET
+import com.joseleandro.fullfocus.service.ACTION_RESUME
+import com.joseleandro.fullfocus.service.ACTION_SKIP
+import com.joseleandro.fullfocus.service.ACTION_START
+import com.joseleandro.fullfocus.service.PomodoroService
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroTimer
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
@@ -113,8 +138,8 @@ fun PomodoroScreen(
 
                 PomodoroTimer(
                     size = size,
-                    timeProgress = uiState.time,
-                    timeMax = uiState.timeSession,
+                    time = uiState.time,
+                    timeSession = uiState.timeSession,
                     supportText = "1/4 sessões"
                 )
             }
@@ -156,7 +181,7 @@ fun PomodoroScreen(
                             }
 
                             SessionStatus.FINISHED -> {
-                                context.startPomodoroService(ACTION_START)
+                                context.startPomodoroService(ACTION_RESET)
                             }
                         }
                     }

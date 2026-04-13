@@ -37,26 +37,23 @@ class PomodoroRepositoryImpl(
             it.copy(
                 pomodoro = it.pomodoro.copy(
                     pausedAt = now,
-                    isRunning = false
+                    isRunning = false,
                 )
             )
         }
     }
 
+
     override suspend fun resume() {
         val now = System.currentTimeMillis()
-
-        val current = dataStore.data.first()
-        val state = current.pomodoro
-
-        val pausedDuration = now - (state.pausedAt ?: now)
-        val newStart = state.startTime + pausedDuration
-
         dataStore.updateData {
+            val state = it.pomodoro
+            val pausedDuration = if (state.pausedAt != null) now - state.pausedAt else 0L
+
             it.copy(
                 pomodoro = state.copy(
-                    startTime = newStart,
-                    pausedAt = null,
+                    startTime = state.startTime + pausedDuration,
+                    pausedAt = null, // Crucial limpar aqui
                     isRunning = true
                 )
             )
@@ -72,11 +69,13 @@ class PomodoroRepositoryImpl(
     }
 
     override fun getRemaining(state: PomodoroPreferences): Long {
-        if (!state.isRunning) return state.duration
-
+        if (state.startTime == 0L) return state.duration
         val now = System.currentTimeMillis()
-        val elapsed = now - state.startTime
 
-        return (state.duration - elapsed).coerceAtLeast(0)
+        return if (state.isRunning) {
+            state.duration - (now - state.startTime)
+        } else {
+            state.duration - ((state.pausedAt ?: now) - state.startTime)
+        }
     }
 }

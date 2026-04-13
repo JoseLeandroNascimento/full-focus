@@ -51,12 +51,12 @@ class PomodoroService : Service(), KoinComponent {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-        Log.d(TAG, "🚀 onStartCommand - action: ${intent?.action}")
-
         when (intent?.action) {
             ACTION_START -> {
                 Log.d(TAG, "▶️ START")
-                scope.launch { repository.start(duration = 25 * 60 * 1000L) }
+                scope.launch {
+                    repository.start(duration = 25 * 60 * 1000L)
+                }
             }
 
             ACTION_PAUSE -> {
@@ -77,7 +77,6 @@ class PomodoroService : Service(), KoinComponent {
             else -> Log.d(TAG, "⚠️ Ação desconhecida")
         }
 
-        Log.d(TAG, "📢 startForeground chamado")
         startForeground(1, createNotification())
 
         observeUpdates()
