@@ -10,6 +10,8 @@ interface PomodoroRepository {
 
     suspend fun pause()
 
+    suspend fun play()
+
     suspend fun resume()
 
     suspend fun reset()

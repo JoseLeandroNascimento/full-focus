@@ -24,7 +24,8 @@ class PomodoroRepositoryImpl(
                 pomodoro = PomodoroPreferences(
                     startTime = now,
                     duration = duration,
-                    isRunning = true
+                    isRunning = true,
+                    pausedAt = null
                 )
             )
         }
@@ -43,6 +44,10 @@ class PomodoroRepositoryImpl(
         }
     }
 
+
+    override suspend fun play() {
+        resume()
+    }
 
     override suspend fun resume() {
         val now = System.currentTimeMillis()
@@ -73,9 +78,10 @@ class PomodoroRepositoryImpl(
         val now = System.currentTimeMillis()
 
         return if (state.isRunning) {
-            state.duration - (now - state.startTime)
+            (state.duration - (now - state.startTime)).coerceAtLeast(0L)
         } else {
-            state.duration - ((state.pausedAt ?: now) - state.startTime)
+            val endPoint = state.pausedAt ?: now
+            (state.duration - (endPoint - state.startTime)).coerceAtLeast(0L)
         }
     }
 }
