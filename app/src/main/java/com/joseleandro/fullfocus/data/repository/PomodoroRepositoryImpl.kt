@@ -2,10 +2,9 @@ package com.joseleandro.fullfocus.data.repository
 
 import androidx.datastore.core.DataStore
 import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
-import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroPreferences
+import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroCurrentPreferences
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 
@@ -13,7 +12,7 @@ class PomodoroRepositoryImpl(
     private val dataStore: DataStore<UserPreferences>
 ) : PomodoroRepository {
 
-    override val pomodoroFlow: Flow<PomodoroPreferences> =
+    override val pomodoroFlow: Flow<PomodoroCurrentPreferences> =
         dataStore.data.map { it.pomodoro }
 
     override suspend fun start(duration: Long) {
@@ -21,7 +20,7 @@ class PomodoroRepositoryImpl(
 
         dataStore.updateData {
             it.copy(
-                pomodoro = PomodoroPreferences(
+                pomodoro = PomodoroCurrentPreferences(
                     startTime = now,
                     duration = duration,
                     isRunning = true,
@@ -68,12 +67,12 @@ class PomodoroRepositoryImpl(
     override suspend fun reset() {
         dataStore.updateData {
             it.copy(
-                pomodoro = PomodoroPreferences()
+                pomodoro = PomodoroCurrentPreferences()
             )
         }
     }
 
-    override fun getRemaining(state: PomodoroPreferences): Long {
+    override fun getRemaining(state: PomodoroCurrentPreferences): Long {
         if (state.startTime == 0L) return state.duration
         val now = System.currentTimeMillis()
 

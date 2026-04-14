@@ -3,6 +3,8 @@ package com.joseleandro.fullfocus.core.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.room.Room
+import com.joseleandro.fullfocus.data.datasource.PomodoroSettingPreferencesLocalDataSource
+import com.joseleandro.fullfocus.data.datasource.PomodoroSettingPreferencesLocalDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.TagLocalDataSource
 import com.joseleandro.fullfocus.data.datasource.TagLocalDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.TaskFilterLocalPreferencesDataSource
@@ -16,10 +18,12 @@ import com.joseleandro.fullfocus.data.local.database.dao.TaskDao
 import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
 import com.joseleandro.fullfocus.data.local.preferences.userPreferencesDataStore
 import com.joseleandro.fullfocus.data.repository.PomodoroRepositoryImpl
+import com.joseleandro.fullfocus.data.repository.PomodoroSettingPreferencesRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TagRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TaskFilterPreferencesRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TaskRepositoryImpl
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
+import com.joseleandro.fullfocus.domain.repository.PomodoroSettingPreferencesRepository
 import com.joseleandro.fullfocus.domain.repository.TagRepository
 import com.joseleandro.fullfocus.domain.repository.TaskFilterPreferencesRepository
 import com.joseleandro.fullfocus.domain.repository.TaskRepository
@@ -27,18 +31,20 @@ import com.joseleandro.fullfocus.domain.usecase.DeleteTagUseCase
 import com.joseleandro.fullfocus.domain.usecase.FilterTaskUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetArgumentFiltersTasks
 import com.joseleandro.fullfocus.domain.usecase.GetFilteredTasksUseCase
+import com.joseleandro.fullfocus.domain.usecase.GetPomodoroSettingPreferencesUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetTagFindAllUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetTagsWithDetailsUseCase
 import com.joseleandro.fullfocus.domain.usecase.SaveTagUseCase
 import com.joseleandro.fullfocus.domain.usecase.SaveTaskUseCase
+import com.joseleandro.fullfocus.domain.usecase.UpdatePomodoroSettingUseCase
 import com.joseleandro.fullfocus.ui.screen.NavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.create_tag.CreateTagViewModel
 import com.joseleandro.fullfocus.ui.screen.create_task.CreateTaskViewModel
 import com.joseleandro.fullfocus.ui.screen.list_tasks.ListTasksViewModel
 import com.joseleandro.fullfocus.ui.screen.manage_tag.ManageTagViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroViewModel
+import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingViewModel
 import org.koin.android.ext.koin.androidApplication
-import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -111,6 +117,17 @@ object AppModule {
 
         }
 
+        single<PomodoroSettingPreferencesLocalDataSource> {
+            PomodoroSettingPreferencesLocalDataSourceImpl(
+                dataStore = get()
+            )
+        }
+
+        single<PomodoroSettingPreferencesRepository> {
+            PomodoroSettingPreferencesRepositoryImpl(
+                pomodoroSettingDataSource = get()
+            )
+        }
 
     }
 
@@ -165,6 +182,18 @@ object AppModule {
             )
         }
 
+        factory {
+            GetPomodoroSettingPreferencesUseCase(
+                pomodoroSettingRepository = get()
+            )
+        }
+
+        factory {
+            UpdatePomodoroSettingUseCase(
+                repository = get()
+            )
+        }
+
     }
 
     val uiModule = module {
@@ -180,6 +209,8 @@ object AppModule {
         viewModelOf(::CreateTaskViewModel)
 
         viewModelOf(::ManageTagViewModel)
+
+        viewModelOf(::PomodoroSettingViewModel)
     }
 
 }

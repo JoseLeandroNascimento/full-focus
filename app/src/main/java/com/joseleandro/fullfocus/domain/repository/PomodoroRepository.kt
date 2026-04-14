@@ -1,10 +1,10 @@
 package com.joseleandro.fullfocus.domain.repository
 
-import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroPreferences
+import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroCurrentPreferences
 import kotlinx.coroutines.flow.Flow
 
 interface PomodoroRepository {
-    val pomodoroFlow: Flow<PomodoroPreferences>
+    val pomodoroFlow: Flow<PomodoroCurrentPreferences>
 
     suspend fun start(duration: Long)
 
@@ -16,5 +16,5 @@ interface PomodoroRepository {
 
     suspend fun reset()
 
-    fun getRemaining(state: PomodoroPreferences): Long
+    fun getRemaining(state: PomodoroCurrentPreferences): Long
 }

@@ -1,19 +1,18 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro_setting.component
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,11 +25,11 @@ fun TimerInput(
     modifier: Modifier = Modifier,
     label: String,
     value: String,
-    onValueChange: (String) -> Unit
+    onClick: () -> Unit
 ) {
 
     Column(
-        modifier = modifier.height(IntrinsicSize.Min),
+        modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -43,43 +42,43 @@ fun TimerInput(
             )
         )
 
-        TimerInput(
+        TimerInputBox(
             value = value,
-            onValueChange = onValueChange
+            onClick = onClick
         )
     }
 }
 
 @Composable
-fun TimerInput(
+private fun TimerInputBox(
     modifier: Modifier = Modifier,
     value: String,
-    onValueChange: (String) -> Unit
+    onClick: () -> Unit
 ) {
 
-    BasicTextField(
-        modifier = modifier.fillMaxWidth(),
-        value = value,
-        textStyle = TextStyle(
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center
-        ),
-        onValueChange = onValueChange
-    ) { innerTextField ->
-        Box(
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = .05f),
-                    shape = MaterialTheme.shapes.medium
-                )
-                .height(48.dp)
-                .padding(horizontal = 16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            innerTextField()
-        }
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(
+                shape = MaterialTheme.shapes.medium
+            )
+            .background(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = .05f),
+                shape = MaterialTheme.shapes.medium
+            )
+            .height(48.dp)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = value,
+            style = TextStyle(
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center
+            )
+        )
     }
 
 }
@@ -95,7 +94,7 @@ private fun TimerInputLightPreview() {
         TimerInput(
             label = "Pomodoro",
             value = "25",
-            onValueChange = {}
+            onClick = {}
         )
     }
 
@@ -112,7 +111,7 @@ private fun TimerInputDarkPreview() {
         TimerInput(
             label = "Pomodoro",
             value = "25",
-            onValueChange = {}
+            onClick = {}
         )
     }
 

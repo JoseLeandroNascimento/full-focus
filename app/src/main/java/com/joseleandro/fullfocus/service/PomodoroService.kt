@@ -12,7 +12,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroPreferences
+import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroCurrentPreferences
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -85,13 +85,24 @@ class PomodoroService : Service(), KoinComponent {
 
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val action = intent?.action
 
-        when (intent?.action) {
+        Log.d(TAG, "📩 onStartCommand: $action")
+
+        if (action == null) {
+            // Se o sistema recriou o service sem intent, verificamos se deve rodar
+            observeUpdates()
+            return START_STICKY
+        }
+
+        when (action) {
             ACTION_START -> {
                 Log.d(TAG, "▶️ START")
                 scope.launch {
                     repository.start(duration = 25 * 60 * 1000L)
                 }
+                // Iniciamos em foreground imediatamente ao dar play
+                startForeground(1, createNotification())
             }
 
             ACTION_PAUSE -> {
@@ -102,6 +113,7 @@ class PomodoroService : Service(), KoinComponent {
             ACTION_RESUME -> {
                 Log.d(TAG, "▶️ RESUME")
                 scope.launch { repository.resume() }
+                startForeground(1, createNotification())
             }
 
             ACTION_RESET -> {
@@ -111,8 +123,6 @@ class PomodoroService : Service(), KoinComponent {
 
             else -> Log.d(TAG, "⚠️ Ação desconhecida")
         }
-
-        startForeground(1, createNotification())
 
         observeUpdates()
 
@@ -159,14 +169,45 @@ class PomodoroService : Service(), KoinComponent {
             repository.pomodoroFlow.collectLatest { state ->
                 if (state.isRunning) {
                     while (true) {
+                        val remaining = repository.getRemaining(state)
+                        
+                        if (remaining <= 0) {
+                            Log.d(TAG, "✅ Tempo esgotado!")
+                            showFinishedNotification()
+                            repository.reset() // Isso disparará o 'else' abaixo na próxima emissão
+                            break
+                        }
+                        
                         updateNotification(state)
                         delay(1000)
                     }
                 } else {
                     updateNotification(state)
+                    
+                    // Se o timer foi resetado (manualmente ou pelo fim do tempo), paramos o service
+                    if (state.startTime == 0L) {
+                        Log.d(TAG, "⏹️ Service parado (Reset ou Fim)")
+                        stopForeground(STOP_FOREGROUND_REMOVE)
+                        stopSelf()
+                    }
                 }
             }
         }
+    }
+
+    private fun showFinishedNotification() {
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.round_check_circle_24)
+            .setContentTitle("Pomodoro Finalizado!")
+            .setContentText("Parabéns! Você completou sua sessão de foco.")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setColor(0xFF4CAF50.toInt()) // Verde Premium para sucesso
+            .setAutoCancel(true)
+            .build()
+
+        val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(2, notification) // ID diferente para não conflitar
     }
 
     // ---------------- NOTIFICAÇÃO ----------------
@@ -174,14 +215,16 @@ class PomodoroService : Service(), KoinComponent {
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Pomodoro")
-            .setContentText("Iniciando...")
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setContentText("Iniciando foco...")
+            .setSmallIcon(R.drawable.outline_access_time_24)
             .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setColor(0xFFE57373.toInt())
+            .setColorized(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
     }
 
-    private fun updateNotification(state: PomodoroPreferences) {
+    private fun updateNotification(state: PomodoroCurrentPreferences) {
 
         val remainingMillis = repository.getRemaining(state)
         val maxProgress = (state.duration / 1000).toInt()
