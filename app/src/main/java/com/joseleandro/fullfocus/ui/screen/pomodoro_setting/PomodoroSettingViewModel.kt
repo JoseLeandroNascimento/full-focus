@@ -2,6 +2,7 @@ package com.joseleandro.fullfocus.ui.screen.pomodoro_setting
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroSettingPreferences
 import com.joseleandro.fullfocus.domain.usecase.GetPomodoroSettingPreferencesUseCase
 import com.joseleandro.fullfocus.domain.usecase.UpdatePomodoroSettingUseCase
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
@@ -105,7 +106,7 @@ class PomodoroSettingViewModel(
         }
     }
 
-    private fun updatePreference(update: (com.joseleandro.fullfocus.data.local.preferences.data.PomodoroSettingPreferences) -> com.joseleandro.fullfocus.data.local.preferences.data.PomodoroSettingPreferences) {
+    private fun updatePreference(update: (PomodoroSettingPreferences) -> PomodoroSettingPreferences) {
         viewModelScope.launch {
             val currentPrefs = getPomodoroSettingUseCase().first()
             val newPrefs = update(currentPrefs)

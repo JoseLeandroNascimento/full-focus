@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -89,6 +90,17 @@ class PomodoroService : Service(), KoinComponent {
 
         Log.d(TAG, "📩 onStartCommand: $action")
 
+        // Garantir que startForeground seja chamado imediatamente para evitar ForegroundServiceDidNotStartInTimeException
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                1,
+                createNotification(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            startForeground(1, createNotification())
+        }
+
         if (action == null) {
             // Se o sistema recriou o service sem intent, verificamos se deve rodar
             observeUpdates()
@@ -101,8 +113,6 @@ class PomodoroService : Service(), KoinComponent {
                 scope.launch {
                     repository.start(duration = 25 * 60 * 1000L)
                 }
-                // Iniciamos em foreground imediatamente ao dar play
-                startForeground(1, createNotification())
             }
 
             ACTION_PAUSE -> {
@@ -113,7 +123,6 @@ class PomodoroService : Service(), KoinComponent {
             ACTION_RESUME -> {
                 Log.d(TAG, "▶️ RESUME")
                 scope.launch { repository.resume() }
-                startForeground(1, createNotification())
             }
 
             ACTION_RESET -> {
@@ -121,7 +130,12 @@ class PomodoroService : Service(), KoinComponent {
                 scope.launch { repository.reset() }
             }
 
-            else -> Log.d(TAG, "⚠️ Ação desconhecida")
+            ACTION_SKIP -> {
+                Log.d(TAG, "⏭️ SKIP")
+                // Adicione a lógica de skip se o repositório suportar
+            }
+
+            else -> Log.d(TAG, "⚠️ Ação desconhecida: $action")
         }
 
         observeUpdates()

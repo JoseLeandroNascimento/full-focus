@@ -103,7 +103,6 @@ fun WheelPicker(
     val items = remember { range.toList() }
     val scope = rememberCoroutineScope()
     
-    // Configura o estado inicial do Pager
     val initialPage = remember { items.indexOf(initialValue).coerceAtLeast(0) }
     val pagerState = rememberPagerState(
         initialPage = initialPage,
