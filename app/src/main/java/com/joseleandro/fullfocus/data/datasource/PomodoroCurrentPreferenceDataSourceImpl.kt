@@ -1,19 +1,26 @@
-package com.joseleandro.fullfocus.data.repository
+package com.joseleandro.fullfocus.data.datasource
 
 import androidx.datastore.core.DataStore
 import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroCurrentPreferences
-import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-
-class PomodoroRepositoryImpl(
-    private val dataStore: DataStore<UserPreferences>
-) : PomodoroRepository {
-
+class PomodoroCurrentPreferenceDataSourceImpl(
+    private val dataStore: DataStore<UserPreferences>,
+    private val pomodoroSettingPreferencesLocalDataSource: PomodoroSettingPreferencesLocalDataSource
+) : PomodoroCurrentPreferenceDataSource {
     override val pomodoroFlow: Flow<PomodoroCurrentPreferences> =
-        dataStore.data.map { it.pomodoro }
+        combine(
+            pomodoroSettingPreferencesLocalDataSource.pomodoroSetting,
+            dataStore.data.map { it.pomodoro }
+        ) { pomodoroSetting, pomodoroCurrent ->
+            pomodoroCurrent.copy(
+                duration = pomodoroSetting.pomodoroDuration
+            )
+        }
+
 
     override suspend fun start(duration: Long) {
         val now = System.currentTimeMillis()

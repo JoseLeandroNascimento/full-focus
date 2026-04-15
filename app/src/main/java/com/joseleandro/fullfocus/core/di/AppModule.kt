@@ -3,6 +3,8 @@ package com.joseleandro.fullfocus.core.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.room.Room
+import com.joseleandro.fullfocus.data.datasource.PomodoroCurrentPreferenceDataSource
+import com.joseleandro.fullfocus.data.datasource.PomodoroCurrentPreferenceDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingPreferencesLocalDataSource
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingPreferencesLocalDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.TagLocalDataSource
@@ -17,7 +19,7 @@ import com.joseleandro.fullfocus.data.local.database.dao.TagDao
 import com.joseleandro.fullfocus.data.local.database.dao.TaskDao
 import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
 import com.joseleandro.fullfocus.data.local.preferences.userPreferencesDataStore
-import com.joseleandro.fullfocus.data.repository.PomodoroRepositoryImpl
+import com.joseleandro.fullfocus.data.repository.PomodoroCurrentRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.PomodoroSettingPreferencesRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TagRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TaskFilterPreferencesRepositoryImpl
@@ -111,8 +113,8 @@ object AppModule {
 
         single<PomodoroRepository> {
 
-            PomodoroRepositoryImpl(
-                dataStore = get()
+            PomodoroCurrentRepositoryImpl(
+                pomodoroCurrentPreferenceDataSource = get()
             )
 
         }
@@ -129,6 +131,12 @@ object AppModule {
             )
         }
 
+        single<PomodoroCurrentPreferenceDataSource> {
+            PomodoroCurrentPreferenceDataSourceImpl(
+                dataStore = get(),
+              pomodoroSettingPreferencesLocalDataSource = get()
+            )
+        }
     }
 
 
