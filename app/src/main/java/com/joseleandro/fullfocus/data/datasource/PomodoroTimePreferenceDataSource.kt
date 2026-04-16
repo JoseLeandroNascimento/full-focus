@@ -1,9 +1,10 @@
-package com.joseleandro.fullfocus.domain.repository
+package com.joseleandro.fullfocus.data.datasource
 
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
 import kotlinx.coroutines.flow.Flow
 
-interface PomodoroRepository {
+interface PomodoroTimePreferenceDataSource {
+
     val pomodoroFlow: Flow<PomodoroTimePreferences>
 
     suspend fun start()

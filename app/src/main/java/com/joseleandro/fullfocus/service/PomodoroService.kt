@@ -13,7 +13,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroCurrentPreferences
+import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +29,7 @@ import java.util.Locale
 const val ACTION_START = "ACTION_START"
 const val ACTION_PAUSE = "ACTION_PAUSE"
 const val ACTION_RESET = "ACTION_RESET"
-const val ACTION_RESUME = "ACTION_RESUME"
+const val ACTION_PLAY = "ACTION_PLAY"
 const val ACTION_SKIP = "ACTION_SKIP"
 
 
@@ -44,9 +44,8 @@ class PomodoroService : Service(), KoinComponent {
 
     private var observing = false
 
-    // Otimização: Cache de PendingIntents e controle de atualização
     private lateinit var pausePending: PendingIntent
-    private lateinit var resumePending: PendingIntent
+    private lateinit var playPending: PendingIntent
     private lateinit var resetPending: PendingIntent
 
     private var lastProgress = -1
@@ -54,9 +53,6 @@ class PomodoroService : Service(), KoinComponent {
 
     override fun onCreate() {
         super.onCreate()
-
-        Log.d(TAG, "🔥 onCreate chamado")
-
         createNotificationChannel()
         initPendingIntents()
     }
@@ -66,8 +62,8 @@ class PomodoroService : Service(), KoinComponent {
             action = ACTION_PAUSE
         }
 
-        val resumeIntent = Intent(this, PomodoroService::class.java).apply {
-            action = ACTION_RESUME
+        val playIntent = Intent(this, PomodoroService::class.java).apply {
+            action = ACTION_PLAY
         }
 
         val resetIntent = Intent(this, PomodoroService::class.java).apply {
@@ -77,8 +73,8 @@ class PomodoroService : Service(), KoinComponent {
         pausePending =
             PendingIntent.getService(this, 0, pauseIntent, PendingIntent.FLAG_IMMUTABLE)
 
-        resumePending =
-            PendingIntent.getService(this, 1, resumeIntent, PendingIntent.FLAG_IMMUTABLE)
+        playPending =
+            PendingIntent.getService(this, 1, playIntent, PendingIntent.FLAG_IMMUTABLE)
 
         resetPending =
             PendingIntent.getService(this, 2, resetIntent, PendingIntent.FLAG_IMMUTABLE)
@@ -88,9 +84,7 @@ class PomodoroService : Service(), KoinComponent {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
 
-        Log.d(TAG, "📩 onStartCommand: $action")
 
-        // Garantir que startForeground seja chamado imediatamente para evitar ForegroundServiceDidNotStartInTimeException
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(
                 1,
@@ -102,37 +96,29 @@ class PomodoroService : Service(), KoinComponent {
         }
 
         if (action == null) {
-            // Se o sistema recriou o service sem intent, verificamos se deve rodar
             observeUpdates()
             return START_STICKY
         }
 
         when (action) {
             ACTION_START -> {
-                Log.d(TAG, "▶️ START")
-                scope.launch {
-                    repository.start(duration = 25 * 60 * 1000L)
-                }
+                scope.launch { repository.start() }
             }
 
             ACTION_PAUSE -> {
-                Log.d(TAG, "⏸️ PAUSE")
                 scope.launch { repository.pause() }
             }
 
-            ACTION_RESUME -> {
-                Log.d(TAG, "▶️ RESUME")
-                scope.launch { repository.resume() }
+            ACTION_PLAY -> {
+                scope.launch { repository.play() }
             }
 
             ACTION_RESET -> {
-                Log.d(TAG, "🔄 RESET")
                 scope.launch { repository.reset() }
             }
 
             ACTION_SKIP -> {
-                Log.d(TAG, "⏭️ SKIP")
-                // Adicione a lógica de skip se o repositório suportar
+                scope.launch { repository.skip() }
             }
 
             else -> Log.d(TAG, "⚠️ Ação desconhecida: $action")
@@ -145,13 +131,11 @@ class PomodoroService : Service(), KoinComponent {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d(TAG, "💀 Service destruído")
         scope.cancel()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
-    // ---------------- CHANNEL ----------------
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -159,50 +143,41 @@ class PomodoroService : Service(), KoinComponent {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Pomodoro Timer",
-                NotificationManager.IMPORTANCE_LOW // Usar LOW para não interromper o usuário a cada bip
+                NotificationManager.IMPORTANCE_LOW
             )
-
-            channel.description = "Notificação do Pomodoro em execução"
 
             val manager = getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(channel)
 
-            Log.d(TAG, "🔔 Canal criado com sucesso")
         }
     }
 
-    // ---------------- OBSERVA ESTADO ----------------
 
     private fun observeUpdates() {
         if (observing) return
         observing = true
 
-        Log.d(TAG, "👀 observeUpdates iniciado")
-
         scope.launch {
             repository.pomodoroFlow.collectLatest { state ->
+
                 if (state.isRunning) {
-                    while (true) {
-                        val remaining = repository.getRemaining(state)
-                        
-                        if (remaining <= 0) {
-                            Log.d(TAG, "✅ Tempo esgotado!")
-                            showFinishedNotification()
-                            repository.reset() // Isso disparará o 'else' abaixo na próxima emissão
-                            break
-                        }
-                        
+
+                    var remaining = repository.getRemaining(state)
+                    while (remaining > 0) {
+                        remaining = repository.getRemaining(state)
                         updateNotification(state)
                         delay(1000)
                     }
+
+                    showFinishedNotification()
+                    repository.finishedSessionPomodoro()
+
                 } else {
                     updateNotification(state)
-                    
-                    // Se o timer foi resetado (manualmente ou pelo fim do tempo), paramos o service
+
                     if (state.startTime == 0L) {
-                        Log.d(TAG, "⏹️ Service parado (Reset ou Fim)")
                         stopForeground(STOP_FOREGROUND_REMOVE)
-                        stopSelf()
+//                        stopSelf()
                     }
                 }
             }
@@ -238,7 +213,7 @@ class PomodoroService : Service(), KoinComponent {
             .build()
     }
 
-    private fun updateNotification(state: PomodoroCurrentPreferences) {
+    private fun updateNotification(state: PomodoroTimePreferences) {
 
         val remainingMillis = repository.getRemaining(state)
         val maxProgress = (state.duration / 1000).toInt()
@@ -256,9 +231,10 @@ class PomodoroService : Service(), KoinComponent {
 
         // Configuração visual Premium
         val title = if (state.isRunning) "Foco Ativo" else "Timer Pausado"
-        val mainIcon = if (state.isRunning) R.drawable.baseline_pause_24 else R.drawable.round_play_arrow_24
+        val mainIcon =
+            if (state.isRunning) R.drawable.baseline_pause_24 else R.drawable.round_play_arrow_24
         val mainActionLabel = if (state.isRunning) "Pausar" else "Continuar"
-        val mainPendingIntent = if (state.isRunning) pausePending else resumePending
+        val mainPendingIntent = if (state.isRunning) pausePending else playPending
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.outline_access_time_24)
@@ -279,7 +255,12 @@ class PomodoroService : Service(), KoinComponent {
                 .setWhen(endTime)
                 .setSubText("Produtividade Máxima")
         } else {
-            val mmSs = String.format(Locale.getDefault(), "%02d:%02d", currentProgress / 60, currentProgress % 60)
+            val mmSs = String.format(
+                Locale.getDefault(),
+                "%02d:%02d",
+                currentProgress / 60,
+                currentProgress % 60
+            )
             builder.setContentText("Sessão interrompida em: $mmSs")
                 .setSubText("Pausado")
         }

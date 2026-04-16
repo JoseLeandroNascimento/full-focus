@@ -3,8 +3,8 @@ package com.joseleandro.fullfocus.core.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.room.Room
-import com.joseleandro.fullfocus.data.datasource.PomodoroCurrentPreferenceDataSource
-import com.joseleandro.fullfocus.data.datasource.PomodoroCurrentPreferenceDataSourceImpl
+import com.joseleandro.fullfocus.data.datasource.PomodoroTimePreferenceDataSource
+import com.joseleandro.fullfocus.data.datasource.PomodoroTimePreferenceDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingPreferencesLocalDataSource
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingPreferencesLocalDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.TagLocalDataSource
@@ -114,7 +114,7 @@ object AppModule {
         single<PomodoroRepository> {
 
             PomodoroCurrentRepositoryImpl(
-                pomodoroCurrentPreferenceDataSource = get()
+                pomodoroTimePreferenceDataSource = get()
             )
 
         }
@@ -131,8 +131,8 @@ object AppModule {
             )
         }
 
-        single<PomodoroCurrentPreferenceDataSource> {
-            PomodoroCurrentPreferenceDataSourceImpl(
+        single<PomodoroTimePreferenceDataSource> {
+            PomodoroTimePreferenceDataSourceImpl(
                 dataStore = get(),
               pomodoroSettingPreferencesLocalDataSource = get()
             )

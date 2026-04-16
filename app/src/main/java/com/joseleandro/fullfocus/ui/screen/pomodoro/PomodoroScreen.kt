@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -41,10 +42,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.domain.enums.SessionStatus
+import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroStatus
 import com.joseleandro.fullfocus.service.ACTION_PAUSE
+import com.joseleandro.fullfocus.service.ACTION_PLAY
 import com.joseleandro.fullfocus.service.ACTION_RESET
-import com.joseleandro.fullfocus.service.ACTION_RESUME
 import com.joseleandro.fullfocus.service.ACTION_SKIP
 import com.joseleandro.fullfocus.service.ACTION_START
 import com.joseleandro.fullfocus.service.PomodoroService
@@ -139,8 +140,9 @@ fun PomodoroScreen(
                 PomodoroTimer(
                     size = size,
                     time = uiState.time,
+                    statusSession = uiState.statusSession,
                     timeSession = uiState.timeSession,
-                    supportText = "1/4 sessões"
+                    supportText = "${uiState.currentSession}/4 sessões"
                 )
             }
 
@@ -149,7 +151,6 @@ fun PomodoroScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
-                // ⏭️ SKIP
                 IconButton(
                     onClick = {
                         context.startPomodoroService(ACTION_SKIP)
@@ -161,38 +162,36 @@ fun PomodoroScreen(
                     )
                 }
 
-                // ▶️ BOTÃO PRINCIPAL
                 PomodoroButtonPrimary(
-                    label = getButtonLabel(uiState),
+                    label = stringResource(id = getButtonLabel(uiState)),
                     iconRes = getButtonIcon(uiState),
                     onClick = {
-                        when (uiState.sessionStatus) {
+                        when (uiState.pomodoroStatus) {
 
-                            SessionStatus.START -> {
+                            PomodoroStatus.START -> {
                                 context.startPomodoroService(ACTION_START)
                             }
 
-                            SessionStatus.PROGRESS -> {
+                            PomodoroStatus.PROGRESS -> {
                                 if (uiState.isPlay) {
                                     context.startPomodoroService(ACTION_PAUSE)
                                 } else {
-                                    context.startPomodoroService(ACTION_RESUME)
+                                    context.startPomodoroService(ACTION_PLAY)
                                 }
                             }
 
-                            SessionStatus.FINISHED -> {
+                            PomodoroStatus.FINISHED -> {
                                 context.startPomodoroService(ACTION_RESET)
                             }
                         }
                     }
                 )
 
-                // 🔄 RESTART
                 IconButton(
                     onClick = {
                         context.startPomodoroService(ACTION_RESET)
                     },
-                    enabled = uiState.sessionStatus != SessionStatus.START
+                    enabled = uiState.pomodoroStatus != PomodoroStatus.START
                 ) {
                     Icon(
                         painterResource(R.drawable.outline_restart_alt_24),
@@ -214,26 +213,26 @@ fun PomodoroScreen(
     }
 }
 
-// ---------------- HELPERS ----------------
 
-fun getButtonLabel(uiState: PomodoroUiState): String {
-    return when (uiState.sessionStatus) {
-        SessionStatus.START -> "Iniciar"
-        SessionStatus.PROGRESS -> if (uiState.isPlay) "Pausar" else "Retomar"
-        SessionStatus.FINISHED -> "Recomeçar"
+@StringRes
+fun getButtonLabel(uiState: PomodoroUiState): Int {
+    return when (uiState.pomodoroStatus) {
+        PomodoroStatus.START -> R.string.iniciar
+        PomodoroStatus.PROGRESS -> if (uiState.isPlay) R.string.pausar else R.string.retomar
+        PomodoroStatus.FINISHED -> R.string.recomecar
     }
 }
 
 @DrawableRes
 fun getButtonIcon(uiState: PomodoroUiState): Int {
-    return when (uiState.sessionStatus) {
-        SessionStatus.START -> R.drawable.round_play_arrow_24
-        SessionStatus.PROGRESS -> {
+    return when (uiState.pomodoroStatus) {
+        PomodoroStatus.START -> R.drawable.round_play_arrow_24
+        PomodoroStatus.PROGRESS -> {
             if (uiState.isPlay) R.drawable.baseline_pause_24
             else R.drawable.round_play_arrow_24
         }
 
-        SessionStatus.FINISHED -> R.drawable.outline_restart_alt_24
+        PomodoroStatus.FINISHED -> R.drawable.outline_restart_alt_24
     }
 }
 

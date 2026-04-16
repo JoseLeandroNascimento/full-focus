@@ -26,13 +26,14 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.domain.enums.StatusSession
+import com.joseleandro.fullfocus.data.local.preferences.data.StatusSession
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import java.util.Locale
 
@@ -52,7 +53,8 @@ fun PomodoroTimer(
     val progressBar = MaterialTheme.colorScheme.surfaceVariant
     val backGround = MaterialTheme.colorScheme.background
 
-    val progress = (360f * (time.toFloat() / timeSession)).coerceAtMost(360f)
+    val progress =
+        if (timeSession == 0) 0f else (360f * (time.toFloat() / timeSession)).coerceAtMost(360f)
 
     val progressAnimated by animateFloatAsState(
         targetValue = progress,
@@ -103,11 +105,11 @@ fun PomodoroTimer(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    Icon(
-                        modifier = Modifier.size(14.dp),
-                        painter = painterResource(id = R.drawable.sharp_target_24),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    Text(
+                        text = stringResource(id = statusSession.description),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     )
 
                     Text(

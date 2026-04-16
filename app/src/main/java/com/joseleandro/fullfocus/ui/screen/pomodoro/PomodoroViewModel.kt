@@ -1,9 +1,7 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joseleandro.fullfocus.domain.enums.SessionStatus
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
@@ -34,11 +32,9 @@ class PomodoroViewModel(
                     it.copy(
                         timeSession = (state.duration / 1000).toInt(),
                         isPlay = state.isRunning,
-                        sessionStatus = when {
-                            state.startTime != 0L -> SessionStatus.PROGRESS
-                            state.startTime == 0L -> SessionStatus.START
-                            else -> SessionStatus.FINISHED
-                        }
+                        statusSession = state.statusSession,
+                        pomodoroStatus = state.pomodoroStatus,
+                        currentSession = state.counterPomodoro + 1
                     )
                 }
             }
@@ -56,8 +52,6 @@ class PomodoroViewModel(
                 _uiState.update {
                     it.copy(time = remaining.toInt())
                 }
-
-                Log.d("time", _uiState.value.toString())
             }
         }
     }
