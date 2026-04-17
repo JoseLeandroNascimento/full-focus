@@ -26,7 +26,7 @@ class NavigationViewModel : ViewModel() {
         _backStack.value += screen
     }
 
-    fun selectedTab(tab: TabScreen){
+    fun selectedTab(tab: TabScreen) {
         _tabBackStack.value += tab
         _tabBackStack.update {
             it.drop(0)

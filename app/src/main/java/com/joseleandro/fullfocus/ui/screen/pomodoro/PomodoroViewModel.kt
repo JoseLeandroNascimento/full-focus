@@ -2,7 +2,9 @@ package com.joseleandro.fullfocus.ui.screen.pomodoro
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
+import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
+import com.joseleandro.fullfocus.domain.usecase.GetTaskCurrentPomodoroUseCase
+import com.joseleandro.fullfocus.domain.usecase.SetCurrentTaskPomodoroUseCase
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import kotlinx.coroutines.delay
@@ -14,13 +16,24 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PomodoroViewModel(
-    private val repository: PomodoroRepository
+    private val repository: PomodoroTimeRepository,
+    private val getTaskCurrentPomodoroUseCase: GetTaskCurrentPomodoroUseCase,
+    private val setCurrentTaskPomodoroUseCase: SetCurrentTaskPomodoroUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PomodoroUiState())
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            getTaskCurrentPomodoroUseCase().collect { taskTimeCurrent ->
+                _uiState.update { state ->
+                    state.copy(
+                        taskCurrent = taskTimeCurrent
+                    )
+                }
+            }
+        }
         observePomodoro()
         startTicker()
     }
@@ -56,6 +69,12 @@ class PomodoroViewModel(
         }
     }
 
+    private fun resetTaskCurrentPomodoro() {
+        viewModelScope.launch {
+            setCurrentTaskPomodoroUseCase(id = null)
+        }
+    }
+
     fun onEvent(event: PomodoroEvent) {
         when (event) {
             is PomodoroEvent.OnShowPomodoroSettingBottomSheet -> {
@@ -63,6 +82,8 @@ class PomodoroViewModel(
                     it.copy(showPomodoroSettingBottomSheet = event.show)
                 }
             }
+
+            PomodoroEvent.OnResetTaskCurrentPomodoro -> resetTaskCurrentPomodoro()
         }
     }
 }

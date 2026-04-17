@@ -36,4 +36,6 @@
     <string name="minhas_tags">Minhas tags</string>
     <string name="editar">Editar</string>
     <string name="excluir">Excluir</string>
+    <string name="selecione_uma_tarefa">Selecione uma tarefa para começar</string>
+    <string name="vamos_focar">Vamos focar?</string>
 </resources>

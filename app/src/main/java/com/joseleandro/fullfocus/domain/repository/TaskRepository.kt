@@ -11,4 +11,6 @@ interface TaskRepository {
 
     suspend fun save(task: TaskDomain)
 
+    fun getTaskById(id: Int): Flow<TaskDomain?>
+
 }

@@ -7,6 +7,7 @@ import com.joseleandro.fullfocus.domain.usecase.FilterTaskUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetArgumentFiltersTasks
 import com.joseleandro.fullfocus.domain.usecase.GetFilteredTasksUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetTagFindAllUseCase
+import com.joseleandro.fullfocus.domain.usecase.SetCurrentTaskPomodoroUseCase
 import com.joseleandro.fullfocus.ui.event.ListTasksEvent
 import com.joseleandro.fullfocus.ui.state.ListTasksFilter
 import com.joseleandro.fullfocus.ui.state.ListTasksUiState
@@ -21,6 +22,7 @@ class ListTasksViewModel(
     private val getFilteredTasksUseCase: GetFilteredTasksUseCase,
     private val filterTaskUseCase: FilterTaskUseCase,
     private val getArgumentFiltersTasks: GetArgumentFiltersTasks,
+    private val setCurrentTaskPomodoroUseCase: SetCurrentTaskPomodoroUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ListTasksUiState())
@@ -39,6 +41,7 @@ class ListTasksViewModel(
             )
 
             is ListTasksEvent.OnFilter -> filter(event.filter)
+            is ListTasksEvent.OnSelectTask -> selectTask(event.idTask)
         }
 
     }
@@ -69,6 +72,12 @@ class ListTasksViewModel(
                 Log.d("tag filter", argumentFilter.tagFilter.toString())
                 changeVisibilityLoading(isLoading = false)
             }
+        }
+    }
+
+    private fun selectTask(idTask: Int) {
+        viewModelScope.launch {
+            setCurrentTaskPomodoroUseCase(idTask)
         }
     }
 

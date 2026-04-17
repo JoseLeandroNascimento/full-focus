@@ -2,6 +2,7 @@ package com.joseleandro.fullfocus.ui.state
 
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroStatus
 import com.joseleandro.fullfocus.data.local.preferences.data.StatusSession
+import com.joseleandro.fullfocus.domain.data.TaskDomain
 
 
 data class PomodoroUiState(
@@ -11,5 +12,6 @@ data class PomodoroUiState(
     val showPomodoroSettingBottomSheet: Boolean = false,
     val pomodoroStatus: PomodoroStatus = PomodoroStatus.START,
     val statusSession: StatusSession = StatusSession.FOCUS,
-    val currentSession: Int = 0
+    val currentSession: Int = 0,
+    val taskCurrent: TaskDomain? = null
 )

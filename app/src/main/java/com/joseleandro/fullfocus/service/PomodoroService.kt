@@ -14,7 +14,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
-import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
+import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +29,7 @@ import java.util.Locale
 const val ACTION_START = "ACTION_START"
 const val ACTION_PAUSE = "ACTION_PAUSE"
 const val ACTION_RESET = "ACTION_RESET"
+const val ACTION_RESTART = "ACTION_RESTART"
 const val ACTION_PLAY = "ACTION_PLAY"
 const val ACTION_SKIP = "ACTION_SKIP"
 
@@ -38,7 +39,7 @@ class PomodoroService : Service(), KoinComponent {
     private val TAG = "PomodoroService"
     private val CHANNEL_ID = "pomodoro_channel"
 
-    private val repository: PomodoroRepository by inject()
+    private val repository: PomodoroTimeRepository by inject()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -47,6 +48,7 @@ class PomodoroService : Service(), KoinComponent {
     private lateinit var pausePending: PendingIntent
     private lateinit var playPending: PendingIntent
     private lateinit var resetPending: PendingIntent
+    private lateinit var restartPending: PendingIntent
 
     private var lastProgress = -1
     private var lastRunningState: Boolean? = null
@@ -70,6 +72,10 @@ class PomodoroService : Service(), KoinComponent {
             action = ACTION_RESET
         }
 
+        val restartIntent = Intent(this, PomodoroService::class.java).apply {
+            action = ACTION_RESTART
+        }
+
         pausePending =
             PendingIntent.getService(this, 0, pauseIntent, PendingIntent.FLAG_IMMUTABLE)
 
@@ -78,6 +84,9 @@ class PomodoroService : Service(), KoinComponent {
 
         resetPending =
             PendingIntent.getService(this, 2, resetIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        restartPending =
+            PendingIntent.getService(this, 3, restartIntent, PendingIntent.FLAG_IMMUTABLE)
     }
 
 
@@ -115,6 +124,10 @@ class PomodoroService : Service(), KoinComponent {
 
             ACTION_RESET -> {
                 scope.launch { repository.reset() }
+            }
+
+            ACTION_RESTART -> {
+                scope.launch { repository.restart() }
             }
 
             ACTION_SKIP -> {
@@ -267,7 +280,7 @@ class PomodoroService : Service(), KoinComponent {
 
         // Adiciona as ações
         builder.addAction(mainIcon, mainActionLabel, mainPendingIntent)
-        builder.addAction(R.drawable.outline_restart_alt_24, "Resetar", resetPending)
+        builder.addAction(R.drawable.outline_restart_alt_24, "Restart", restartPending)
 
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(1, builder.build())

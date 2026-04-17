@@ -18,4 +18,7 @@ class TaskRepositoryImpl(
     override suspend fun save(task: TaskDomain) {
         taskLocalDataSource.save(task)
     }
+
+    override fun getTaskById(id: Int): Flow<TaskDomain?> =
+        taskLocalDataSource.getTaskById(id)
 }

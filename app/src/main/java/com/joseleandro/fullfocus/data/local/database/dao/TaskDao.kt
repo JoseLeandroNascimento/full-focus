@@ -22,6 +22,9 @@ interface TaskDao {
         updatedAt: Long
     )
 
+    @Query("SELECT * FROM task_entity WHERE id = :id")
+    fun getById(id: Int): Flow<TaskEntity?>
+
     @Query("SELECT * FROM task_entity")
     fun getAll(): Flow<List<TaskEntity>>
 

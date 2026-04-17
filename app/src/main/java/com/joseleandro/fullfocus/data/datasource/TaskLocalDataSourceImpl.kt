@@ -47,4 +47,8 @@ class TaskLocalDataSourceImpl(
         }
 
     }
+
+    override fun getTaskById(id: Int): Flow<TaskDomain?> =
+        taskDao.getById(id = id).map { it?.toDomain() }
+
 }

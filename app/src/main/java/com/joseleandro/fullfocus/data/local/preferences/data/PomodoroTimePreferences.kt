@@ -10,11 +10,13 @@ data class PomodoroTimePreferences(
     val isRunning: Boolean = false,
     val statusSession: StatusSession = StatusSession.FOCUS,
     val counterPomodoro: Int = 0,
-    val pomodoroIntervalBreakLong: Int = 4
+    val pomodoroIntervalBreakLong: Int = 4,
+    val idTask: Int? = null
 ) {
 
     val pomodoroStatus: PomodoroStatus
         get() = when {
+            idTask == null -> PomodoroStatus.IDLE
             startTime == 0L -> PomodoroStatus.START
             startTime > 0L -> PomodoroStatus.PROGRESS
             else -> PomodoroStatus.FINISHED

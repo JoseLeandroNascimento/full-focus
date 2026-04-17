@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +32,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -43,14 +43,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroStatus
+import com.joseleandro.fullfocus.domain.data.tasksListMock
 import com.joseleandro.fullfocus.service.ACTION_PAUSE
 import com.joseleandro.fullfocus.service.ACTION_PLAY
-import com.joseleandro.fullfocus.service.ACTION_RESET
+import com.joseleandro.fullfocus.service.ACTION_RESTART
 import com.joseleandro.fullfocus.service.ACTION_SKIP
 import com.joseleandro.fullfocus.service.ACTION_START
 import com.joseleandro.fullfocus.service.PomodoroService
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
+import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroControls
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroTimer
+import com.joseleandro.fullfocus.ui.screen.pomodoro.component.TaskCurrentCard
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
@@ -131,74 +134,47 @@ fun PomodoroScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            BoxWithConstraints(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                val size = (maxWidth * .8f).coerceAtMost(340.dp)
+            TaskCurrentCard(
+                taskCurrent = uiState.taskCurrent,
+                onResetTask = { onEvent(PomodoroEvent.OnResetTaskCurrentPomodoro) }
+            )
 
-                PomodoroTimer(
-                    size = size,
-                    time = uiState.time,
-                    statusSession = uiState.statusSession,
-                    timeSession = uiState.timeSession,
-                    supportText = "${uiState.currentSession}/4 sessões"
-                )
-            }
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                IconButton(
-                    onClick = {
-                        context.startPomodoroService(ACTION_SKIP)
-                    }
+                BoxWithConstraints(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painterResource(R.drawable.rounded_skip_next_24),
-                        contentDescription = "Pular"
+                    val size = (maxWidth * .8f).coerceAtMost(340.dp)
+                    val isIdle = uiState.taskCurrent == null
+
+                    PomodoroTimer(
+                        size = size,
+                        time = uiState.time,
+                        statusSession = uiState.statusSession,
+                        timeSession = uiState.timeSession,
+                        isIdle = isIdle,
+                        supportText = if (isIdle) stringResource(R.string.selecione_uma_tarefa)
+                        else "${uiState.currentSession}/${uiState.taskCurrent?.pomodoros ?: 0} sessões"
                     )
                 }
 
-                PomodoroButtonPrimary(
-                    label = stringResource(id = getButtonLabel(uiState)),
-                    iconRes = getButtonIcon(uiState),
-                    onClick = {
-                        when (uiState.pomodoroStatus) {
-
-                            PomodoroStatus.START -> {
-                                context.startPomodoroService(ACTION_START)
-                            }
-
-                            PomodoroStatus.PROGRESS -> {
-                                if (uiState.isPlay) {
-                                    context.startPomodoroService(ACTION_PAUSE)
-                                } else {
-                                    context.startPomodoroService(ACTION_PLAY)
-                                }
-                            }
-
-                            PomodoroStatus.FINISHED -> {
-                                context.startPomodoroService(ACTION_RESET)
-                            }
-                        }
-                    }
+                PomodoroControls(
+                    uiState = uiState,
+                    onStart = { context.startPomodoroService(ACTION_START) },
+                    onPause = { context.startPomodoroService(ACTION_PAUSE) },
+                    onPlay = { context.startPomodoroService(ACTION_PLAY) },
+                    onReset = { context.startPomodoroService(ACTION_RESTART) },
+                    onSkip = { context.startPomodoroService(ACTION_SKIP) }
                 )
-
-                IconButton(
-                    onClick = {
-                        context.startPomodoroService(ACTION_RESET)
-                    },
-                    enabled = uiState.pomodoroStatus != PomodoroStatus.START
-                ) {
-                    Icon(
-                        painterResource(R.drawable.outline_restart_alt_24),
-                        contentDescription = "Reiniciar"
-                    )
-                }
             }
+
         }
     }
 
@@ -217,6 +193,7 @@ fun PomodoroScreen(
 @StringRes
 fun getButtonLabel(uiState: PomodoroUiState): Int {
     return when (uiState.pomodoroStatus) {
+        PomodoroStatus.IDLE,
         PomodoroStatus.START -> R.string.iniciar
         PomodoroStatus.PROGRESS -> if (uiState.isPlay) R.string.pausar else R.string.retomar
         PomodoroStatus.FINISHED -> R.string.recomecar
@@ -226,6 +203,7 @@ fun getButtonLabel(uiState: PomodoroUiState): Int {
 @DrawableRes
 fun getButtonIcon(uiState: PomodoroUiState): Int {
     return when (uiState.pomodoroStatus) {
+        PomodoroStatus.IDLE,
         PomodoroStatus.START -> R.drawable.round_play_arrow_24
         PomodoroStatus.PROGRESS -> {
             if (uiState.isPlay) R.drawable.baseline_pause_24
@@ -255,20 +233,28 @@ fun PomodoroButtonPrimary(
     modifier: Modifier = Modifier,
     label: String,
     @DrawableRes iconRes: Int,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
+    val alpha = if (enabled) 1f else 0.5f
     Button(
-        modifier = modifier.background(
-            brush = Brush.linearGradient(
-                listOf(
-                    MaterialTheme.colorScheme.primary,
-                    MaterialTheme.colorScheme.secondary
-                )
+        modifier = modifier
+            .alpha(alpha)
+            .background(
+                brush = Brush.linearGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.secondary
+                    )
+                ),
+                shape = MaterialTheme.shapes.extraLarge
             ),
-            shape = MaterialTheme.shapes.extraLarge
-        ),
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent
+        ),
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp)
     ) {
         Icon(painterResource(iconRes), contentDescription = null)
@@ -286,7 +272,9 @@ private fun PomodoroScreenLightPreview() {
         darkTheme = false
     ) {
         PomodoroScreen(
-            uiState = PomodoroUiState(),
+            uiState = PomodoroUiState(
+                taskCurrent = tasksListMock.first()
+            ),
             openDrawer = {},
             onEvent = {}
         )
@@ -303,7 +291,9 @@ private fun PomodoroScreenDarkPreview() {
         darkTheme = true
     ) {
         PomodoroScreen(
-            uiState = PomodoroUiState(),
+            uiState = PomodoroUiState(
+                taskCurrent = tasksListMock.first()
+            ),
             openDrawer = {},
             onEvent = {}
         )

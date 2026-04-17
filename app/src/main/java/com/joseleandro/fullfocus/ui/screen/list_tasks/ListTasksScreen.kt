@@ -1,7 +1,6 @@
 package com.joseleandro.fullfocus.ui.screen.list_tasks
 
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,11 +38,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
+import com.joseleandro.fullfocus.core.navigation.TabScreen
 import com.joseleandro.fullfocus.domain.data.TagDomain
 import com.joseleandro.fullfocus.domain.data.tasksListMock
 import com.joseleandro.fullfocus.ui.component.FullFocusFloatingActionButton
 import com.joseleandro.fullfocus.ui.component.FullFocusTagFilterChip
 import com.joseleandro.fullfocus.ui.event.ListTasksEvent
+import com.joseleandro.fullfocus.ui.screen.NavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.create_tag.CreateTagBottomSheet
 import com.joseleandro.fullfocus.ui.screen.create_task.CreateTaskBottomSheet
 import com.joseleandro.fullfocus.ui.screen.list_tasks.component.CreateOptionsDialog
@@ -60,6 +61,8 @@ fun ListTasksScreen(
 ) {
 
     val viewModel: ListTasksViewModel = koinViewModel()
+    val navigationViewModel: NavigationViewModel = koinViewModel()
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
@@ -69,7 +72,8 @@ fun ListTasksScreen(
     ListTasksScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        openDrawer = openDrawer
+        openDrawer = openDrawer,
+        onNavigate = navigationViewModel::selectedTab
     )
 
 }
@@ -79,7 +83,8 @@ fun ListTasksScreen(
 fun ListTasksScreen(
     uiState: ListTasksUiState,
     onEvent: (ListTasksEvent) -> Unit,
-    openDrawer: () -> Unit
+    openDrawer: () -> Unit,
+    onNavigate: (TabScreen) -> Unit
 ) {
 
     var showConfirmActionDialog by rememberSaveable {
@@ -202,7 +207,11 @@ fun ListTasksScreen(
                                         fadeInSpec = tween(300),
                                         fadeOutSpec = tween(300)
                                     ),
-                                task = task
+                                task = task,
+                                onClick = {
+                                    onEvent(ListTasksEvent.OnSelectTask(task.id))
+                                    onNavigate(TabScreen.PomodoroScreen)
+                                }
                             )
                         }
                     }
@@ -315,6 +324,7 @@ private fun ListTasksScreenLightPreview() {
                 isLoading = false,
                 tasks = tasksListMock
             ),
+            onNavigate = {},
             openDrawer = {},
             onEvent = {}
         )
@@ -330,6 +340,7 @@ private fun ListTasksScreenDarkPreview() {
     ) {
         ListTasksScreen(
             uiState = ListTasksUiState(),
+            onNavigate = {},
             openDrawer = {},
             onEvent = {}
         )

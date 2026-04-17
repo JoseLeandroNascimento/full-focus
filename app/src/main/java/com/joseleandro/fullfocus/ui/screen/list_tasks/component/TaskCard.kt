@@ -24,14 +24,18 @@ import com.joseleandro.fullfocus.domain.data.TaskDomain
 @Composable
 fun TaskCard(
     modifier: Modifier = Modifier,
-    task: TaskDomain
+    task: TaskDomain,
+    onClick: () -> Unit
 ) {
 
     Surface(
         modifier = modifier.fillMaxWidth(),
         tonalElevation = .4.dp,
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .2f)),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = .2f)
+        ),
     ) {
         Row(
             modifier = Modifier
@@ -74,7 +78,7 @@ fun TaskCard(
                         containerColor = MaterialTheme.colorScheme.primary.copy(alpha = .9f),
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     ),
-                    onClick = {}
+                    onClick = onClick
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.round_play_arrow_24),

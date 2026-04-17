@@ -82,6 +82,18 @@ class PomodoroTimePreferenceDataSourceImpl(
         }
     }
 
+    override suspend fun restart() {
+        dataStore.updateData {
+            it.copy(
+                pomodoro = it.pomodoro.copy(
+                    startTime = 0,
+                    pausedAt = null,
+                    isRunning = false
+                )
+            )
+        }
+    }
+
     override suspend fun skip() {
         dataStore.updateData {
             val state = it.pomodoro
@@ -98,7 +110,16 @@ class PomodoroTimePreferenceDataSourceImpl(
         }
     }
 
+    override suspend fun currentTask(id: Int?) {
+        dataStore.updateData {
+            it.copy(
+                pomodoro = it.pomodoro.copy(idTask = id)
+            )
+        }
+    }
+
     override fun getRemaining(state: PomodoroTimePreferences): Long {
+        if (state.idTask == null) return 0L
         if (state.startTime == 0L) return state.duration
         val now = System.currentTimeMillis()
 

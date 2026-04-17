@@ -2,13 +2,13 @@ package com.joseleandro.fullfocus.data.repository
 
 import com.joseleandro.fullfocus.data.datasource.PomodoroTimePreferenceDataSource
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
-import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
+import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
 import kotlinx.coroutines.flow.Flow
 
 
-class PomodoroCurrentRepositoryImpl(
+class PomodoroTimeRepositoryImpl(
     private val pomodoroTimePreferenceDataSource: PomodoroTimePreferenceDataSource
-) : PomodoroRepository {
+) : PomodoroTimeRepository {
 
     override val pomodoroFlow: Flow<PomodoroTimePreferences> =
         pomodoroTimePreferenceDataSource.pomodoroFlow
@@ -26,8 +26,15 @@ class PomodoroCurrentRepositoryImpl(
     override suspend fun reset() =
         pomodoroTimePreferenceDataSource.reset()
 
+    override suspend fun restart() =
+        pomodoroTimePreferenceDataSource.restart()
+
     override suspend fun skip() {
         pomodoroTimePreferenceDataSource.skip()
+    }
+
+    override suspend fun currentTask(id: Int?) {
+        pomodoroTimePreferenceDataSource.currentTask(id)
     }
 
     override fun getRemaining(state: PomodoroTimePreferences): Long =

@@ -43,7 +43,7 @@ fun FullFocusModalDrawerSheet(
         drawerState = drawerState,
         modifier = modifier,
         drawerTonalElevation = 6.dp,
-        drawerContainerColor = MaterialTheme.colorScheme.surface
+        drawerContainerColor = MaterialTheme.colorScheme.surfaceVariant
     ) {
 
         FullFocusDrawerHeader()

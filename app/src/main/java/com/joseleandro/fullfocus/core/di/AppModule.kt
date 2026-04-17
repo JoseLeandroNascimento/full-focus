@@ -3,10 +3,10 @@ package com.joseleandro.fullfocus.core.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.room.Room
-import com.joseleandro.fullfocus.data.datasource.PomodoroTimePreferenceDataSource
-import com.joseleandro.fullfocus.data.datasource.PomodoroTimePreferenceDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingPreferencesLocalDataSource
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingPreferencesLocalDataSourceImpl
+import com.joseleandro.fullfocus.data.datasource.PomodoroTimePreferenceDataSource
+import com.joseleandro.fullfocus.data.datasource.PomodoroTimePreferenceDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.TagLocalDataSource
 import com.joseleandro.fullfocus.data.datasource.TagLocalDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.TaskFilterLocalPreferencesDataSource
@@ -19,13 +19,13 @@ import com.joseleandro.fullfocus.data.local.database.dao.TagDao
 import com.joseleandro.fullfocus.data.local.database.dao.TaskDao
 import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
 import com.joseleandro.fullfocus.data.local.preferences.userPreferencesDataStore
-import com.joseleandro.fullfocus.data.repository.PomodoroCurrentRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.PomodoroSettingPreferencesRepositoryImpl
+import com.joseleandro.fullfocus.data.repository.PomodoroTimeRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TagRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TaskFilterPreferencesRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.TaskRepositoryImpl
-import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingPreferencesRepository
+import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
 import com.joseleandro.fullfocus.domain.repository.TagRepository
 import com.joseleandro.fullfocus.domain.repository.TaskFilterPreferencesRepository
 import com.joseleandro.fullfocus.domain.repository.TaskRepository
@@ -36,8 +36,10 @@ import com.joseleandro.fullfocus.domain.usecase.GetFilteredTasksUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetPomodoroSettingPreferencesUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetTagFindAllUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetTagsWithDetailsUseCase
+import com.joseleandro.fullfocus.domain.usecase.GetTaskCurrentPomodoroUseCase
 import com.joseleandro.fullfocus.domain.usecase.SaveTagUseCase
 import com.joseleandro.fullfocus.domain.usecase.SaveTaskUseCase
+import com.joseleandro.fullfocus.domain.usecase.SetCurrentTaskPomodoroUseCase
 import com.joseleandro.fullfocus.domain.usecase.UpdatePomodoroSettingUseCase
 import com.joseleandro.fullfocus.ui.screen.NavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.create_tag.CreateTagViewModel
@@ -111,9 +113,9 @@ object AppModule {
             )
         }
 
-        single<PomodoroRepository> {
+        single<PomodoroTimeRepository> {
 
-            PomodoroCurrentRepositoryImpl(
+            PomodoroTimeRepositoryImpl(
                 pomodoroTimePreferenceDataSource = get()
             )
 
@@ -134,7 +136,7 @@ object AppModule {
         single<PomodoroTimePreferenceDataSource> {
             PomodoroTimePreferenceDataSourceImpl(
                 dataStore = get(),
-              pomodoroSettingPreferencesLocalDataSource = get()
+                pomodoroSettingPreferencesLocalDataSource = get()
             )
         }
     }
@@ -199,6 +201,19 @@ object AppModule {
         factory {
             UpdatePomodoroSettingUseCase(
                 repository = get()
+            )
+        }
+
+        factory {
+            SetCurrentTaskPomodoroUseCase(
+                pomodoroTimeRepository = get()
+            )
+        }
+
+        factory {
+            GetTaskCurrentPomodoroUseCase(
+                pomodoroTimeRepository = get(),
+                taskRepository = get()
             )
         }
 

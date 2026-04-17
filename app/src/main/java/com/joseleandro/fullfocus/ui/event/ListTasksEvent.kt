@@ -8,6 +8,8 @@ sealed interface ListTasksEvent {
 
     data object OnReset : ListTasksEvent
 
+    data class OnSelectTask(val idTask: Int) : ListTasksEvent
+
     data class OnFilter(val filter: ListTasksFilter) : ListTasksEvent
 
     data class OnChangeVisibilityCreateTaskBottomSheetShow(val visible: Boolean) : ListTasksEvent

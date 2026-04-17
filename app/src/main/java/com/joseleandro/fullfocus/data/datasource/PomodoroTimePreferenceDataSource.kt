@@ -15,7 +15,11 @@ interface PomodoroTimePreferenceDataSource {
 
     suspend fun reset()
 
+    suspend fun restart()
+
     suspend fun skip()
+
+    suspend fun currentTask(id: Int? = null)
 
     fun getRemaining(state: PomodoroTimePreferences): Long
 
