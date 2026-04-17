@@ -13,5 +13,7 @@ data class PomodoroUiState(
     val pomodoroStatus: PomodoroStatus = PomodoroStatus.START,
     val statusSession: StatusSession = StatusSession.FOCUS,
     val currentSession: Int = 0,
-    val taskCurrent: TaskDomain? = null
+    val taskCurrent: TaskDomain? = null,
+    val tasks: List<TaskDomain> = emptyList(),
+    val showSelectTaskBottomSheet: Boolean = false
 )

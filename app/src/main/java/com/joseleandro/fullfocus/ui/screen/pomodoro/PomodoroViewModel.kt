@@ -3,6 +3,7 @@ package com.joseleandro.fullfocus.ui.screen.pomodoro
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
+import com.joseleandro.fullfocus.domain.usecase.GetFilteredTasksUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetTaskCurrentPomodoroUseCase
 import com.joseleandro.fullfocus.domain.usecase.SetCurrentTaskPomodoroUseCase
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
@@ -18,7 +19,8 @@ import kotlinx.coroutines.launch
 class PomodoroViewModel(
     private val repository: PomodoroTimeRepository,
     private val getTaskCurrentPomodoroUseCase: GetTaskCurrentPomodoroUseCase,
-    private val setCurrentTaskPomodoroUseCase: SetCurrentTaskPomodoroUseCase
+    private val setCurrentTaskPomodoroUseCase: SetCurrentTaskPomodoroUseCase,
+    private val getFilteredTasksUseCase: GetFilteredTasksUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PomodoroUiState())
@@ -36,6 +38,15 @@ class PomodoroViewModel(
         }
         observePomodoro()
         startTicker()
+        observeTasks()
+    }
+
+    private fun observeTasks() {
+        viewModelScope.launch {
+            getFilteredTasksUseCase().collect { tasks ->
+                _uiState.update { it.copy(tasks = tasks) }
+            }
+        }
     }
 
     private fun observePomodoro() {
@@ -84,6 +95,19 @@ class PomodoroViewModel(
             }
 
             PomodoroEvent.OnResetTaskCurrentPomodoro -> resetTaskCurrentPomodoro()
+
+            is PomodoroEvent.OnShowSelectTaskBottomSheet -> {
+                _uiState.update {
+                    it.copy(showSelectTaskBottomSheet = event.show)
+                }
+            }
+
+            is PomodoroEvent.OnSelectTask -> {
+                viewModelScope.launch {
+                    setCurrentTaskPomodoroUseCase(id = event.id)
+                    _uiState.update { it.copy(showSelectTaskBottomSheet = false) }
+                }
+            }
         }
     }
 }

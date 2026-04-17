@@ -6,4 +6,8 @@ sealed interface PomodoroEvent {
 
     data object OnResetTaskCurrentPomodoro : PomodoroEvent
 
+    data class OnShowSelectTaskBottomSheet(val show: Boolean) : PomodoroEvent
+
+    data class OnSelectTask(val id: Int) : PomodoroEvent
+
 }

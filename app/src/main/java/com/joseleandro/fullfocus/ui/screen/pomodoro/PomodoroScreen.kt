@@ -51,9 +51,12 @@ import com.joseleandro.fullfocus.service.ACTION_SKIP
 import com.joseleandro.fullfocus.service.ACTION_START
 import com.joseleandro.fullfocus.service.PomodoroService
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
+import com.joseleandro.fullfocus.ui.screen.NavigationViewModel
+import com.joseleandro.fullfocus.ui.screen.pomodoro.component.EmptyTaskCard
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroControls
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroTimer
-import com.joseleandro.fullfocus.ui.screen.pomodoro.component.TaskCurrentCard
+import com.joseleandro.fullfocus.ui.screen.pomodoro.component.SelectTaskBottomSheet
+import com.joseleandro.fullfocus.ui.screen.pomodoro.component.SelectedTaskCard
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
@@ -67,13 +70,17 @@ fun PomodoroScreen(
     openDrawer: () -> Unit
 ) {
     val viewModel: PomodoroViewModel = koinViewModel()
+    val navigationViewModel: NavigationViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     PomodoroScreen(
         modifier = modifier,
         uiState = uiState,
         onEvent = viewModel::onEvent,
-        openDrawer = openDrawer
+        openDrawer = openDrawer,
+        onNavigateToTasks = {
+            navigationViewModel.selectedTab(com.joseleandro.fullfocus.core.navigation.TabScreen.ListTasksScreen)
+        }
     )
 }
 
@@ -83,7 +90,8 @@ fun PomodoroScreen(
     modifier: Modifier = Modifier,
     uiState: PomodoroUiState,
     onEvent: (PomodoroEvent) -> Unit,
-    openDrawer: () -> Unit
+    openDrawer: () -> Unit,
+    onNavigateToTasks: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -134,10 +142,18 @@ fun PomodoroScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            TaskCurrentCard(
-                taskCurrent = uiState.taskCurrent,
-                onResetTask = { onEvent(PomodoroEvent.OnResetTaskCurrentPomodoro) }
-            )
+            if (uiState.taskCurrent != null) {
+                SelectedTaskCard(
+                    taskTitle = uiState.taskCurrent.title,
+                    onResetTask = { onEvent(PomodoroEvent.OnResetTaskCurrentPomodoro) }
+                )
+            } else {
+                EmptyTaskCard(
+                    onClick = {
+                        onEvent(PomodoroEvent.OnShowSelectTaskBottomSheet(true))
+                    }
+                )
+            }
 
             Column(
                 modifier = Modifier
@@ -178,6 +194,19 @@ fun PomodoroScreen(
         }
     }
 
+    if (uiState.showSelectTaskBottomSheet) {
+        SelectTaskBottomSheet(
+            sheetState = bottomSheetState,
+            tasks = uiState.tasks,
+            onDismissRequest = {
+                onEvent(PomodoroEvent.OnShowSelectTaskBottomSheet(false))
+            },
+            onSelectTask = { taskId ->
+                onEvent(PomodoroEvent.OnSelectTask(taskId))
+            }
+        )
+    }
+
     if (uiState.showPomodoroSettingBottomSheet) {
         PomodoroSettingBottomSheet(
             sheetState = bottomSheetState,
@@ -195,6 +224,7 @@ fun getButtonLabel(uiState: PomodoroUiState): Int {
     return when (uiState.pomodoroStatus) {
         PomodoroStatus.IDLE,
         PomodoroStatus.START -> R.string.iniciar
+
         PomodoroStatus.PROGRESS -> if (uiState.isPlay) R.string.pausar else R.string.retomar
         PomodoroStatus.FINISHED -> R.string.recomecar
     }
@@ -205,6 +235,7 @@ fun getButtonIcon(uiState: PomodoroUiState): Int {
     return when (uiState.pomodoroStatus) {
         PomodoroStatus.IDLE,
         PomodoroStatus.START -> R.drawable.round_play_arrow_24
+
         PomodoroStatus.PROGRESS -> {
             if (uiState.isPlay) R.drawable.baseline_pause_24
             else R.drawable.round_play_arrow_24
@@ -276,7 +307,8 @@ private fun PomodoroScreenLightPreview() {
                 taskCurrent = tasksListMock.first()
             ),
             openDrawer = {},
-            onEvent = {}
+            onEvent = {},
+            onNavigateToTasks = {}
         )
     }
 
@@ -295,7 +327,8 @@ private fun PomodoroScreenDarkPreview() {
                 taskCurrent = tasksListMock.first()
             ),
             openDrawer = {},
-            onEvent = {}
+            onEvent = {},
+            onNavigateToTasks = {}
         )
     }
 
