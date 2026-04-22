@@ -1,5 +1,6 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
@@ -12,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -31,9 +33,10 @@ class PomodoroViewModel(
             getTaskEndPomodoroSessionUseCase().collect { taskAnPomodoroSessions ->
                 _uiState.update { state ->
                     state.copy(
-                        taskCurrent = taskAnPomodoroSessions?.task
+                        taskCurrent = taskAnPomodoroSessions?.task,
                     )
                 }
+
             }
         }
         observePomodoro()
@@ -51,7 +54,7 @@ class PomodoroViewModel(
 
     private fun observePomodoro() {
         viewModelScope.launch {
-            repository.pomodoroFlow.collect { state ->
+            repository.pomodoroFlow.collectLatest { state ->
                 _uiState.update {
                     it.copy(
                         timeSession = (state.duration / 1000).toInt(),

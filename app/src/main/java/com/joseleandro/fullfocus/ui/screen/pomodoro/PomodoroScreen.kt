@@ -8,6 +8,7 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -143,7 +144,8 @@ fun PomodoroScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(1f)
+                    .fillMaxHeight(),
                 verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -153,16 +155,13 @@ fun PomodoroScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     val size = (maxWidth * .8f).coerceAtMost(340.dp)
-                    val isIdle = uiState.taskCurrent == null
 
                     PomodoroTimer(
                         size = size,
                         time = uiState.time,
-                        statusSession = uiState.statusSession,
                         timeSession = uiState.timeSession,
-                        isIdle = isIdle,
-                        supportText = if (isIdle) stringResource(R.string.selecione_uma_tarefa)
-                        else "${uiState.currentSession}/${uiState.taskCurrent?.pomodoros ?: 0} sessões"
+                        statusSession = uiState.statusSession,
+                        supportText = "${uiState.currentSession}/${uiState.taskCurrent?.pomodoros ?: 0} sessões"
                     )
                 }
 
@@ -205,31 +204,7 @@ fun PomodoroScreen(
 }
 
 
-@StringRes
-fun getButtonLabel(uiState: PomodoroUiState): Int {
-    return when (uiState.pomodoroStatus) {
-        PomodoroStatus.IDLE,
-        PomodoroStatus.START -> R.string.iniciar
 
-        PomodoroStatus.PROGRESS -> if (uiState.isPlay) R.string.pausar else R.string.retomar
-        PomodoroStatus.FINISHED -> R.string.recomecar
-    }
-}
-
-@DrawableRes
-fun getButtonIcon(uiState: PomodoroUiState): Int {
-    return when (uiState.pomodoroStatus) {
-        PomodoroStatus.IDLE,
-        PomodoroStatus.START -> R.drawable.round_play_arrow_24
-
-        PomodoroStatus.PROGRESS -> {
-            if (uiState.isPlay) R.drawable.baseline_pause_24
-            else R.drawable.round_play_arrow_24
-        }
-
-        PomodoroStatus.FINISHED -> R.drawable.outline_restart_alt_24
-    }
-}
 
 
 fun Context.startPomodoroService(action: String) {

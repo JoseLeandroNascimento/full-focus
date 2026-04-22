@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -25,14 +24,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import java.util.Locale
@@ -44,7 +41,6 @@ fun PomodoroTimer(
     time: Int,
     timeSession: Int,
     statusSession: StatusSession = StatusSession.FOCUS,
-    isIdle: Boolean = false,
     supportText: String,
     size: Dp = 340.dp
 ) {
@@ -55,7 +51,7 @@ fun PomodoroTimer(
     val backGround = MaterialTheme.colorScheme.background
 
     val progress =
-        if (timeSession == 0 || isIdle) 0f else (360f * (time.toFloat() / timeSession)).coerceAtMost(
+        if (timeSession == 0) 0f else (360f * (time.toFloat() / timeSession)).coerceAtMost(
             360f
         )
 
@@ -66,7 +62,7 @@ fun PomodoroTimer(
     )
 
     val timeAnimated by animateIntAsState(
-        targetValue = if (isIdle) 0 else time,
+        targetValue = time,
         animationSpec = tween(durationMillis = 300, easing = LinearEasing)
     )
 
@@ -108,44 +104,22 @@ fun PomodoroTimer(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
-                    if (!isIdle) {
-                        Text(
-                            text = stringResource(id = statusSession.description),
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                    Text(
+                        text = stringResource(id = statusSession.description),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = MaterialTheme.colorScheme.primary
                         )
+                    )
 
-                        Text(
-                            text = timeAnimated.formattedTime(),
-                            style = MaterialTheme.typography.headlineLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 64.sp,
-                                letterSpacing = (-1).sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                    Text(
+                        text = timeAnimated.formattedTime(),
+                        style = MaterialTheme.typography.headlineLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 64.sp,
+                            letterSpacing = (-1).sp,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                    } else {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-
-                            Icon(
-                                painter = painterResource(id = R.drawable.tdesign_focus),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.secondary
-                            )
-
-                            Text(
-                                text = stringResource(R.string.vamos_focar),
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            )
-                        }
-                    }
+                    )
 
                     Text(
                         text = supportText,
@@ -256,27 +230,5 @@ private fun PomodoroTimerDarkPreview() {
             timeSession = 60 * 25,
             supportText = "1/4 sessões"
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PomodoroTimerIdlePreview() {
-    FullFocusTheme(
-        dynamicColor = false,
-        darkTheme = false
-    ) {
-        Box(
-            modifier = Modifier.padding(16.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            PomodoroTimer(
-                size = 340.dp,
-                time = 0,
-                timeSession = 0,
-                isIdle = true,
-                supportText = "Selecione uma tarefa para começar"
-            )
-        }
     }
 }

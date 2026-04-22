@@ -3,7 +3,8 @@
     <string name="foco">Foco</string>
     <string name="pausa_curta">Pausa curta</string>
     <string name="pausa_longa">Pausa longa</string>
-    <string name="iniciar">Iniciar</string>
+    <string name="iniciar_foco">Iniciar foco</string>
+    <string name="iniciar_pausa">Iniciar pausa</string>
     <string name="pausar">Pausar</string>
     <string name="retomar">Retomar</string>
     <string name="recomecar">Recomeçar</string>

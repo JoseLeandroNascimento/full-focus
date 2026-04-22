@@ -1,5 +1,6 @@
 package com.joseleandro.fullfocus.data.datasource
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroSettingPreferences
@@ -23,12 +24,13 @@ class PomodoroTimePreferenceDataSourceImpl(
             pomodoroSettingPreferencesLocalDataSource.pomodoroSetting,
             dataStore.data.map { it.pomodoro }
         ) { pomodoroSetting, pomodoroCurrent ->
+
             pomodoroCurrent.copy(
                 duration = durationTimeCurrentStatusPomodoro(
                     pomodoroSetting = pomodoroSetting,
                     pomodoroTimePreferences = pomodoroCurrent
                 ),
-                pomodoroIntervalBreakLong = pomodoroSetting.longBreakInterval
+                pomodoroIntervalBreakLong = pomodoroSetting.longBreakInterval,
             )
         }
 
@@ -137,7 +139,6 @@ class PomodoroTimePreferenceDataSourceImpl(
     }
 
     override fun getRemaining(state: PomodoroTimePreferences): Long {
-        if (state.idTask == null) return 0L
         if (state.startTime == 0L) return state.duration
         val now = System.currentTimeMillis()
 
