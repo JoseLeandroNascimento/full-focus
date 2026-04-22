@@ -13,4 +13,5 @@ interface TaskRepository {
 
     fun getTaskById(id: Int): Flow<TaskDomain?>
 
+    suspend fun setProgressPomodoro(id: Int, progress: Int)
 }

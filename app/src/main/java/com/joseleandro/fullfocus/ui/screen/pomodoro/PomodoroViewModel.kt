@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
 import com.joseleandro.fullfocus.domain.usecase.GetFilteredTasksUseCase
-import com.joseleandro.fullfocus.domain.usecase.GetTaskCurrentPomodoroUseCase
+import com.joseleandro.fullfocus.domain.usecase.GetTaskEndPomodoroSessionUseCase
 import com.joseleandro.fullfocus.domain.usecase.SetCurrentTaskPomodoroUseCase
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 
 class PomodoroViewModel(
     private val repository: PomodoroTimeRepository,
-    private val getTaskCurrentPomodoroUseCase: GetTaskCurrentPomodoroUseCase,
+    private val getTaskEndPomodoroSessionUseCase: GetTaskEndPomodoroSessionUseCase,
     private val setCurrentTaskPomodoroUseCase: SetCurrentTaskPomodoroUseCase,
     private val getFilteredTasksUseCase: GetFilteredTasksUseCase
 ) : ViewModel() {
@@ -28,10 +28,10 @@ class PomodoroViewModel(
 
     init {
         viewModelScope.launch {
-            getTaskCurrentPomodoroUseCase().collect { taskTimeCurrent ->
+            getTaskEndPomodoroSessionUseCase().collect { taskAnPomodoroSessions ->
                 _uiState.update { state ->
                     state.copy(
-                        taskCurrent = taskTimeCurrent
+                        taskCurrent = taskAnPomodoroSessions?.task
                     )
                 }
             }

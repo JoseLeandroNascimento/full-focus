@@ -13,6 +13,8 @@ class PomodoroTimeRepositoryImpl(
     override val pomodoroFlow: Flow<PomodoroTimePreferences> =
         pomodoroTimePreferenceDataSource.pomodoroFlow
 
+    override val events = pomodoroTimePreferenceDataSource.events
+
     override suspend fun start() =
         pomodoroTimePreferenceDataSource.start()
 
@@ -40,7 +42,8 @@ class PomodoroTimeRepositoryImpl(
     override fun getRemaining(state: PomodoroTimePreferences): Long =
         pomodoroTimePreferenceDataSource.getRemaining(state = state)
 
-    override suspend fun finishedSessionPomodoro() {
-        pomodoroTimePreferenceDataSource.finishedSessionPomodoro()
+
+    override suspend fun onPomodoroSessionFinished() {
+        pomodoroTimePreferenceDataSource.onPomodoroSessionFinished()
     }
 }

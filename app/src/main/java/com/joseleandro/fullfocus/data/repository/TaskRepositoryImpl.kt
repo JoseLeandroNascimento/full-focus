@@ -21,4 +21,7 @@ class TaskRepositoryImpl(
 
     override fun getTaskById(id: Int): Flow<TaskDomain?> =
         taskLocalDataSource.getTaskById(id)
+
+    override suspend fun setProgressPomodoro(id: Int, progress: Int) =
+        taskLocalDataSource.setProgressPomodoro(id = id, progress = progress)
 }

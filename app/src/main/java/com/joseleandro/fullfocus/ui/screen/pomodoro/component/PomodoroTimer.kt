@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,7 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.data.local.preferences.data.StatusSession
+import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import java.util.Locale
 
@@ -124,13 +126,25 @@ fun PomodoroTimer(
                             )
                         )
                     } else {
-                        Text(
-                            text = stringResource(R.string.vamos_focar),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+
+                            Icon(
+                                painter = painterResource(id = R.drawable.tdesign_focus),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary
                             )
-                        )
+
+                            Text(
+                                text = stringResource(R.string.vamos_focar),
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            )
+                        }
                     }
 
                     Text(

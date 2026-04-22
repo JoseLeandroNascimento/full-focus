@@ -1,7 +1,7 @@
 package com.joseleandro.fullfocus.ui.state
 
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroStatus
-import com.joseleandro.fullfocus.data.local.preferences.data.StatusSession
+import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
 import com.joseleandro.fullfocus.domain.data.TaskDomain
 
 

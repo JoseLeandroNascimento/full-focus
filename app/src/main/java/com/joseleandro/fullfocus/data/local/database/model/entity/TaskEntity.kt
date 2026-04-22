@@ -1,4 +1,4 @@
-package com.joseleandro.fullfocus.data.local.database.model
+package com.joseleandro.fullfocus.data.local.database.model.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -21,8 +21,8 @@ import androidx.room.PrimaryKey
 data class TaskEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val title: String,
-    val pomodoros: Int,
-    val progress: Int = 0,
+    val estimatedPomodoros: Int,
+    val completedPomodoros: Int = 0,
     @ColumnInfo(name = "tag_id")
     val tagId: Int? = null,
     @ColumnInfo(name = "is_done")

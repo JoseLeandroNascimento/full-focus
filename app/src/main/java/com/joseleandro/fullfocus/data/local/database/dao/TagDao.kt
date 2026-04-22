@@ -3,8 +3,8 @@ package com.joseleandro.fullfocus.data.local.database.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.joseleandro.fullfocus.data.local.database.model.TagEntity
-import com.joseleandro.fullfocus.data.local.database.model.TagWithTasksDetailsDto
+import com.joseleandro.fullfocus.data.local.database.model.entity.TagEntity
+import com.joseleandro.fullfocus.data.local.database.model.dto.TagWithTasksDetailsDto
 import kotlinx.coroutines.flow.Flow
 
 @Dao

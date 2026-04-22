@@ -12,7 +12,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroStatus
-import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroButtonPrimary
 import com.joseleandro.fullfocus.ui.screen.pomodoro.getButtonIcon
 import com.joseleandro.fullfocus.ui.screen.pomodoro.getButtonLabel
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
@@ -50,9 +49,11 @@ fun PomodoroControls(
                 when (uiState.pomodoroStatus) {
                     PomodoroStatus.IDLE,
                     PomodoroStatus.START -> onStart()
+
                     PomodoroStatus.PROGRESS -> {
                         if (uiState.isPlay) onPause() else onPlay()
                     }
+
                     PomodoroStatus.FINISHED -> onReset()
                 }
             }

@@ -3,7 +3,7 @@ package com.joseleandro.fullfocus.data.datasource
 import com.joseleandro.fullfocus.data.local.database.dao.TagDao
 import com.joseleandro.fullfocus.data.local.database.mapper.toDomain
 import com.joseleandro.fullfocus.data.local.database.mapper.toEntity
-import com.joseleandro.fullfocus.data.local.database.model.TagEntity
+import com.joseleandro.fullfocus.data.local.database.model.entity.TagEntity
 import com.joseleandro.fullfocus.domain.data.TagDomain
 import com.joseleandro.fullfocus.domain.data.TagWithTasksDetailsDomain
 import kotlinx.coroutines.flow.Flow

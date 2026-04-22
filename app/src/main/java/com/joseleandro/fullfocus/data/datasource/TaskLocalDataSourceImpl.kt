@@ -3,7 +3,7 @@ package com.joseleandro.fullfocus.data.datasource
 import com.joseleandro.fullfocus.data.local.database.dao.TaskDao
 import com.joseleandro.fullfocus.data.local.database.mapper.toDomain
 import com.joseleandro.fullfocus.data.local.database.mapper.toEntity
-import com.joseleandro.fullfocus.data.local.database.model.TaskEntity
+import com.joseleandro.fullfocus.data.local.database.model.entity.TaskEntity
 import com.joseleandro.fullfocus.domain.data.TaskDomain
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -39,8 +39,8 @@ class TaskLocalDataSourceImpl(
             taskDao.update(
                 id = data.id,
                 title = data.title,
-                pomodoros = data.pomodoros,
-                progress = data.progress,
+                pomodoros = data.estimatedPomodoros,
+                progress = data.completedPomodoros,
                 tag = data.tagId,
                 updatedAt = System.currentTimeMillis()
             )
@@ -50,5 +50,8 @@ class TaskLocalDataSourceImpl(
 
     override fun getTaskById(id: Int): Flow<TaskDomain?> =
         taskDao.getById(id = id).map { it?.toDomain() }
+
+    override suspend fun setProgressPomodoro(id: Int, progress: Int) =
+        taskDao.updateProgressPomodoro(idTask = id, progress = progress)
 
 }

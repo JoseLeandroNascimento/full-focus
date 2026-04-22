@@ -1,4 +1,4 @@
-package com.joseleandro.fullfocus.data.local.database.model
+package com.joseleandro.fullfocus.data.local.database.model.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

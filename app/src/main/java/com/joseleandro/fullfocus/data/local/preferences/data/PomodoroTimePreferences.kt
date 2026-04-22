@@ -1,5 +1,6 @@
 package com.joseleandro.fullfocus.data.local.preferences.data
 
+import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
 import kotlinx.serialization.Serializable
 
 @Serializable

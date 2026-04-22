@@ -14,13 +14,17 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
+import com.joseleandro.fullfocus.domain.data.PomodoroTimeEvent
+import com.joseleandro.fullfocus.domain.repository.PomodoroSessionRepository
 import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -39,11 +43,15 @@ class PomodoroService : Service(), KoinComponent {
     private val TAG = "PomodoroService"
     private val CHANNEL_ID = "pomodoro_channel"
 
+    private var timerJob: Job? = null
+
     private val repository: PomodoroTimeRepository by inject()
+    private val pomodoroSessionRepository: PomodoroSessionRepository by inject()
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private var observing = false
+    private var observingEvents = false
 
     private lateinit var pausePending: PendingIntent
     private lateinit var playPending: PendingIntent
@@ -137,6 +145,7 @@ class PomodoroService : Service(), KoinComponent {
             else -> Log.d(TAG, "⚠️ Ação desconhecida: $action")
         }
 
+        observeEvents()
         observeUpdates()
 
         return START_STICKY
@@ -165,6 +174,47 @@ class PomodoroService : Service(), KoinComponent {
         }
     }
 
+    private fun observeEvents() {
+        if (observingEvents) return
+        observingEvents = true
+
+        scope.launch {
+            repository.events.collect { event ->
+
+                when (event) {
+
+                    is PomodoroTimeEvent.PomodoroTimeCompleted -> {
+                        Log.d(TAG, "🔥 Evento recebido no Service: Pomodoro concluído")
+
+                        pomodoroSessionRepository.completeSession()
+                        showFinishedNotification()
+
+                    }
+
+                    is PomodoroTimeEvent.Start -> {
+                        Log.d(TAG, "Informações da sessão iniciada ${event.sessionInfo}")
+                        pomodoroSessionRepository.startSession(state = event.sessionInfo)
+                    }
+
+                    PomodoroTimeEvent.Pause -> {
+
+                    }
+
+                    PomodoroTimeEvent.Play -> {
+
+                    }
+
+                    PomodoroTimeEvent.Reset -> {
+
+                    }
+
+                    PomodoroTimeEvent.Skip -> {
+
+                    }
+                }
+            }
+        }
+    }
 
     private fun observeUpdates() {
         if (observing) return
@@ -173,29 +223,51 @@ class PomodoroService : Service(), KoinComponent {
         scope.launch {
             repository.pomodoroFlow.collectLatest { state ->
 
+                updateNotification(state)
+
                 if (state.isRunning) {
-
-                    var remaining = repository.getRemaining(state)
-                    while (remaining > 0) {
-                        remaining = repository.getRemaining(state)
-                        updateNotification(state)
-                        delay(1000)
-                    }
-
-                    showFinishedNotification()
-                    repository.finishedSessionPomodoro()
-
+                    startTimer()
                 } else {
-                    updateNotification(state)
+                    stopTimer()
+                }
 
-                    if (state.startTime == 0L) {
-                        stopForeground(STOP_FOREGROUND_REMOVE)
-//                        stopSelf()
-                    }
+                if (state.startTime == 0L) {
+                    stopForeground(STOP_FOREGROUND_REMOVE)
                 }
             }
         }
     }
+
+    private fun startTimer() {
+
+        if (timerJob?.isActive == true) return
+
+        timerJob = scope.launch {
+
+            while (true) {
+
+                val state = repository.pomodoroFlow.first() // 🔥 pega o estado atual
+                val remaining = repository.getRemaining(state)
+
+                if (!state.isRunning) break
+
+                if (remaining <= 0) {
+                    Log.d(TAG, "⏰ Timer finalizado")
+
+                    repository.onPomodoroSessionFinished()
+                    break
+                }
+
+                delay(1000)
+            }
+        }
+    }
+
+    private fun stopTimer() {
+        timerJob?.cancel()
+        timerJob = null
+    }
+
 
     private fun showFinishedNotification() {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
@@ -211,8 +283,6 @@ class PomodoroService : Service(), KoinComponent {
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(2, notification) // ID diferente para não conflitar
     }
-
-    // ---------------- NOTIFICAÇÃO ----------------
 
     private fun createNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)

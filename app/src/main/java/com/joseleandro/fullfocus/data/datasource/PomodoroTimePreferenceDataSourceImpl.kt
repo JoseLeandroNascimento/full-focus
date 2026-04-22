@@ -4,15 +4,18 @@ import androidx.datastore.core.DataStore
 import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroSettingPreferences
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
-import com.joseleandro.fullfocus.data.local.preferences.data.StatusSession
+import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
+import com.joseleandro.fullfocus.domain.data.PomodoroTimeEvent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class PomodoroTimePreferenceDataSourceImpl(
     private val dataStore: DataStore<UserPreferences>,
-    private val pomodoroSettingPreferencesLocalDataSource: PomodoroSettingPreferencesLocalDataSource
+    private val pomodoroSettingPreferencesLocalDataSource: PomodoroSettingPreferencesLocalDataSource,
 ) : PomodoroTimePreferenceDataSource {
 
     override val pomodoroFlow: Flow<PomodoroTimePreferences> =
@@ -29,11 +32,17 @@ class PomodoroTimePreferenceDataSourceImpl(
             )
         }
 
+    private val _events = MutableSharedFlow<PomodoroTimeEvent>(
+        replay = 0,
+        extraBufferCapacity = 10
+    )
+    override val events = _events.asSharedFlow()
+
 
     override suspend fun start() {
         val now = System.currentTimeMillis()
 
-        dataStore.updateData {
+        val response = dataStore.updateData {
             it.copy(
                 pomodoro = it.pomodoro.copy(
                     startTime = now,
@@ -42,6 +51,8 @@ class PomodoroTimePreferenceDataSourceImpl(
                 )
             )
         }
+
+        emit(PomodoroTimeEvent.Start(sessionInfo = response.pomodoro))
     }
 
     override suspend fun pause() {
@@ -55,6 +66,8 @@ class PomodoroTimePreferenceDataSourceImpl(
                 )
             )
         }
+
+        emit(PomodoroTimeEvent.Pause)
     }
 
 
@@ -72,6 +85,8 @@ class PomodoroTimePreferenceDataSourceImpl(
                 )
             )
         }
+
+        emit(PomodoroTimeEvent.Play)
     }
 
     override suspend fun reset() {
@@ -80,6 +95,7 @@ class PomodoroTimePreferenceDataSourceImpl(
                 pomodoro = PomodoroTimePreferences()
             )
         }
+        emit(PomodoroTimeEvent.Reset)
     }
 
     override suspend fun restart() {
@@ -108,6 +124,8 @@ class PomodoroTimePreferenceDataSourceImpl(
                 )
             )
         }
+
+        emit(PomodoroTimeEvent.Skip)
     }
 
     override suspend fun currentTask(id: Int?) {
@@ -132,37 +150,64 @@ class PomodoroTimePreferenceDataSourceImpl(
     }
 
 
-    override suspend fun finishedSessionPomodoro() {
-        dataStore.updateData {
-            it.copy(
-                pomodoro = it.pomodoro.copy(
+    override suspend fun onPomodoroSessionFinished() {
+        val current = pomodoroFlow.first()
+
+        if (current.startTime == 0L) return
+
+        val result = dataStore.updateData { userPreferences ->
+
+            userPreferences.copy(
+                pomodoro = userPreferences.pomodoro.copy(
                     isRunning = false,
-                    statusSession = it.pomodoro.statusSession.nextSession(),
-                    counterPomodoro = incrementSessionPomodoroCompleted(it.pomodoro),
+                    statusSession = userPreferences.pomodoro.statusSession.nextSession(),
+                    counterPomodoro = incrementSessionPomodoroCompleted(userPreferences.pomodoro),
                     startTime = 0L,
                     pausedAt = 0L
                 )
             )
         }
+
+        emit(
+            PomodoroTimeEvent.PomodoroTimeCompleted(
+                count = result.pomodoro.counterPomodoro
+            )
+        )
+
     }
 
     private suspend fun StatusSession.nextSession(): StatusSession {
-        val pomodoroTimePreferences = pomodoroFlow.first()
+        val state = pomodoroFlow.first()
+
         return when (this) {
             StatusSession.FOCUS -> {
-                val interval = pomodoroTimePreferences.pomodoroIntervalBreakLong
-                if (interval > 0 && (pomodoroTimePreferences.counterPomodoro + 1) % interval == 0)
+                val interval = state.pomodoroIntervalBreakLong
+
+                if (interval > 0 && (state.counterPomodoro + 1) % interval == 0)
                     StatusSession.PAUSE_LONG
                 else
                     StatusSession.PAUSE_SHORT
             }
 
-            else -> StatusSession.FOCUS
+            StatusSession.PAUSE_SHORT,
+            StatusSession.PAUSE_LONG -> {
+                StatusSession.FOCUS
+            }
         }
     }
 
-    private fun incrementSessionPomodoroCompleted(pomodoroTimePreferences: PomodoroTimePreferences): Int =
-        if (pomodoroTimePreferences.statusSession !== StatusSession.FOCUS) pomodoroTimePreferences.counterPomodoro else pomodoroTimePreferences.counterPomodoro + 1
+    private fun incrementSessionPomodoroCompleted(
+        pomodoro: PomodoroTimePreferences
+    ): Int {
+        return if (
+            pomodoro.statusSession == StatusSession.PAUSE_SHORT ||
+            pomodoro.statusSession == StatusSession.PAUSE_LONG
+        ) {
+            pomodoro.counterPomodoro + 1
+        } else {
+            pomodoro.counterPomodoro
+        }
+    }
 
 
     private fun durationTimeCurrentStatusPomodoro(
@@ -179,4 +224,7 @@ class PomodoroTimePreferenceDataSourceImpl(
         }
 
     }
+
+    private fun emit(event: PomodoroTimeEvent) =
+        _events.tryEmit(event)
 }

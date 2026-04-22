@@ -14,8 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.joseleandro.fullfocus.R
+import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 @Composable
 fun EmptyTaskCard(
@@ -39,7 +41,7 @@ fun EmptyTaskCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Icon(
-                painterResource(R.drawable.baseline_timer_24),
+                painterResource(R.drawable.solar_list_check_minimalistic_bold),
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -55,5 +57,27 @@ fun EmptyTaskCard(
                 tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
             )
         }
+    }
+}
+
+@Preview
+@Composable
+private fun EmptyTaskCardLightPreview() {
+    FullFocusTheme(
+        dynamicColor = false,
+        darkTheme = false
+    ) {
+        EmptyTaskCard() { }
+    }
+}
+
+@Preview
+@Composable
+private fun EmptyTaskCardDarkPreview() {
+    FullFocusTheme(
+        dynamicColor = false,
+        darkTheme = true
+    ) {
+        EmptyTaskCard() { }
     }
 }

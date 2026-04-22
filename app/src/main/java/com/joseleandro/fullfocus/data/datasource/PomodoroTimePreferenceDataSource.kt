@@ -1,11 +1,14 @@
 package com.joseleandro.fullfocus.data.datasource
 
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
+import com.joseleandro.fullfocus.domain.data.PomodoroTimeEvent
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 
 interface PomodoroTimePreferenceDataSource {
 
     val pomodoroFlow: Flow<PomodoroTimePreferences>
+    val events: SharedFlow<PomodoroTimeEvent>
 
     suspend fun start()
 
@@ -23,5 +26,5 @@ interface PomodoroTimePreferenceDataSource {
 
     fun getRemaining(state: PomodoroTimePreferences): Long
 
-    suspend fun finishedSessionPomodoro()
+    suspend fun onPomodoroSessionFinished()
 }

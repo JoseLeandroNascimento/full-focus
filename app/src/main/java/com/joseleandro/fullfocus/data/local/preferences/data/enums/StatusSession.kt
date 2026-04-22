@@ -1,4 +1,4 @@
-package com.joseleandro.fullfocus.data.local.preferences.data
+package com.joseleandro.fullfocus.data.local.preferences.data.enums
 
 import androidx.annotation.StringRes
 import com.joseleandro.fullfocus.R

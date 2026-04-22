@@ -5,20 +5,14 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -32,9 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -51,7 +42,6 @@ import com.joseleandro.fullfocus.service.ACTION_SKIP
 import com.joseleandro.fullfocus.service.ACTION_START
 import com.joseleandro.fullfocus.service.PomodoroService
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
-import com.joseleandro.fullfocus.ui.screen.NavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.EmptyTaskCard
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroControls
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroTimer
@@ -70,7 +60,6 @@ fun PomodoroScreen(
     openDrawer: () -> Unit
 ) {
     val viewModel: PomodoroViewModel = koinViewModel()
-    val navigationViewModel: NavigationViewModel = koinViewModel()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     PomodoroScreen(
@@ -78,9 +67,6 @@ fun PomodoroScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         openDrawer = openDrawer,
-        onNavigateToTasks = {
-            navigationViewModel.selectedTab(com.joseleandro.fullfocus.core.navigation.TabScreen.ListTasksScreen)
-        }
     )
 }
 
@@ -91,7 +77,6 @@ fun PomodoroScreen(
     uiState: PomodoroUiState,
     onEvent: (PomodoroEvent) -> Unit,
     openDrawer: () -> Unit,
-    onNavigateToTasks: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -201,6 +186,7 @@ fun PomodoroScreen(
             onDismissRequest = {
                 onEvent(PomodoroEvent.OnShowSelectTaskBottomSheet(false))
             },
+            value = uiState.taskCurrent,
             onSelectTask = { taskId ->
                 onEvent(PomodoroEvent.OnSelectTask(taskId))
             }
@@ -259,41 +245,6 @@ fun Context.startPomodoroService(action: String) {
 }
 
 
-@Composable
-fun PomodoroButtonPrimary(
-    modifier: Modifier = Modifier,
-    label: String,
-    @DrawableRes iconRes: Int,
-    enabled: Boolean = true,
-    onClick: () -> Unit,
-) {
-    val alpha = if (enabled) 1f else 0.5f
-    Button(
-        modifier = modifier
-            .alpha(alpha)
-            .background(
-                brush = Brush.linearGradient(
-                    listOf(
-                        MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.secondary
-                    )
-                ),
-                shape = MaterialTheme.shapes.extraLarge
-            ),
-        onClick = onClick,
-        enabled = enabled,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            disabledContainerColor = Color.Transparent
-        ),
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp)
-    ) {
-        Icon(painterResource(iconRes), contentDescription = null)
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(label)
-    }
-}
-
 @Preview
 @Composable
 private fun PomodoroScreenLightPreview() {
@@ -308,7 +259,6 @@ private fun PomodoroScreenLightPreview() {
             ),
             openDrawer = {},
             onEvent = {},
-            onNavigateToTasks = {}
         )
     }
 
@@ -328,7 +278,6 @@ private fun PomodoroScreenDarkPreview() {
             ),
             openDrawer = {},
             onEvent = {},
-            onNavigateToTasks = {}
         )
     }
 
