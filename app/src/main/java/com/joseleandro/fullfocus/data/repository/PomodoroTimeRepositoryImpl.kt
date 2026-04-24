@@ -25,14 +25,16 @@ class PomodoroTimeRepositoryImpl(
     override suspend fun play() =
         pomodoroTimePreferenceDataSource.play()
 
-    override suspend fun reset() =
-        pomodoroTimePreferenceDataSource.reset()
 
     override suspend fun restart() =
         pomodoroTimePreferenceDataSource.restart()
 
     override suspend fun skip() {
         pomodoroTimePreferenceDataSource.skip()
+    }
+
+    override suspend fun cancel(completed: Boolean) {
+        pomodoroTimePreferenceDataSource.cancel(completed)
     }
 
     override suspend fun currentTask(id: Int?) {

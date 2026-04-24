@@ -8,9 +8,7 @@ import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePrefere
 import com.joseleandro.fullfocus.domain.data.TaskWithPomodoroSessionsDomain
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 class PomodoroSessionLocalDataSourceImpl(
@@ -23,7 +21,16 @@ class PomodoroSessionLocalDataSourceImpl(
         get() =
             pomodoroTimePreferences.pomodoroFlow.flatMapLatest { pomodoroTimePreferences ->
                 if (pomodoroTimePreferences.idTask == null) {
-                    flowOf(null)
+                    pomodoroSessionDao.getActiveSessionWithTask().map { activeSessionWithTask ->
+                        if (activeSessionWithTask == null) {
+                            null
+                        } else {
+                            TaskWithPomodoroSessionsDomain(
+                                task = null,
+                                sessions = listOf(activeSessionWithTask.session.toDomain())
+                            )
+                        }
+                    }
                 } else {
                     pomodoroSessionDao.getTaskWithSessions(taskId = pomodoroTimePreferences.idTask)
                         .map { response ->
@@ -34,14 +41,12 @@ class PomodoroSessionLocalDataSourceImpl(
                 }
             }
 
-    private val pomodoroTimerCurrent = pomodoroTimePreferences.pomodoroFlow
-
     override suspend fun startSession(state: PomodoroTimePreferences) {
 
 
-        val taskId = state.idTask ?: return
+        val taskId = state.idTask
 
-        val existing = pomodoroSessionDao.getActiveSession(taskId)
+        val existing = pomodoroSessionDao.getActiveSession()
         if (existing != null) return
 
         val now = System.currentTimeMillis()
@@ -71,13 +76,25 @@ class PomodoroSessionLocalDataSourceImpl(
     override suspend fun skipSession() =
         updateSession(SessionStatus.SKIPPED)
 
+    override suspend fun restartSession() {
+        val existing = pomodoroSessionDao.getActiveSession() ?: return
+
+        val updated = existing.copy(
+            startedAt = System.currentTimeMillis()
+        )
+        pomodoroSessionDao.update(updated)
+    }
+
+    override suspend fun updateActiveSessionTask(taskId: Int?) {
+        val existing = pomodoroSessionDao.getActiveSession() ?: return
+        val updated = existing.copy(taskId = taskId)
+        pomodoroSessionDao.update(updated)
+    }
+
     private suspend fun updateSession(
         status: SessionStatus
     ) {
-        val state = pomodoroTimerCurrent.first()
-        val taskId = state.idTask ?: return
-
-        val existing = pomodoroSessionDao.getActiveSession(taskId) ?: return
+        val existing = pomodoroSessionDao.getActiveSession() ?: return
 
         val updated = existing.copy(
             endedAt = System.currentTimeMillis(),

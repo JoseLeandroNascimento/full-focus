@@ -15,4 +15,8 @@ interface PomodoroSessionRepository {
     suspend fun cancelSession()
 
     suspend fun skipSession()
+
+    suspend fun restartSession()
+
+    suspend fun updateActiveSessionTask(taskId: Int?)
 }

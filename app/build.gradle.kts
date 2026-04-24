@@ -44,6 +44,8 @@ android {
 
 dependencies {
 
+    implementation(libs.lottie)
+
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.serialization.json)
 

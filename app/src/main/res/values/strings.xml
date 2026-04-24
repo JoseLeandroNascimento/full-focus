@@ -39,4 +39,10 @@
     <string name="excluir">Excluir</string>
     <string name="selecione_uma_tarefa">Selecione uma tarefa para começar</string>
     <string name="vamos_focar">Vamos focar?</string>
+    <string name="encerrar_sessao">Finalizar sessão</string>
+    <string name="mensagem_confirmacao_cancelar_pomodoro">Tem certeza que deseja finalizar a sessão atual?</string>
+    <string name="sim">Sim</string>
+    <string name="nao">Não</string>
+    <string name="progress_task_session">%1$d/%2$d sessões</string>
+    <string name="progress_session">%1$d sessões</string>
 </resources>

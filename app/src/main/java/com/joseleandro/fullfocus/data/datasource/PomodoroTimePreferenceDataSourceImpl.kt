@@ -1,12 +1,11 @@
 package com.joseleandro.fullfocus.data.datasource
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import com.joseleandro.fullfocus.data.local.preferences.UserPreferences
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroSettingPreferences
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
 import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
-import com.joseleandro.fullfocus.domain.data.PomodoroTimeEvent
+import com.joseleandro.fullfocus.domain.data.PomodoroTimeUIEffect
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -34,12 +33,11 @@ class PomodoroTimePreferenceDataSourceImpl(
             )
         }
 
-    private val _events = MutableSharedFlow<PomodoroTimeEvent>(
+    private val _events = MutableSharedFlow<PomodoroTimeUIEffect>(
         replay = 0,
         extraBufferCapacity = 10
     )
     override val events = _events.asSharedFlow()
-
 
     override suspend fun start() {
         val now = System.currentTimeMillis()
@@ -54,7 +52,7 @@ class PomodoroTimePreferenceDataSourceImpl(
             )
         }
 
-        emit(PomodoroTimeEvent.Start(sessionInfo = response.pomodoro))
+        emit(PomodoroTimeUIEffect.Start(sessionInfo = response.pomodoro))
     }
 
     override suspend fun pause() {
@@ -69,9 +67,7 @@ class PomodoroTimePreferenceDataSourceImpl(
             )
         }
 
-        emit(PomodoroTimeEvent.Pause)
     }
-
 
     override suspend fun play() {
         val now = System.currentTimeMillis()
@@ -88,16 +84,6 @@ class PomodoroTimePreferenceDataSourceImpl(
             )
         }
 
-        emit(PomodoroTimeEvent.Play)
-    }
-
-    override suspend fun reset() {
-        dataStore.updateData {
-            it.copy(
-                pomodoro = PomodoroTimePreferences()
-            )
-        }
-        emit(PomodoroTimeEvent.Reset)
     }
 
     override suspend fun restart() {
@@ -110,6 +96,7 @@ class PomodoroTimePreferenceDataSourceImpl(
                 )
             )
         }
+        emit(PomodoroTimeUIEffect.Restart)
     }
 
     override suspend fun skip() {
@@ -127,7 +114,24 @@ class PomodoroTimePreferenceDataSourceImpl(
             )
         }
 
-        emit(PomodoroTimeEvent.Skip)
+        emit(PomodoroTimeUIEffect.Skip)
+    }
+
+    override suspend fun cancel(completed: Boolean) {
+        val settings = pomodoroSettingPreferencesLocalDataSource.pomodoroSetting.first()
+        dataStore.updateData {
+            it.copy(
+                pomodoro = it.pomodoro.copy(
+                    startTime = 0L,
+                    counterPomodoro = 0,
+                    statusSession = StatusSession.FOCUS,
+                    duration = settings.pomodoroDuration,
+                    pausedAt = null,
+                    isRunning = false
+                )
+            )
+        }
+        emit(PomodoroTimeUIEffect.Cancel(completed = completed))
     }
 
     override suspend fun currentTask(id: Int?) {
@@ -136,9 +140,12 @@ class PomodoroTimePreferenceDataSourceImpl(
                 pomodoro = it.pomodoro.copy(idTask = id)
             )
         }
+
+        emit(PomodoroTimeUIEffect.UpdateTaskId(taskId = id))
     }
 
     override fun getRemaining(state: PomodoroTimePreferences): Long {
+
         if (state.startTime == 0L) return state.duration
         val now = System.currentTimeMillis()
 
@@ -158,25 +165,57 @@ class PomodoroTimePreferenceDataSourceImpl(
 
         val result = dataStore.updateData { userPreferences ->
 
+            val statusSessionNew = userPreferences.pomodoro.statusSession.nextSession()
+            val isRunningAuto =
+                isStartSessionRunningAuto(
+                    statusSession = statusSessionNew,
+                    userPreferences = userPreferences
+                )
+
             userPreferences.copy(
                 pomodoro = userPreferences.pomodoro.copy(
-                    isRunning = false,
-                    statusSession = userPreferences.pomodoro.statusSession.nextSession(),
+                    isRunning = isRunningAuto,
+                    statusSession = statusSessionNew,
                     counterPomodoro = incrementSessionPomodoroCompleted(userPreferences.pomodoro),
-                    startTime = 0L,
-                    pausedAt = 0L
+                    startTime = if (isRunningAuto) System.currentTimeMillis() else 0L,
+                    pausedAt = null
                 )
             )
         }
 
         emit(
-            PomodoroTimeEvent.PomodoroTimeCompleted(
+            PomodoroTimeUIEffect.PomodoroTimeCompleted(
                 count = result.pomodoro.counterPomodoro
             )
         )
 
     }
 
+
+    /**
+     * Verifica se o pomodoro deve iniciar automaticamente o timer do pomodoro.
+     *
+     * @param statusSession Sessão do pomodoro
+     * @param userPreferences contêm os dados de preferências de usuário
+     * @return retorna um boolean se o time deve começar isRunning verdadeiro ou falso.
+     */
+    private fun isStartSessionRunningAuto(
+        statusSession: StatusSession,
+        userPreferences: UserPreferences
+    ): Boolean {
+        return when (statusSession) {
+            StatusSession.FOCUS -> userPreferences.pomodoroSettingPreferences.autoStartNextPomodoro
+            StatusSession.PAUSE_SHORT -> userPreferences.pomodoroSettingPreferences.autoStartNextShortBreak
+            StatusSession.PAUSE_LONG -> userPreferences.pomodoroSettingPreferences.autoStartNextLongBreak
+        }
+    }
+
+
+    /**
+     * Verifica qual a proxima sessão do pomodoro, tendo como referência a sessão atual.
+     *
+     * @return retornar a proxima sessão do pomodoro.
+     */
     private suspend fun StatusSession.nextSession(): StatusSession {
         val state = pomodoroFlow.first()
 
@@ -226,6 +265,6 @@ class PomodoroTimePreferenceDataSourceImpl(
 
     }
 
-    private fun emit(event: PomodoroTimeEvent) =
+    private fun emit(event: PomodoroTimeUIEffect) =
         _events.tryEmit(event)
 }

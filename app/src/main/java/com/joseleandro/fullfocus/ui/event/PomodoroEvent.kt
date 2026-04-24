@@ -1,13 +1,20 @@
 package com.joseleandro.fullfocus.ui.event
 
-sealed interface PomodoroEvent {
+import android.content.Context
+import com.joseleandro.fullfocus.ui.state.PomodoroModalTypeUiState
 
-    data class OnShowPomodoroSettingBottomSheet(val show: Boolean) : PomodoroEvent
+sealed interface PomodoroEvent {
 
     data object OnResetTaskCurrentPomodoro : PomodoroEvent
 
-    data class OnShowSelectTaskBottomSheet(val show: Boolean) : PomodoroEvent
-
     data class OnSelectTask(val id: Int) : PomodoroEvent
 
+    data class OnShowModal(val modal: PomodoroModalTypeUiState) : PomodoroEvent
+
+    data object CloseModal : PomodoroEvent
+
+    data class OnActionPomodoro(
+        val context: Context,
+        val actionEvent: PomodoroActionControlsEvent
+    ) : PomodoroEvent
 }

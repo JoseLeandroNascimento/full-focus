@@ -23,4 +23,10 @@ class PomodoroSessionRepositoryImpl(
 
     override suspend fun skipSession() =
         pomodoroSessionLocalDataSource.skipSession()
+
+    override suspend fun restartSession() =
+        pomodoroSessionLocalDataSource.restartSession()
+
+    override suspend fun updateActiveSessionTask(taskId: Int?) =
+        pomodoroSessionLocalDataSource.updateActiveSessionTask(taskId = taskId)
 }

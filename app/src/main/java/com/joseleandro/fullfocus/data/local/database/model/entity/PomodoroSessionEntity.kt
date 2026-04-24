@@ -28,7 +28,7 @@ data class PomodoroSessionEntity(
     val id: Int = 0,
 
     @ColumnInfo(name = "task_id")
-    val taskId: Int,
+    val taskId: Int? = null,
 
     val type: StatusSession,
 

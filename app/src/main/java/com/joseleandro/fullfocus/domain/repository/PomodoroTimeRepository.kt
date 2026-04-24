@@ -1,13 +1,13 @@
 package com.joseleandro.fullfocus.domain.repository
 
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
-import com.joseleandro.fullfocus.domain.data.PomodoroTimeEvent
+import com.joseleandro.fullfocus.domain.data.PomodoroTimeUIEffect
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 
 interface PomodoroTimeRepository {
     val pomodoroFlow: Flow<PomodoroTimePreferences>
-    val events: SharedFlow<PomodoroTimeEvent>
+    val events: SharedFlow<PomodoroTimeUIEffect>
 
     suspend fun start()
 
@@ -15,11 +15,11 @@ interface PomodoroTimeRepository {
 
     suspend fun play()
 
-    suspend fun reset()
-
     suspend fun restart()
 
     suspend fun skip()
+
+    suspend fun cancel(completed: Boolean = false)
 
     suspend fun currentTask(id: Int?)
 

@@ -18,7 +18,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -35,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheet
 import com.joseleandro.fullfocus.ui.component.FullFocusBottomSheetHeader
+import com.joseleandro.fullfocus.ui.component.FullFocusSwitch
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.component.TimerInput
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.component.WheelTimePickerDialog
@@ -81,7 +81,7 @@ fun PomodoroSettingBottomSheet(
                 title = {
                     Text(
                         text = "Ajustes do Timer",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+//                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
                 trailingIcon = {
@@ -125,7 +125,7 @@ fun PomodoroSettingBottomSheet(
                 )
                 Text(
                     text = "Tempo",
-                    style = MaterialTheme.typography.bodyLarge.copy(
+                    style = MaterialTheme.typography.bodyMedium.copy(
                         fontWeight = FontWeight.Medium
                     )
                 )
@@ -168,8 +168,8 @@ fun PomodoroSettingBottomSheet(
                     modifier = Modifier.padding(horizontal = 0.dp),
                     headlineContent = {
                         Text(
-                            text = "Auto-iniciar descanso",
-                            style = MaterialTheme.typography.bodyLarge.copy(
+                            text = "Auto-iniciar descanso longo",
+                            style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -182,7 +182,38 @@ fun PomodoroSettingBottomSheet(
                         )
                     },
                     trailingContent = {
-                        Switch(
+                        FullFocusSwitch(
+                            checked = uiState.autoStartNextLongBreak,
+                            onCheckedChange = {
+                                onEvent(
+                                    PomodoroSettingEvent.OnAutoStartLongBreakChange(
+                                        it
+                                    )
+                                )
+                            }
+                        )
+                    }
+                )
+
+                ListItem(
+                    modifier = Modifier.padding(horizontal = 0.dp),
+                    headlineContent = {
+                        Text(
+                            text = "Auto-iniciar descanso curto",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        )
+                    },
+                    supportingContent = {
+                        Text(
+                            text = "Inicia a pausa logo após o fim do foco",
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    },
+                    trailingContent = {
+                        FullFocusSwitch(
                             checked = uiState.autoStartNextShortBreak,
                             onCheckedChange = {
                                 onEvent(
@@ -200,7 +231,7 @@ fun PomodoroSettingBottomSheet(
                     headlineContent = {
                         Text(
                             text = "Auto-iniciar foco",
-                            style = MaterialTheme.typography.bodyLarge.copy(
+                            style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
@@ -213,7 +244,7 @@ fun PomodoroSettingBottomSheet(
                         )
                     },
                     trailingContent = {
-                        Switch(
+                        FullFocusSwitch(
                             checked = uiState.autoStartNextPomodoro,
                             onCheckedChange = {
                                 onEvent(
@@ -223,6 +254,7 @@ fun PomodoroSettingBottomSheet(
                                 )
                             }
                         )
+
                     }
                 )
 
@@ -231,7 +263,7 @@ fun PomodoroSettingBottomSheet(
                     headlineContent = {
                         Text(
                             text = "Pausa longa após",
-                            style = MaterialTheme.typography.bodyLarge.copy(
+                            style = MaterialTheme.typography.bodyMedium.copy(
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )

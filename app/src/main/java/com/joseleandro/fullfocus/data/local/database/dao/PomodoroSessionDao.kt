@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.joseleandro.fullfocus.data.local.database.model.dto.PomodoroSessionWithTaskDto
 import com.joseleandro.fullfocus.data.local.database.model.dto.TaskWithPomodoroSessionsDto
 import com.joseleandro.fullfocus.data.local.database.model.entity.PomodoroSessionEntity
 import kotlinx.coroutines.flow.Flow
@@ -18,17 +19,20 @@ interface PomodoroSessionDao {
     @Query(
         """
             SELECT * FROM pomodoro_session_table 
-            WHERE task_id = :taskId 
-            AND status = 'IN_PROGRESS'
+            WHERE status = 'IN_PROGRESS'
             LIMIT 1
     """
     )
-    suspend fun getActiveSession(taskId: Int): PomodoroSessionEntity?
+    suspend fun getActiveSession(): PomodoroSessionEntity?
+
+    @Transaction
+    @Query("SELECT * FROM pomodoro_session_table WHERE status = 'IN_PROGRESS' LIMIT 1")
+    fun getActiveSessionWithTask(): Flow<PomodoroSessionWithTaskDto?>
 
     @Transaction
     @Query("SELECT * FROM task_entity WHERE id = :taskId")
     fun getTaskWithSessions(taskId: Int): Flow<TaskWithPomodoroSessionsDto>
 
     @Update
-    fun update(pomodoroSession: PomodoroSessionEntity)
+    suspend fun update(pomodoroSession: PomodoroSessionEntity)
 }

@@ -14,7 +14,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroTimePreferences
-import com.joseleandro.fullfocus.domain.data.PomodoroTimeEvent
+import com.joseleandro.fullfocus.domain.data.PomodoroTimeUIEffect
 import com.joseleandro.fullfocus.domain.repository.PomodoroSessionRepository
 import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
 import kotlinx.coroutines.CoroutineScope
@@ -32,10 +32,11 @@ import java.util.Locale
 
 const val ACTION_START = "ACTION_START"
 const val ACTION_PAUSE = "ACTION_PAUSE"
-const val ACTION_RESET = "ACTION_RESET"
 const val ACTION_RESTART = "ACTION_RESTART"
 const val ACTION_PLAY = "ACTION_PLAY"
 const val ACTION_SKIP = "ACTION_SKIP"
+const val ACTION_CANCEL_COMPLETED = "ACTION_CANCEL_COMPLETED"
+const val ACTION_CANCEL_DISCARD = "ACTION_CANCEL_DISCARD"
 
 
 class PomodoroService : Service(), KoinComponent {
@@ -55,7 +56,6 @@ class PomodoroService : Service(), KoinComponent {
 
     private lateinit var pausePending: PendingIntent
     private lateinit var playPending: PendingIntent
-    private lateinit var resetPending: PendingIntent
     private lateinit var restartPending: PendingIntent
 
     private var lastProgress = -1
@@ -76,9 +76,6 @@ class PomodoroService : Service(), KoinComponent {
             action = ACTION_PLAY
         }
 
-        val resetIntent = Intent(this, PomodoroService::class.java).apply {
-            action = ACTION_RESET
-        }
 
         val restartIntent = Intent(this, PomodoroService::class.java).apply {
             action = ACTION_RESTART
@@ -90,8 +87,7 @@ class PomodoroService : Service(), KoinComponent {
         playPending =
             PendingIntent.getService(this, 1, playIntent, PendingIntent.FLAG_IMMUTABLE)
 
-        resetPending =
-            PendingIntent.getService(this, 2, resetIntent, PendingIntent.FLAG_IMMUTABLE)
+
 
         restartPending =
             PendingIntent.getService(this, 3, restartIntent, PendingIntent.FLAG_IMMUTABLE)
@@ -130,16 +126,20 @@ class PomodoroService : Service(), KoinComponent {
                 scope.launch { repository.play() }
             }
 
-            ACTION_RESET -> {
-                scope.launch { repository.reset() }
-            }
-
             ACTION_RESTART -> {
                 scope.launch { repository.restart() }
             }
 
             ACTION_SKIP -> {
                 scope.launch { repository.skip() }
+            }
+
+            ACTION_CANCEL_COMPLETED -> {
+                scope.launch { repository.cancel(completed = true) }
+            }
+
+            ACTION_CANCEL_DISCARD -> {
+                scope.launch { repository.cancel(completed = false) }
             }
 
             else -> Log.d(TAG, "⚠️ Ação desconhecida: $action")
@@ -183,33 +183,34 @@ class PomodoroService : Service(), KoinComponent {
 
                 when (event) {
 
-                    is PomodoroTimeEvent.PomodoroTimeCompleted -> {
-                        Log.d(TAG, "🔥 Evento recebido no Service: Pomodoro concluído")
-
+                    is PomodoroTimeUIEffect.PomodoroTimeCompleted -> {
                         pomodoroSessionRepository.completeSession()
                         showFinishedNotification()
-
                     }
 
-                    is PomodoroTimeEvent.Start -> {
-                        Log.d(TAG, "Informações da sessão iniciada ${event.sessionInfo}")
+                    is PomodoroTimeUIEffect.Start -> {
                         pomodoroSessionRepository.startSession(state = event.sessionInfo)
                     }
 
-                    PomodoroTimeEvent.Pause -> {
-
+                    is PomodoroTimeUIEffect.UpdateTaskId -> {
+                        pomodoroSessionRepository.updateActiveSessionTask(taskId = event.taskId)
                     }
 
-                    PomodoroTimeEvent.Play -> {
-
+                    PomodoroTimeUIEffect.Restart -> {
+                        pomodoroSessionRepository.restartSession()
                     }
 
-                    PomodoroTimeEvent.Reset -> {
-
+                    is PomodoroTimeUIEffect.Skip -> {
+                        pomodoroSessionRepository.skipSession()
                     }
 
-                    PomodoroTimeEvent.Skip -> {
-
+                    is PomodoroTimeUIEffect.Cancel -> {
+                        if (event.completed) {
+                            pomodoroSessionRepository.completeSession()
+                            showFinishedNotification()
+                        } else {
+                            pomodoroSessionRepository.cancelSession()
+                        }
                     }
                 }
             }
@@ -246,13 +247,12 @@ class PomodoroService : Service(), KoinComponent {
 
             while (true) {
 
-                val state = repository.pomodoroFlow.first() // 🔥 pega o estado atual
+                val state = repository.pomodoroFlow.first()
                 val remaining = repository.getRemaining(state)
 
                 if (!state.isRunning) break
 
                 if (remaining <= 0) {
-                    Log.d(TAG, "⏰ Timer finalizado")
 
                     repository.onPomodoroSessionFinished()
                     break

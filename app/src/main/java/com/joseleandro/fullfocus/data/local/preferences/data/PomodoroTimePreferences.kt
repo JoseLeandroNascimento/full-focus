@@ -17,7 +17,6 @@ data class PomodoroTimePreferences(
 
     val pomodoroStatus: PomodoroStatus
         get() = when {
-            idTask == null -> PomodoroStatus.IDLE
             startTime == 0L -> PomodoroStatus.START
             startTime > 0L -> PomodoroStatus.PROGRESS
             else -> PomodoroStatus.FINISHED

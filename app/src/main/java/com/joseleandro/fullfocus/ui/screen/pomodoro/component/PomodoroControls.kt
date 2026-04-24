@@ -15,17 +15,17 @@ import androidx.compose.ui.unit.dp
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroStatus
 import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
+import com.joseleandro.fullfocus.ui.event.PomodoroActionControlsEvent
+import com.joseleandro.fullfocus.ui.event.PomodoroEvent
+import com.joseleandro.fullfocus.ui.state.PomodoroModalTypeUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 
 @Composable
 fun PomodoroControls(
     modifier: Modifier = Modifier,
     uiState: PomodoroUiState,
-    onStart: () -> Unit,
-    onPause: () -> Unit,
-    onPlay: () -> Unit,
-    onReset: () -> Unit,
-    onSkip: () -> Unit
+    onEvent: (PomodoroEvent) -> Unit,
+    onActionControlPomodoro: (PomodoroActionControlsEvent) -> Unit
 ) {
     Row(
         modifier = modifier,
@@ -37,8 +37,9 @@ fun PomodoroControls(
 
             if (uiState.statusSession == StatusSession.PAUSE_LONG || uiState.statusSession == StatusSession.PAUSE_SHORT) {
                 IconButton(
-                    onClick = onSkip,
-                    enabled = uiState.taskCurrent != null
+                    onClick = {
+                        onActionControlPomodoro(PomodoroActionControlsEvent.OnSkip)
+                    }
                 ) {
                     Icon(
                         painterResource(R.drawable.rounded_skip_next_24),
@@ -48,8 +49,9 @@ fun PomodoroControls(
             } else {
 
                 IconButton(
-                    onClick = onReset,
-                    enabled = uiState.taskCurrent != null
+                    onClick = {
+                        onActionControlPomodoro(PomodoroActionControlsEvent.OnReset)
+                    }
                 ) {
                     Icon(
                         painterResource(R.drawable.outline_restart_alt_24),
@@ -63,25 +65,29 @@ fun PomodoroControls(
         PomodoroButtonPrimary(
             label = stringResource(id = getButtonLabel(uiState)),
             iconRes = getButtonIcon(uiState),
-            enabled = uiState.taskCurrent != null,
             onClick = {
                 when (uiState.pomodoroStatus) {
                     PomodoroStatus.IDLE,
-                    PomodoroStatus.START -> onStart()
-
-                    PomodoroStatus.PROGRESS -> {
-                        if (uiState.isPlay) onPause() else onPlay()
+                    PomodoroStatus.START -> {
+                        onActionControlPomodoro(PomodoroActionControlsEvent.OnStart)
                     }
 
-                    PomodoroStatus.FINISHED -> onReset()
+                    PomodoroStatus.PROGRESS -> {
+                        if (uiState.isPlay) onActionControlPomodoro(PomodoroActionControlsEvent.OnPause) else onActionControlPomodoro(
+                            PomodoroActionControlsEvent.OnPlay
+                        )
+                    }
+
+                    PomodoroStatus.FINISHED -> onActionControlPomodoro(PomodoroActionControlsEvent.OnReset)
                 }
             }
         )
 
         if (uiState.pomodoroStatus != PomodoroStatus.START) {
             IconButton(
-                onClick = {},
-                enabled = uiState.taskCurrent != null
+                onClick = {
+                    onEvent(PomodoroEvent.OnShowModal(modal = PomodoroModalTypeUiState.ConfirmCancel))
+                }
             ) {
                 Icon(
                     painterResource(R.drawable.baseline_close_24),

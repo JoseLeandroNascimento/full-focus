@@ -8,11 +8,6 @@ class SetCurrentTaskPomodoroUseCase(
 
     suspend operator fun invoke(id: Int? = null) {
 
-        if (id == null){
-            pomodoroTimeRepository.reset()
-            return
-        }
-
         pomodoroTimeRepository.currentTask(id = id)
 
     }

@@ -1,19 +1,31 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro
 
-import android.util.Log
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.repository.PomodoroTimeRepository
 import com.joseleandro.fullfocus.domain.usecase.GetFilteredTasksUseCase
 import com.joseleandro.fullfocus.domain.usecase.GetTaskEndPomodoroSessionUseCase
 import com.joseleandro.fullfocus.domain.usecase.SetCurrentTaskPomodoroUseCase
+import com.joseleandro.fullfocus.service.ACTION_CANCEL_COMPLETED
+import com.joseleandro.fullfocus.service.ACTION_CANCEL_DISCARD
+import com.joseleandro.fullfocus.service.ACTION_PAUSE
+import com.joseleandro.fullfocus.service.ACTION_PLAY
+import com.joseleandro.fullfocus.service.ACTION_RESTART
+import com.joseleandro.fullfocus.service.ACTION_SKIP
+import com.joseleandro.fullfocus.service.ACTION_START
+import com.joseleandro.fullfocus.service.PomodoroService
+import com.joseleandro.fullfocus.ui.event.PomodoroActionControlsEvent
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
+import com.joseleandro.fullfocus.ui.state.PomodoroModalTypeUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -29,43 +41,28 @@ class PomodoroViewModel(
     val uiState: StateFlow<PomodoroUiState> = _uiState.asStateFlow()
 
     init {
-        viewModelScope.launch {
-            getTaskEndPomodoroSessionUseCase().collect { taskAnPomodoroSessions ->
-                _uiState.update { state ->
-                    state.copy(
-                        taskCurrent = taskAnPomodoroSessions?.task,
-                    )
-                }
 
+        viewModelScope.launch {
+            combine(
+                getTaskEndPomodoroSessionUseCase(),
+                repository.pomodoroFlow,
+                getFilteredTasksUseCase()
+            ) { taskSession, pomodoro, tasks ->
+                PomodoroUiState(
+                    taskCurrent = taskSession?.task,
+                    timeSession = (pomodoro.duration / 1000).toInt(),
+                    isPlay = pomodoro.isRunning,
+                    statusSession = pomodoro.statusSession,
+                    pomodoroStatus = pomodoro.pomodoroStatus,
+                    currentSession = pomodoro.counterPomodoro + 1,
+                    tasks = tasks,
+                    time = _uiState.value.time
+                )
+            }.collect { newState ->
+                _uiState.value = newState
             }
         }
-        observePomodoro()
         startTicker()
-        observeTasks()
-    }
-
-    private fun observeTasks() {
-        viewModelScope.launch {
-            getFilteredTasksUseCase().collect { tasks ->
-                _uiState.update { it.copy(tasks = tasks) }
-            }
-        }
-    }
-
-    private fun observePomodoro() {
-        viewModelScope.launch {
-            repository.pomodoroFlow.collectLatest { state ->
-                _uiState.update {
-                    it.copy(
-                        timeSession = (state.duration / 1000).toInt(),
-                        isPlay = state.isRunning,
-                        statusSession = state.statusSession,
-                        pomodoroStatus = state.pomodoroStatus,
-                        currentSession = state.counterPomodoro + 1
-                    )
-                }
-            }
-        }
     }
 
     private fun startTicker() {
@@ -89,28 +86,67 @@ class PomodoroViewModel(
         }
     }
 
+    private fun changeVisibilityModal(visibility: PomodoroModalTypeUiState) {
+        _uiState.update { state ->
+            state.copy(
+                activeModal = visibility
+            )
+        }
+    }
+
+    private fun setTaskCurrent(idTask: Int?) {
+        viewModelScope.launch {
+            setCurrentTaskPomodoroUseCase(id = idTask)
+        }
+    }
+
     fun onEvent(event: PomodoroEvent) {
         when (event) {
-            is PomodoroEvent.OnShowPomodoroSettingBottomSheet -> {
-                _uiState.update {
-                    it.copy(showPomodoroSettingBottomSheet = event.show)
-                }
-            }
 
             PomodoroEvent.OnResetTaskCurrentPomodoro -> resetTaskCurrentPomodoro()
 
-            is PomodoroEvent.OnShowSelectTaskBottomSheet -> {
-                _uiState.update {
-                    it.copy(showSelectTaskBottomSheet = event.show)
-                }
-            }
+            is PomodoroEvent.OnSelectTask -> setTaskCurrent(idTask = event.id)
 
-            is PomodoroEvent.OnSelectTask -> {
-                viewModelScope.launch {
-                    setCurrentTaskPomodoroUseCase(id = event.id)
-                    _uiState.update { it.copy(showSelectTaskBottomSheet = false) }
-                }
-            }
+            is PomodoroEvent.OnShowModal -> changeVisibilityModal(visibility = event.modal)
+
+            PomodoroEvent.CloseModal -> changeVisibilityModal(visibility = PomodoroModalTypeUiState.None)
+
+            is PomodoroEvent.OnActionPomodoro -> actionControlPomodoro(
+                context = event.context,
+                action = event.actionEvent
+            )
         }
     }
+
+    private fun actionControlPomodoro(context: Context, action: PomodoroActionControlsEvent) {
+        when (action) {
+            PomodoroActionControlsEvent.OnCancelCompleted -> context.startPomodoroService(
+                ACTION_CANCEL_COMPLETED
+            )
+
+            PomodoroActionControlsEvent.OnCancelDiscard -> context.startPomodoroService(
+                ACTION_CANCEL_DISCARD
+            )
+
+            PomodoroActionControlsEvent.OnPause -> context.startPomodoroService(ACTION_PAUSE)
+            PomodoroActionControlsEvent.OnPlay -> context.startPomodoroService(ACTION_PLAY)
+            PomodoroActionControlsEvent.OnReset -> context.startPomodoroService(ACTION_RESTART)
+            PomodoroActionControlsEvent.OnSkip -> context.startPomodoroService(ACTION_SKIP)
+            PomodoroActionControlsEvent.OnStart -> context.startPomodoroService(ACTION_START)
+        }
+    }
+
+    fun Context.startPomodoroService(action: String) {
+        val intent = Intent(this, PomodoroService::class.java).apply {
+            this.action = action
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
+    }
+
 }
+

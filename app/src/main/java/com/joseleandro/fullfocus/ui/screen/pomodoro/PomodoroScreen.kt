@@ -1,10 +1,6 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro
 
-import android.content.Context
-import android.content.Intent
-import android.os.Build
-import androidx.annotation.DrawableRes
-import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -34,21 +30,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.data.local.preferences.data.PomodoroStatus
 import com.joseleandro.fullfocus.domain.data.tasksListMock
-import com.joseleandro.fullfocus.service.ACTION_PAUSE
-import com.joseleandro.fullfocus.service.ACTION_PLAY
-import com.joseleandro.fullfocus.service.ACTION_RESTART
-import com.joseleandro.fullfocus.service.ACTION_SKIP
-import com.joseleandro.fullfocus.service.ACTION_START
-import com.joseleandro.fullfocus.service.PomodoroService
+import com.joseleandro.fullfocus.ui.event.PomodoroActionControlsEvent
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
+import com.joseleandro.fullfocus.ui.screen.pomodoro.component.ConfirmCancelSessionDialog
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.EmptyTaskCard
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroControls
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroTimer
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.SelectTaskBottomSheet
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.SelectedTaskCard
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
+import com.joseleandro.fullfocus.ui.state.PomodoroModalTypeUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import kotlinx.coroutines.launch
@@ -81,8 +73,6 @@ fun PomodoroScreen(
 ) {
 
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     Scaffold(
         modifier = modifier,
@@ -105,7 +95,7 @@ fun PomodoroScreen(
                 actions = {
                     IconButton(
                         onClick = {
-                            onEvent(PomodoroEvent.OnShowPomodoroSettingBottomSheet(true))
+                            onEvent(PomodoroEvent.OnShowModal(modal = PomodoroModalTypeUiState.Settings))
                         }
                     ) {
                         Icon(
@@ -128,17 +118,23 @@ fun PomodoroScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            if (uiState.taskCurrent != null) {
-                SelectedTaskCard(
-                    taskTitle = uiState.taskCurrent.title,
-                    onResetTask = { onEvent(PomodoroEvent.OnResetTaskCurrentPomodoro) }
-                )
-            } else {
-                EmptyTaskCard(
-                    onClick = {
-                        onEvent(PomodoroEvent.OnShowSelectTaskBottomSheet(true))
-                    }
-                )
+
+            AnimatedContent(
+                targetState = uiState.taskCurrent,
+                label = "task_card_transition"
+            ) { task ->
+                if (task != null) {
+                    SelectedTaskCard(
+                        taskTitle = task.title,
+                        onResetTask = { onEvent(PomodoroEvent.OnResetTaskCurrentPomodoro) }
+                    )
+                } else {
+                    EmptyTaskCard(
+                        onClick = {
+                            onEvent(PomodoroEvent.OnShowModal(modal = PomodoroModalTypeUiState.SelectTask))
+                        }
+                    )
+                }
             }
 
             Column(
@@ -161,61 +157,96 @@ fun PomodoroScreen(
                         time = uiState.time,
                         timeSession = uiState.timeSession,
                         statusSession = uiState.statusSession,
-                        supportText = "${uiState.currentSession}/${uiState.taskCurrent?.pomodoros ?: 0} sessões"
+                        supportText = if (uiState.taskCurrent != null) {
+                            stringResource(
+                                R.string.progress_task_session,
+                                uiState.currentSession,
+                                uiState.taskCurrent.pomodoros
+                            )
+                        } else {
+                            stringResource(R.string.progress_session, uiState.currentSession)
+                        }
                     )
                 }
 
                 PomodoroControls(
                     uiState = uiState,
-                    onStart = { context.startPomodoroService(ACTION_START) },
-                    onPause = { context.startPomodoroService(ACTION_PAUSE) },
-                    onPlay = { context.startPomodoroService(ACTION_PLAY) },
-                    onReset = { context.startPomodoroService(ACTION_RESTART) },
-                    onSkip = { context.startPomodoroService(ACTION_SKIP) }
+                    onActionControlPomodoro = { event ->
+                        onEvent(
+                            PomodoroEvent.OnActionPomodoro(
+                                context = context,
+                                actionEvent = event
+                            )
+                        )
+                    },
+                    onEvent = onEvent
                 )
             }
 
         }
     }
 
-    if (uiState.showSelectTaskBottomSheet) {
-        SelectTaskBottomSheet(
-            sheetState = bottomSheetState,
-            tasks = uiState.tasks,
-            onDismissRequest = {
-                onEvent(PomodoroEvent.OnShowSelectTaskBottomSheet(false))
-            },
-            value = uiState.taskCurrent,
-            onSelectTask = { taskId ->
-                onEvent(PomodoroEvent.OnSelectTask(taskId))
-            }
-        )
-    }
+    PomodoroModals(
+        uiState = uiState,
+        onEvent = onEvent,
+        onActionControlPomodoro = { eventControl ->
+            onEvent(PomodoroEvent.OnActionPomodoro(context = context, actionEvent = eventControl))
+        }
+    )
 
-    if (uiState.showPomodoroSettingBottomSheet) {
-        PomodoroSettingBottomSheet(
-            sheetState = bottomSheetState,
-            onDismissRequest = {
-                onEvent(PomodoroEvent.OnShowPomodoroSettingBottomSheet(false))
-                scope.launch { bottomSheetState.hide() }
-            }
-        )
-    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PomodoroModals(
+    uiState: PomodoroUiState,
+    onEvent: (PomodoroEvent) -> Unit,
+    onActionControlPomodoro: (PomodoroActionControlsEvent) -> Unit
+) {
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
 
+    when (uiState.activeModal) {
+        PomodoroModalTypeUiState.ConfirmCancel -> {
+            ConfirmCancelSessionDialog(
+                onDismissRequest = { onEvent(PomodoroEvent.CloseModal) },
+                onConfirm = { isFinished ->
+                    onEvent(PomodoroEvent.CloseModal)
+                    if (isFinished) {
+                        onActionControlPomodoro(PomodoroActionControlsEvent.OnCancelCompleted)
+                    } else {
+                        onActionControlPomodoro(PomodoroActionControlsEvent.OnCancelDiscard)
+                    }
+                }
+            )
+        }
 
+        PomodoroModalTypeUiState.SelectTask -> {
+            SelectTaskBottomSheet(
+                sheetState = bottomSheetState,
+                tasks = uiState.tasks,
+                onDismissRequest = {
+                    onEvent(PomodoroEvent.CloseModal)
+                },
+                value = uiState.taskCurrent,
+                onSelectTask = { taskId ->
+                    onEvent(PomodoroEvent.OnSelectTask(taskId))
+                }
+            )
+        }
 
+        PomodoroModalTypeUiState.Settings -> {
+            PomodoroSettingBottomSheet(
+                sheetState = bottomSheetState,
+                onDismissRequest = {
+                    onEvent(PomodoroEvent.CloseModal)
+                    scope.launch { bottomSheetState.hide() }
+                }
+            )
+        }
 
-fun Context.startPomodoroService(action: String) {
-    val intent = Intent(this, PomodoroService::class.java).apply {
-        this.action = action
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        startForegroundService(intent)
-    } else {
-        startService(intent)
+        PomodoroModalTypeUiState.None -> { /* Nada a exibir */
+        }
     }
 }
 
