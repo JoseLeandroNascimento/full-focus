@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -30,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.domain.data.tasksListMock
@@ -112,83 +113,106 @@ fun PomodoroScreen(
         containerColor = MaterialTheme.colorScheme.surface
     ) { padding ->
 
-        Column(
+        BoxWithConstraints(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-
-            AnimatedContent(
-                targetState = uiState.taskCurrent,
-                label = "task_card_transition"
-            ) { task ->
-                if (task != null) {
-                    SelectedTaskCard(
-                        taskTitle = task.title,
-                        onResetTask = { onEvent(PomodoroEvent.OnResetTaskCurrentPomodoro) }
-                    )
-                } else {
-                    EmptyTaskCard(
-                        onClick = {
-                            onEvent(PomodoroEvent.OnShowModal(modal = PomodoroModalTypeUiState.SelectTask))
-                        }
-                    )
-                }
-            }
-
+            val minHeight = maxHeight
             Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .fillMaxHeight(),
-                verticalArrangement = Arrangement.Center,
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                BoxWithConstraints(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
+                ConstraintLayout(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = minHeight)
                 ) {
-                    val size = (maxWidth * .8f).coerceAtMost(340.dp)
 
-                    PomodoroTimer(
-                        size = size,
-                        time = uiState.time,
-                        timeSession = uiState.timeSession,
-                        statusSession = uiState.statusSession,
-                        currentSession = uiState.currentSession,
-                        totalSessions = uiState.taskCurrent?.pomodoros ?: 0
-                    )
-                }
-                Spacer(
-                    modifier = Modifier.height(16.dp)
-                )
-                PomodoroSessionTimeline(
-                    totalSessions = uiState.taskCurrent?.pomodoros ?: 0,
-                    currentSession = uiState.currentSession,
-                    statusSession = uiState.statusSession
-                )
-                Spacer(
-                    modifier = Modifier.height(16.dp)
-                )
-                PomodoroControls(
-                    uiState = uiState,
-                    onActionControlPomodoro = { event ->
-                        onEvent(
-                            PomodoroEvent.OnActionPomodoro(
-                                context = context,
-                                actionEvent = event
+                    val (selectTaskContainerRef, progressPomodoroContainerRef) = createRefs()
+
+                    AnimatedContent(
+                        modifier = Modifier.constrainAs(
+                            selectTaskContainerRef
+                        ) {
+                            top.linkTo(parent.top, margin = 32.dp)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        },
+                        targetState = uiState.taskCurrent,
+                        label = "task_card_transition"
+                    ) { task ->
+                        if (task != null) {
+                            SelectedTaskCard(
+                                taskTitle = task.title,
+                                onResetTask = { onEvent(PomodoroEvent.OnResetTaskCurrentPomodoro) }
                             )
-                        )
-                    },
-                    onEvent = onEvent
-                )
-            }
+                        } else {
+                            EmptyTaskCard(
+                                onClick = {
+                                    onEvent(PomodoroEvent.OnShowModal(modal = PomodoroModalTypeUiState.SelectTask))
+                                }
+                            )
+                        }
+                    }
 
+                    Column(
+                        modifier = Modifier
+                            .constrainAs(progressPomodoroContainerRef) {
+                                top.linkTo(selectTaskContainerRef.bottom, margin = 24.dp)
+                                bottom.linkTo(parent.bottom, margin = 24.dp)
+                                start.linkTo(parent.start)
+                                end.linkTo(parent.end)
+                            }
+                            .fillMaxWidth(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        BoxWithConstraints(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val size = (maxWidth * .8f).coerceAtMost(340.dp)
+
+                            PomodoroTimer(
+                                size = size,
+                                time = uiState.time,
+                                timeSession = uiState.timeSession,
+                                statusSession = uiState.statusSession,
+                                currentSession = uiState.currentSession,
+                                totalSessions = uiState.taskCurrent?.pomodoros ?: 4
+                            )
+                        }
+                        Spacer(
+                            modifier = Modifier.height(40.dp)
+                        )
+                        PomodoroSessionTimeline(
+                            modifier = Modifier.height(28.dp),
+                            totalSessions = uiState.taskCurrent?.pomodoros ?: 4,
+                            currentSession = uiState.currentSession + 1,
+                            statusSession = uiState.statusSession
+                        )
+                        Spacer(
+                            modifier = Modifier.height(24.dp)
+                        )
+                        PomodoroControls(
+                            uiState = uiState,
+                            onActionControlPomodoro = { event ->
+                                onEvent(
+                                    PomodoroEvent.OnActionPomodoro(
+                                        context = context,
+                                        actionEvent = event
+                                    )
+                                )
+                            },
+                            onEvent = onEvent
+                        )
+                    }
+                }
+            }
         }
     }
 

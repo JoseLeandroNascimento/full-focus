@@ -35,7 +35,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
@@ -95,8 +94,11 @@ fun PomodoroSessionTimeline(
 
                 val iconPainter = when {
                     isPast -> painterResource(id = R.drawable.baseline_check_24)
-                    isCurrent -> if (isFocus) painterResource(id = R.drawable.tdesign_focus) else painterResource(id = R.drawable.uiw_coffee)
-                    else -> painterResource(id = R.drawable.tdesign_focus)
+                    isCurrent -> if (isFocus) painterResource(id = R.drawable.tdesign_focus) else painterResource(
+                        id = R.drawable.uiw_coffee
+                    )
+
+                    else -> painterResource(id = R.drawable.material_symbols_timer_outline_rounded)
                 }
 
                 val markerColor by animateColorAsState(
@@ -109,7 +111,7 @@ fun PomodoroSessionTimeline(
                 )
 
                 val size by animateDpAsState(
-                    targetValue = if (isCurrent) 40.dp else 30.dp,
+                    targetValue = if (isCurrent) 28.dp else 20.dp,
                     label = "size"
                 )
 
@@ -130,13 +132,14 @@ fun PomodoroSessionTimeline(
                         Icon(
                             painter = iconPainter,
                             contentDescription = null,
-                            modifier = Modifier.size(if (isCurrent) 24.dp else 18.dp),
+                            modifier = Modifier.size(if (isCurrent) 18.dp else 16.dp),
                             tint = if (isPast || isCurrent) markerColor else markerColor.copy(alpha = 0.5f)
                         )
                     }
 
                     if (i < totalSessions - 1) {
-                        val lineColor = if (i < currentSession - 1) doneColor else MaterialTheme.colorScheme.outlineVariant
+                        val lineColor =
+                            if (i < currentSession - 1) doneColor else MaterialTheme.colorScheme.outlineVariant
                         Spacer(
                             modifier = Modifier
                                 .width(10.dp)
@@ -153,7 +156,9 @@ fun PomodoroSessionTimeline(
 @Preview(showBackground = true)
 @Composable
 private fun TimelineFewSessionsPreview() {
-    FullFocusTheme {
+    FullFocusTheme(
+        dynamicColor = false
+    ) {
         PomodoroSessionTimeline(
             totalSessions = 4,
             currentSession = 2,
@@ -165,7 +170,9 @@ private fun TimelineFewSessionsPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun TimelineManySessionsPreview() {
-    FullFocusTheme {
+    FullFocusTheme(
+        dynamicColor = false
+    ) {
         PomodoroSessionTimeline(
             totalSessions = 20,
             currentSession = 5,

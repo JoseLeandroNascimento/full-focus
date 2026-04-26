@@ -44,6 +44,8 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.constraintlayout.compose.v111)
     implementation(libs.lottie)
 
     implementation(libs.androidx.datastore)

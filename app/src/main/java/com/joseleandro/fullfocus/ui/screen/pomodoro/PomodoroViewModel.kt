@@ -54,7 +54,7 @@ class PomodoroViewModel(
                     isPlay = pomodoro.isRunning,
                     statusSession = pomodoro.statusSession,
                     pomodoroStatus = pomodoro.pomodoroStatus,
-                    currentSession = pomodoro.counterPomodoro + 1,
+                    currentSession = pomodoro.counterPomodoro,
                     tasks = tasks,
                     time = _uiState.value.time
                 )
