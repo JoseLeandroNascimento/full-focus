@@ -4,9 +4,11 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -36,6 +38,7 @@ import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.ConfirmCancelSessionDialog
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.EmptyTaskCard
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroControls
+import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroSessionTimeline
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroTimer
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.SelectTaskBottomSheet
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.SelectedTaskCard
@@ -142,7 +145,7 @@ fun PomodoroScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .fillMaxHeight(),
-                verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
+                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
@@ -157,18 +160,21 @@ fun PomodoroScreen(
                         time = uiState.time,
                         timeSession = uiState.timeSession,
                         statusSession = uiState.statusSession,
-                        supportText = if (uiState.taskCurrent != null) {
-                            stringResource(
-                                R.string.progress_task_session,
-                                uiState.currentSession,
-                                uiState.taskCurrent.pomodoros
-                            )
-                        } else {
-                            stringResource(R.string.progress_session, uiState.currentSession)
-                        }
+                        currentSession = uiState.currentSession,
+                        totalSessions = uiState.taskCurrent?.pomodoros ?: 0
                     )
                 }
-
+                Spacer(
+                    modifier = Modifier.height(16.dp)
+                )
+                PomodoroSessionTimeline(
+                    totalSessions = uiState.taskCurrent?.pomodoros ?: 0,
+                    currentSession = uiState.currentSession,
+                    statusSession = uiState.statusSession
+                )
+                Spacer(
+                    modifier = Modifier.height(16.dp)
+                )
                 PomodoroControls(
                     uiState = uiState,
                     onActionControlPomodoro = { event ->
@@ -280,7 +286,7 @@ private fun PomodoroScreenDarkPreview() {
     ) {
         PomodoroScreen(
             uiState = PomodoroUiState(
-                taskCurrent = tasksListMock.first()
+                taskCurrent = tasksListMock[2]
             ),
             openDrawer = {},
             onEvent = {},

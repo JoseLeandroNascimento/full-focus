@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -24,12 +25,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import java.util.Locale
@@ -41,12 +44,16 @@ fun PomodoroTimer(
     time: Int,
     timeSession: Int,
     statusSession: StatusSession = StatusSession.FOCUS,
-    supportText: String,
+    currentSession: Int,
+    totalSessions: Int,
     size: Dp = 340.dp
 ) {
 
-    val progressColor = MaterialTheme.colorScheme.primary
-    val progressColor2 = MaterialTheme.colorScheme.secondary
+    val isFocus = statusSession == StatusSession.FOCUS
+
+    // Cores Dinâmicas baseadas no Estado
+    val mainColor = if (isFocus) MaterialTheme.colorScheme.primary else Color(0xFF4CAF50)
+    val secondaryColor = if (isFocus) MaterialTheme.colorScheme.secondary else Color(0xFF81C784)
     val progressBar = MaterialTheme.colorScheme.surfaceVariant
     val backGround = MaterialTheme.colorScheme.background
 
@@ -79,7 +86,7 @@ fun PomodoroTimer(
             )
 
             drawProgressIndicator(
-                colors = listOf(progressColor, progressColor2),
+                colors = listOf(mainColor, secondaryColor),
                 progress = progressAnimated
             )
         }
@@ -100,35 +107,51 @@ fun PomodoroTimer(
             ) {
 
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
 
+                    // Ícone de Status (Ultra-Minimalista)
+                    Icon(
+                        painter = painterResource(
+                            id = if (isFocus) R.drawable.tdesign_focus
+                            else R.drawable.uiw_coffee
+                        ),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = mainColor.copy(alpha = 0.6f)
+                    )
+
                     Text(
-                        text = stringResource(id = statusSession.description),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            color = MaterialTheme.colorScheme.primary
+                        text = stringResource(id = statusSession.description).uppercase(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 10.sp,
+                            letterSpacing = 2.sp,
+                            color = mainColor.copy(alpha = 0.5f)
                         )
                     )
 
                     Text(
                         text = timeAnimated.formattedTime(),
                         style = MaterialTheme.typography.headlineLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 64.sp,
-                            letterSpacing = (-1).sp,
+                            fontWeight = FontWeight.Light, // Mais elegante
+                            fontSize = 80.sp, // Destaque total ao tempo
+                            letterSpacing = (-4).sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     )
 
-                    Text(
-                        text = supportText,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        ),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
+                    if (totalSessions > 0) {
+                        Text(
+                            text = "$currentSession / $totalSessions",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 11.sp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -200,6 +223,23 @@ private fun DrawScope.drawProgressIndicator(
     )
 }
 
+@Preview
+@Composable
+private fun PomodoroTimerLightPauseShortPreview() {
+    FullFocusTheme(
+        dynamicColor = false,
+        darkTheme = false
+    ) {
+        PomodoroTimer(
+            size = 340.dp,
+            time = 60 * 10,
+            statusSession = StatusSession.PAUSE_SHORT,
+            timeSession = 60 * 25,
+            currentSession = 2,
+            totalSessions = 10
+        )
+    }
+}
 
 @Preview
 @Composable
@@ -212,7 +252,8 @@ private fun PomodoroTimerLightPreview() {
             size = 340.dp,
             time = 60 * 4,
             timeSession = 60 * 25,
-            supportText = "1/4 sessões"
+            currentSession = 2,
+            totalSessions = 10
         )
     }
 }
@@ -228,7 +269,8 @@ private fun PomodoroTimerDarkPreview() {
             size = 340.dp,
             time = 60 * 4,
             timeSession = 60 * 25,
-            supportText = "1/4 sessões"
+            currentSession = 2,
+            totalSessions = 10
         )
     }
 }
