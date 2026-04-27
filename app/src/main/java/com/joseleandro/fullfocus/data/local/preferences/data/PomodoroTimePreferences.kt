@@ -12,7 +12,9 @@ data class PomodoroTimePreferences(
     val statusSession: StatusSession = StatusSession.FOCUS,
     val counterPomodoro: Int = 0,
     val pomodoroIntervalBreakLong: Int = 4,
-    val idTask: Int? = null
+    val idTask: Int? = null,
+    val pomodoroId: String = "",
+    val sessionId: String = ""
 ) {
 
     val pomodoroStatus: PomodoroStatus

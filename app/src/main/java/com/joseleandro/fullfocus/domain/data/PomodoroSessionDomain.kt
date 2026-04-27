@@ -6,6 +6,8 @@ import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
 data class PomodoroSessionDomain(
     val id: Int = 0,
     val taskId: Int? = null,
+    val pomodoroId: String,
+    val sessionId: String,
     val type: StatusSession,
     val status: SessionStatus,
     val startedAt: Long,

@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 
 class PomodoroTimePreferenceDataSourceImpl(
     private val dataStore: DataStore<UserPreferences>,
@@ -43,11 +44,19 @@ class PomodoroTimePreferenceDataSourceImpl(
         val now = System.currentTimeMillis()
 
         val response = dataStore.updateData {
+            val pomodoroId = it.pomodoro.pomodoroId.ifEmpty {
+                UUID.randomUUID().toString()
+            }
+            val sessionId = it.pomodoro.sessionId.ifEmpty {
+                UUID.randomUUID().toString()
+            }
             it.copy(
                 pomodoro = it.pomodoro.copy(
                     startTime = now,
                     pausedAt = null,
                     isRunning = true,
+                    pomodoroId = pomodoroId,
+                    sessionId = sessionId
                 )
             )
         }
@@ -102,6 +111,7 @@ class PomodoroTimePreferenceDataSourceImpl(
     override suspend fun skip() {
         dataStore.updateData {
             val state = it.pomodoro
+            val nextStatus = state.statusSession.nextSession()
 
             it.copy(
                 pomodoro = state.copy(
@@ -109,7 +119,8 @@ class PomodoroTimePreferenceDataSourceImpl(
                     pausedAt = null,
                     isRunning = false,
                     counterPomodoro = incrementSessionPomodoroCompleted(it.pomodoro),
-                    statusSession = state.statusSession.nextSession()
+                    statusSession = nextStatus,
+                    sessionId = if (nextStatus == StatusSession.FOCUS) UUID.randomUUID().toString() else state.sessionId
                 )
             )
         }
@@ -127,7 +138,9 @@ class PomodoroTimePreferenceDataSourceImpl(
                     statusSession = StatusSession.FOCUS,
                     duration = settings.pomodoroDuration,
                     pausedAt = null,
-                    isRunning = false
+                    isRunning = false,
+                    pomodoroId = "",
+                    sessionId = ""
                 )
             )
         }
@@ -172,13 +185,20 @@ class PomodoroTimePreferenceDataSourceImpl(
                     userPreferences = userPreferences
                 )
 
+            val sessionId = if (statusSessionNew == StatusSession.FOCUS) {
+                UUID.randomUUID().toString()
+            } else {
+                userPreferences.pomodoro.sessionId
+            }
+
             userPreferences.copy(
                 pomodoro = userPreferences.pomodoro.copy(
                     isRunning = isRunningAuto,
                     statusSession = statusSessionNew,
                     counterPomodoro = incrementSessionPomodoroCompleted(userPreferences.pomodoro),
                     startTime = if (isRunningAuto) System.currentTimeMillis() else 0L,
-                    pausedAt = null
+                    pausedAt = null,
+                    sessionId = sessionId
                 )
             )
         }

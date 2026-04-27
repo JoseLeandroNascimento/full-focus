@@ -19,7 +19,8 @@ import com.joseleandro.fullfocus.data.local.preferences.data.enums.StatusSession
         )
     ],
     indices = [
-        Index(value = ["task_id"])
+        Index(value = ["task_id"]),
+        Index(value = ["pomodoro_id"])
     ]
 )
 data class PomodoroSessionEntity(
@@ -29,6 +30,12 @@ data class PomodoroSessionEntity(
 
     @ColumnInfo(name = "task_id")
     val taskId: Int? = null,
+
+    @ColumnInfo(name = "pomodoro_id")
+    val pomodoroId: String,
+
+    @ColumnInfo(name = "session_id")
+    val sessionId: String,
 
     val type: StatusSession,
 

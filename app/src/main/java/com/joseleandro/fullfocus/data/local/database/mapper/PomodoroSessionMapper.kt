@@ -7,6 +7,8 @@ fun PomodoroSessionEntity.toDomain(): PomodoroSessionDomain =
     PomodoroSessionDomain(
         id = id,
         taskId = taskId,
+        pomodoroId = pomodoroId,
+        sessionId = sessionId,
         duration = duration,
         type = type,
         status = status,

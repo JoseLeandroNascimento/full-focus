@@ -149,13 +149,14 @@ fun PomodoroScreen(
                                 taskTitle = task.title,
                                 onResetTask = { onEvent(PomodoroEvent.OnResetTaskCurrentPomodoro) }
                             )
-                        } else {
-                            EmptyTaskCard(
-                                onClick = {
-                                    onEvent(PomodoroEvent.OnShowModal(modal = PomodoroModalTypeUiState.SelectTask))
-                                }
-                            )
                         }
+//                        else {
+//                            EmptyTaskCard(
+//                                onClick = {
+//                                    onEvent(PomodoroEvent.OnShowModal(modal = PomodoroModalTypeUiState.SelectTask))
+//                                }
+//                            )
+//                        }
                     }
 
                     Column(

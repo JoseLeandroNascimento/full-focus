@@ -154,7 +154,8 @@ object AppModule {
         single<PomodoroSessionLocalDataSource> {
             PomodoroSessionLocalDataSourceImpl(
                 pomodoroSessionDao = get(),
-                pomodoroTimePreferences = get()
+                pomodoroTimePreferences = get(),
+                taskLocalDataSource = get()
             )
         }
 
