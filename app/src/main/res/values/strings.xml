@@ -3,4 +3,5 @@
     <string name="foco">Foco</string>
     <string name="pausa_curta">Pausa curta</string>
     <string name="pausa_longa">Pausa longa</string>
+    <string name="index_sessao">%1$d sessão</string>
 </resources>

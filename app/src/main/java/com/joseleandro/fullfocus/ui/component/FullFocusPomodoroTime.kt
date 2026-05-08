@@ -28,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.domain.model.PomodoroState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
@@ -101,7 +102,7 @@ fun FullFocusPomodoroTime(
                 )
 
                 Text(
-                    text = "1 sessão",
+                    text = stringResource(R.string.index_sessao, 1),
                     style = MaterialTheme.typography.bodySmall
                 )
             }
