@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -28,13 +29,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.domain.model.PomodoroState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
-private const val POMODORO_TIME_WIDTH_STROKE = 36f
-private const val POMODORO_TIME_PROGRESS_BAR_BACKGROUND_COLOR = 0XFFAAAAAA
-private const val POMODORO_TIME_PROGRESS_BAR_COLOR = 0XFFFF3838
+private const val POMODORO_TIME_WIDTH_STROKE = 40f
 
 @Composable
 fun FullFocusPomodoroTime(
@@ -80,18 +78,11 @@ fun FullFocusPomodoroTime(
             Column(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(
-                    space = 16.dp,
+                    space = 8.dp,
                     alignment = Alignment.CenterVertically
                 ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                Text(
-                    text = stringResource(id = state.labelRes).uppercase(),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Medium
-                    )
-                )
 
                 Text(
                     text = currentTime.formattedTimer(),
@@ -102,8 +93,10 @@ fun FullFocusPomodoroTime(
                 )
 
                 Text(
-                    text = stringResource(R.string.index_sessao, 1),
-                    style = MaterialTheme.typography.bodySmall
+                    text = stringResource(id = state.labelRes).uppercase(),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontWeight = FontWeight.Medium
+                    )
                 )
             }
         }
@@ -121,13 +114,16 @@ private fun Long.formattedTimer(): String {
 
 @Composable
 private fun FullFocusPomodoroTimeBackgroundBar(modifier: Modifier = Modifier) {
+
+    val timeProgressBarBackground = MaterialTheme.colorScheme.surfaceVariant
+
     Canvas(
         modifier = modifier.fillMaxSize()
     ) {
 
         drawArc(
             startAngle = 90f,
-            color = Color(POMODORO_TIME_PROGRESS_BAR_BACKGROUND_COLOR),
+            color = timeProgressBarBackground,
             sweepAngle = 360f,
             useCenter = false,
             style = Stroke(
@@ -151,29 +147,13 @@ private fun FullFocusPomodoroTimeProgressBar(
 
         drawArc(
             startAngle = -90f,
-            color = Color(POMODORO_TIME_PROGRESS_BAR_COLOR).copy(alpha = .2f),
-            sweepAngle = progress * 360,
-            useCenter = false,
-            style = Stroke(
-                width = POMODORO_TIME_WIDTH_STROKE + 18f,
-                cap = StrokeCap.Round
-            )
-        )
-
-        drawArc(
-            startAngle = -90f,
-            color = Color(POMODORO_TIME_PROGRESS_BAR_COLOR).copy(alpha = .4f),
-            sweepAngle = progress * 360,
-            useCenter = false,
-            style = Stroke(
-                width = POMODORO_TIME_WIDTH_STROKE + 10f,
-                cap = StrokeCap.Round
-            )
-        )
-
-        drawArc(
-            startAngle = -90f,
-            color = Color(POMODORO_TIME_PROGRESS_BAR_COLOR),
+            brush = Brush.sweepGradient(
+                colors = listOf(
+                    Color(0xFF25D9FF),
+                    Color(0xFF39F3B2),
+                    Color(0xFF25D9FF)
+                )
+            ),
             sweepAngle = progress * 360,
             useCenter = false,
             style = Stroke(
@@ -192,7 +172,7 @@ private fun FullFocusPomodoroTimeLightPreview() {
         darkTheme = false
     ) {
         FullFocusPomodoroTime(
-            progress = .5f,
+            progress = .8f,
             state = PomodoroState.FOCUS,
             timeTotal = 25 * 60 * 1000
         )
