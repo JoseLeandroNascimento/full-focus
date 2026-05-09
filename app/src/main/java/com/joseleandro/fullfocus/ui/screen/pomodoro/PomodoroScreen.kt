@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.joseleandro.fullfocus.domain.model.PomodoroState
+import com.joseleandro.fullfocus.ui.component.FullFocusButtonMainAction
 import com.joseleandro.fullfocus.ui.component.FullFocusPomodoroTime
 import com.joseleandro.fullfocus.ui.component.FullFocusRadioProgressPomodoroIndicator
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
@@ -56,6 +57,8 @@ fun PomodoroScreen() {
                     indexCurrent = 3,
                     totalPomodoros = 4
                 )
+
+                FullFocusButtonMainAction() { }
             }
 
         }
