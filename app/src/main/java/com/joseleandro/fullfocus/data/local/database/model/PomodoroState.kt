@@ -1,4 +1,4 @@
-package com.joseleandro.fullfocus.domain.model
+package com.joseleandro.fullfocus.data.local.database.model
 
 import androidx.annotation.StringRes
 import com.joseleandro.fullfocus.R

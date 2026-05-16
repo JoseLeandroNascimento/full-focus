@@ -1,7 +1,8 @@
 package com.joseleandro.fullfocus
 
 import android.app.Application
-import com.joseleandro.fullfocus.core.di.KoinModule
+import com.joseleandro.fullfocus.core.di.KoinModule.dataModule
+import com.joseleandro.fullfocus.core.di.KoinModule.uiModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -14,7 +15,7 @@ class MainApplication : Application() {
         startKoin {
             androidLogger()
             androidContext(this@MainApplication)
-            modules(KoinModule.uiModule)
+            modules(uiModule, dataModule)
         }
     }
 }

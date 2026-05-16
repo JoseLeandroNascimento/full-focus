@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.joseleandro.fullfocus.domain.model.PomodoroState
+import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 private const val POMODORO_TIME_WIDTH_STROKE = 40f
