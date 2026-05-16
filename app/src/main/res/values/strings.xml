@@ -4,4 +4,7 @@
     <string name="pausa_curta">Pausa curta</string>
     <string name="pausa_longa">Pausa longa</string>
     <string name="index_sessao">%1$d sessão</string>
+    <string name="pomodoro">Pomodoro</string>
+    <string name="setting_pomodoro">setting pomodoro</string>
+    <string name="menu">menu</string>
 </resources>

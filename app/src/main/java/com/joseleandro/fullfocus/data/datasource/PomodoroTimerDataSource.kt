@@ -13,5 +13,7 @@ interface PomodoroTimerDataSource {
 
     suspend fun cancel()
 
+    suspend fun restart()
+
     suspend fun getTime(): Long
 }

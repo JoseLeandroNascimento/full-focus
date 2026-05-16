@@ -11,5 +11,9 @@ interface PomodoroTimerRepository {
 
     suspend fun pause()
 
+    suspend fun cancel()
+
+    suspend fun restart()
+
     suspend fun updateTimer()
 }

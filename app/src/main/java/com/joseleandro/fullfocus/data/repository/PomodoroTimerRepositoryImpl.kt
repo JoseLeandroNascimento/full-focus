@@ -21,6 +21,21 @@ class PomodoroTimerRepositoryImpl(
 
     private val _time = MutableStateFlow(0L)
 
+    override val pomodoroTimer: Flow<PomodoroTimerDomain>
+        get() = combine(
+            pomodoroTimerDataSource.pomodoroTimer,
+            _time
+        ) { pomodoroTimer, time ->
+
+            PomodoroTimerDomain(
+                duration = pomodoroTimer.duration,
+                isRunning = pomodoroTimer.isRunning,
+                time = time,
+                progress = pomodoroTimer.progress,
+                pomodoroState = pomodoroTimer.pomodoroState
+            )
+        }
+
     init {
         scope.launch {
             updateTimer()
@@ -34,25 +49,20 @@ class PomodoroTimerRepositoryImpl(
         }
     }
 
-    override val pomodoroTimer: Flow<PomodoroTimerDomain>
-        get() = combine(
-            pomodoroTimerDataSource.pomodoroTimer,
-            _time
-        ) { pomodoroTimer, time ->
-
-            PomodoroTimerDomain(
-                duration = pomodoroTimer.duration,
-                isRunning = pomodoroTimer.isRunning,
-                time = time
-            )
-        }
-
     override suspend fun play() {
         pomodoroTimerDataSource.start()
     }
 
     override suspend fun pause() {
         pomodoroTimerDataSource.pause()
+    }
+
+    override suspend fun cancel() {
+       pomodoroTimerDataSource.cancel()
+    }
+
+    override suspend fun restart() {
+        pomodoroTimerDataSource.restart()
     }
 
     override suspend fun updateTimer() {

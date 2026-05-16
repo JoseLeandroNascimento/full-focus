@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
@@ -88,14 +89,16 @@ fun FullFocusPomodoroTime(
                     text = currentTime.formattedTimer(),
                     style = MaterialTheme.typography.displayLarge.copy(
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 4.sp
                     )
                 )
 
                 Text(
                     text = stringResource(id = state.labelRes).uppercase(),
                     style = MaterialTheme.typography.bodySmall.copy(
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 4.sp
                     )
                 )
             }

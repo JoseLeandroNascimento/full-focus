@@ -26,7 +26,8 @@ class PomodoroViewModel(
                     state.copy(
                         isRunning = pomodoroTimerDomain.isRunning,
                         durationTime = pomodoroTimerDomain.duration,
-                        progressPercent = pomodoroTimerDomain.calcPercentTime()
+                        progressPercent = pomodoroTimerDomain.calcPercentTime(),
+                        progressPomodoro = pomodoroTimerDomain.progress
                     )
                 }
             }
@@ -37,6 +38,8 @@ class PomodoroViewModel(
         when (event) {
             PomodoroEvent.OnPlay -> play()
             PomodoroEvent.OnPause -> pause()
+            PomodoroEvent.OnCancel -> cancel()
+            PomodoroEvent.OnRestart -> restart()
         }
     }
 
@@ -49,6 +52,18 @@ class PomodoroViewModel(
     private fun pause() {
         viewModelScope.launch {
             pomodoroTimerRepository.pause()
+        }
+    }
+
+    private fun cancel(){
+        viewModelScope.launch {
+            pomodoroTimerRepository.cancel()
+        }
+    }
+
+    private fun restart(){
+        viewModelScope.launch {
+            pomodoroTimerRepository.restart()
         }
     }
 
