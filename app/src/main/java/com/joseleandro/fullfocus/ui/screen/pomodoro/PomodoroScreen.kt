@@ -25,9 +25,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.ui.component.FullFocusPomodoroTime
-import com.joseleandro.fullfocus.ui.screen.event.PomodoroEvent
+import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroButton
-import com.joseleandro.fullfocus.ui.screen.state.PomodoroUiState
+import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
+import com.joseleandro.fullfocus.ui.state.PomodoroModalUiState
+import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -73,7 +75,9 @@ fun PomodoroScreen(
                 },
                 actions = {
                     IconButton(
-                        onClick = {}
+                        onClick = {
+                            onEvent(PomodoroEvent.OnShowModal(modal = PomodoroModalUiState.PomodoroSettingModal))
+                        }
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.mdi_timer_cog_outline),
@@ -183,6 +187,14 @@ fun PomodoroScreen(
                 }
             }
         }
+    }
+
+    if (uiState.modal is PomodoroModalUiState.PomodoroSettingModal) {
+        PomodoroSettingBottomSheet(
+            onDismissRequest = {
+                onEvent(PomodoroEvent.OnCloseModal)
+            },
+        )
     }
 }
 

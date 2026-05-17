@@ -7,4 +7,7 @@
     <string name="pomodoro">Pomodoro</string>
     <string name="setting_pomodoro">setting pomodoro</string>
     <string name="menu">menu</string>
+    <string name="tempo_de_foco">Tempo de Foco</string>
+    <string name="configura_es_de_tempo">Configurações de Tempo</string>
+    <string name="salvar">Salvar</string>
 </resources>

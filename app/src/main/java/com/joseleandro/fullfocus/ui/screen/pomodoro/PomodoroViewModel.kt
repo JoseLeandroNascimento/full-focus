@@ -4,8 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.model.PomodoroTimerDomain
 import com.joseleandro.fullfocus.domain.repository.PomodoroTimerRepository
-import com.joseleandro.fullfocus.ui.screen.event.PomodoroEvent
-import com.joseleandro.fullfocus.ui.screen.state.PomodoroUiState
+import com.joseleandro.fullfocus.ui.event.PomodoroEvent
+import com.joseleandro.fullfocus.ui.state.PomodoroModalUiState
+import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,6 +41,8 @@ class PomodoroViewModel(
             PomodoroEvent.OnPause -> pause()
             PomodoroEvent.OnCancel -> cancel()
             PomodoroEvent.OnRestart -> restart()
+            is PomodoroEvent.OnShowModal -> openModal(modal = event.modal)
+            PomodoroEvent.OnCloseModal -> closeModal()
         }
     }
 
@@ -55,15 +58,31 @@ class PomodoroViewModel(
         }
     }
 
-    private fun cancel(){
+    private fun cancel() {
         viewModelScope.launch {
             pomodoroTimerRepository.cancel()
         }
     }
 
-    private fun restart(){
+    private fun restart() {
         viewModelScope.launch {
             pomodoroTimerRepository.restart()
+        }
+    }
+
+    private fun openModal(modal: PomodoroModalUiState) {
+        _uiState.update { state ->
+            state.copy(
+                modal = modal
+            )
+        }
+    }
+
+    private fun closeModal() {
+        _uiState.update { state ->
+            state.copy(
+                modal = PomodoroModalUiState.None
+            )
         }
     }
 

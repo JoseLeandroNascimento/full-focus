@@ -1,0 +1,26 @@
+package com.joseleandro.fullfocus.data.repository
+
+import com.joseleandro.fullfocus.data.datasource.PomodoroSettingDataSource
+import com.joseleandro.fullfocus.data.local.preferences.model.PomodoroSetting
+import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
+import kotlinx.coroutines.flow.Flow
+
+class PomodoroSettingRepositoryImpl(
+    private val pomodoroSettingDataSource: PomodoroSettingDataSource
+) : PomodoroSettingRepository {
+
+    override val pomodoroSetting: Flow<PomodoroSetting>
+        get() = pomodoroSettingDataSource.pomodoroSetting
+
+    override suspend fun updatePomodoroSetting(
+        focusTime: Long,
+        shortPauseTime: Long,
+        longPauseTime: Long
+    ) {
+        pomodoroSettingDataSource.updatePomodoroSetting(
+            focusTime = focusTime,
+            shortPauseTime = shortPauseTime,
+            longPauseTime = longPauseTime
+        )
+    }
+}
