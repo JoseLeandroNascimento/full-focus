@@ -2,18 +2,18 @@ package com.joseleandro.fullfocus.core.di
 
 import androidx.room.Room
 import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigation
+import com.joseleandro.fullfocus.data.datasource.PomodoroDataSource
+import com.joseleandro.fullfocus.data.datasource.PomodoroDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingDataSource
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingDataSourceImpl
-import com.joseleandro.fullfocus.data.datasource.PomodoroTimerDataSource
-import com.joseleandro.fullfocus.data.datasource.PomodoroTimerDataSourceImpl
 import com.joseleandro.fullfocus.data.local.database.FULL_FOCUS_DATABASE
 import com.joseleandro.fullfocus.data.local.database.FullFocusDataBase
 import com.joseleandro.fullfocus.data.local.database.dao.PomodoroDao
 import com.joseleandro.fullfocus.data.local.database.dao.SessionDao
+import com.joseleandro.fullfocus.data.repository.PomodoroRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.PomodoroSettingRepositoryImpl
-import com.joseleandro.fullfocus.data.repository.PomodoroTimerRepositoryImpl
+import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
-import com.joseleandro.fullfocus.domain.repository.PomodoroTimerRepository
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingViewModel
 import org.koin.android.ext.koin.androidContext
@@ -26,8 +26,9 @@ object KoinModule {
 
         single<FullFocusDataBase> {
             Room.databaseBuilder<FullFocusDataBase>(
-                context = androidContext().applicationContext, name = FULL_FOCUS_DATABASE
-            ).fallbackToDestructiveMigrationFrom(dropAllTables = true).build()
+                context = androidContext().applicationContext,
+                name = FULL_FOCUS_DATABASE,
+            ).fallbackToDestructiveMigration(dropAllTables = true).build()
         }
 
         single<PomodoroDao> {
@@ -36,18 +37,6 @@ object KoinModule {
 
         single<SessionDao> {
             get<FullFocusDataBase>().sessionDao()
-        }
-
-        single<PomodoroTimerDataSource> {
-            PomodoroTimerDataSourceImpl(
-                context = androidContext().applicationContext
-            )
-        }
-
-        single<PomodoroTimerRepository> {
-            PomodoroTimerRepositoryImpl(
-                pomodoroTimerDataSource = get()
-            )
         }
 
         single<PomodoroSettingDataSource> {
@@ -62,6 +51,20 @@ object KoinModule {
             )
         }
 
+        single<PomodoroRepository> {
+            PomodoroRepositoryImpl(
+                pomodoroSettingDataSource = get(),
+                pomodoroDataSource = get()
+            )
+        }
+
+        single<PomodoroDataSource> {
+            PomodoroDataSourceImpl(
+                pomodoroDao = get(),
+                sessionDao = get()
+            )
+        }
+
     }
 
     val uiModule = module {
@@ -71,5 +74,6 @@ object KoinModule {
         viewModelOf(::PomodoroViewModel)
 
         viewModelOf(::PomodoroSettingViewModel)
+
     }
 }

@@ -13,17 +13,31 @@ class PomodoroSettingDataSourceImpl(
     override val pomodoroSetting: Flow<PomodoroSetting>
         get() = context.dataStore.data.map { it.pomodoroSetting }
 
-    override suspend fun updatePomodoroSetting(
-        focusTime: Long,
-        shortPauseTime: Long,
-        longPauseTime: Long
-    ) {
-        context.dataStore.updateData { setting ->
-            setting.copy(
-                pomodoroSetting = setting.pomodoroSetting.copy(
-                    focusTime = focusTime,
-                    shortPauseTime = shortPauseTime,
-                    longPauseTime = longPauseTime
+    override suspend fun updateFocusTime(time: Long) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    focusTime = time
+                )
+            )
+        }
+    }
+
+    override suspend fun updateShortBreakTime(time: Long) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    shortPauseTime = time
+                )
+            )
+        }
+    }
+
+    override suspend fun updateLongBreakTime(time: Long) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    longPauseTime = time
                 )
             )
         }

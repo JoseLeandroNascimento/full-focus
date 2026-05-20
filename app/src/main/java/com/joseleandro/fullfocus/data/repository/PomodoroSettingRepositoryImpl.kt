@@ -12,15 +12,15 @@ class PomodoroSettingRepositoryImpl(
     override val pomodoroSetting: Flow<PomodoroSetting>
         get() = pomodoroSettingDataSource.pomodoroSetting
 
-    override suspend fun updatePomodoroSetting(
-        focusTime: Long,
-        shortPauseTime: Long,
-        longPauseTime: Long
-    ) {
-        pomodoroSettingDataSource.updatePomodoroSetting(
-            focusTime = focusTime,
-            shortPauseTime = shortPauseTime,
-            longPauseTime = longPauseTime
-        )
+    override suspend fun updateFocusTime(time: Long) {
+        pomodoroSettingDataSource.updateFocusTime(time = time)
+    }
+
+    override suspend fun updateShortBreakTime(time: Long) {
+        pomodoroSettingDataSource.updateShortBreakTime(time = time)
+    }
+
+    override suspend fun updateLongBreakTime(time: Long) {
+        pomodoroSettingDataSource.updateLongBreakTime(time = time)
     }
 }

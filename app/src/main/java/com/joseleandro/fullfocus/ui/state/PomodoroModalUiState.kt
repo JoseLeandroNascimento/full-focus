@@ -4,6 +4,8 @@ sealed interface PomodoroModalUiState {
 
     data object None: PomodoroModalUiState
 
-    data object PomodoroSettingModal : PomodoroModalUiState
+    data object PomodoroSetting: PomodoroModalUiState
+
+    data object CancelOptions: PomodoroModalUiState
 
 }

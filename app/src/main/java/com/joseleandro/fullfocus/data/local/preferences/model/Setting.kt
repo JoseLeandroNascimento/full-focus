@@ -4,6 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Setting(
-    val pomodoroTimer: PomodoroTimer = PomodoroTimer(),
     val pomodoroSetting: PomodoroSetting = PomodoroSetting()
 )

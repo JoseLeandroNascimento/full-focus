@@ -11,16 +11,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.joseleandro.fullfocus.R
 
 @Composable
 fun FullFocusWheelPickerDialog(
     title: String,
     items: List<String>,
-    initialSelection: String? = null,
+    value: String? = null,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
-    var tempValue by remember { mutableStateOf(initialSelection ?: items.firstOrNull() ?: "") }
+    var tempValue by remember { mutableStateOf(value ?: items.firstOrNull() ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -34,18 +36,18 @@ fun FullFocusWheelPickerDialog(
             FullFocusWheelPicker(
                 modifier = Modifier.fillMaxWidth(),
                 items = items,
-                initialSelection = initialSelection,
+                initialSelection = value,
                 onItemSelected = { tempValue = it }
             )
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(tempValue) }) {
-                Text("Confirmar")
+                Text(stringResource(R.string.confirmar))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.cancelar))
             }
         }
     )

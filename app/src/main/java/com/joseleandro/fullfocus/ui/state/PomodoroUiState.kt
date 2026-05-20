@@ -3,10 +3,11 @@ package com.joseleandro.fullfocus.ui.state
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 
 data class PomodoroUiState(
-    val isRunning: Boolean = false,
+    val duration: Long = 0,
     val progressPercent: Float = 0f,
-    val durationTime: Long = 0L,
-    val statePomodoro: PomodoroState = PomodoroState.FOCUS,
-    val progressPomodoro: Boolean = false,
+    val isRunning: Boolean = false,
+    val pomodoroState: PomodoroState = PomodoroState.FOCUS,
+    val focusCount: Int = 0,
+    val sessionsUntilLongPause: Int = 4,
     val modal: PomodoroModalUiState = PomodoroModalUiState.None
 )

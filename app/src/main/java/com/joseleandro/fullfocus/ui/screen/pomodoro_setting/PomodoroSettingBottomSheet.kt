@@ -16,209 +16,226 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.ui.component.FullFocusInputWheelPicker
 import com.joseleandro.fullfocus.ui.component.FullFocusWheelPickerDialog
+import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
+import com.joseleandro.fullfocus.ui.state.PomodoroSettingModalUiState
+import com.joseleandro.fullfocus.ui.state.PomodoroSettingUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
-import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PomodoroSettingBottomSheet(
-    modifier: Modifier = Modifier,
-    viewModel: PomodoroSettingViewModel = koinViewModel(),
     onDismissRequest: () -> Unit,
-    sheetState: SheetState = rememberModalBottomSheetState()
+    sheetState: SheetState
 ) {
+
+    val viewModel = koinViewModel<PomodoroSettingViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val scope = rememberCoroutineScope()
 
     PomodoroSettingBottomSheet(
-        modifier = modifier,
-        uiState = uiState,
-        onEvent = viewModel::onEvent,
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        onSave = {
-            viewModel.onEvent(PomodoroSettingEvent.OnSave)
-            scope.launch {
-                sheetState.hide()
-            }.invokeOnCompletion {
-                if (!sheetState.isVisible) {
-                    onDismissRequest()
-                }
-            }
-        }
+        uiState = uiState,
+        onEvent = viewModel::onEvent
     )
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PomodoroSettingBottomSheet(
-    modifier: Modifier = Modifier,
-    uiState: PomodoroSettingUiState,
-    onEvent: (PomodoroSettingEvent) -> Unit,
     onDismissRequest: () -> Unit,
-    sheetState: SheetState = rememberModalBottomSheetState(),
-    onSave: () -> Unit = {}
+    sheetState: SheetState,
+    uiState: PomodoroSettingUiState,
+    onEvent: (PomodoroSettingEvent) -> Unit
 ) {
+
     val isPreview = LocalInspectionMode.current
 
-    if (uiState.showFocusPicker) {
-        FullFocusWheelPickerDialog(
-            title = stringResource(R.string.tempo_de_foco),
-            items = uiState.focusItems,
-            initialSelection = uiState.focusTime,
-            onDismiss = { onEvent(PomodoroSettingEvent.OnDismissPicker) },
-            onConfirm = {
-                onEvent(PomodoroSettingEvent.OnFocusTimeChange(it))
-            }
-        )
-    }
+    when (uiState.modal) {
+        PomodoroSettingModalUiState.FocusTimer -> {
+            FullFocusWheelPickerDialog(
+                title = stringResource(id = R.string.tempo_de_foco),
+                value = uiState.focusTime.split(":")[0],
+                items = (1..60).map {
+                    String.format(LocalLocale.current.platformLocale, "%02d", it)
+                },
+                onConfirm = {
+                    onEvent(PomodoroSettingEvent.UpdateFocusTime(time = it))
+                },
+                onDismiss = {
+                    onEvent(PomodoroSettingEvent.CloseModal)
+                }
+            )
+        }
 
-    if (uiState.showShortPausePicker) {
-        FullFocusWheelPickerDialog(
-            title = "Pausa Curta",
-            items = uiState.shortPauseItems,
-            initialSelection = uiState.shortPauseTime,
-            onDismiss = { onEvent(PomodoroSettingEvent.OnDismissPicker) },
-            onConfirm = {
-                onEvent(PomodoroSettingEvent.OnShortPauseTimeChange(it))
-            }
-        )
-    }
+        PomodoroSettingModalUiState.LongBreakTimer -> {
+            FullFocusWheelPickerDialog(
+                title = stringResource(id = R.string.pausa_longa),
+                value = uiState.longBreakTime.split(":")[0],
+                items = (1..60).map {
+                    String.format(LocalLocale.current.platformLocale, "%02d", it)
+                },
+                onConfirm = {
+                    onEvent(PomodoroSettingEvent.UpdateLongBreakTime(time = it))
+                },
+                onDismiss = {
+                    onEvent(PomodoroSettingEvent.CloseModal)
+                }
+            )
+        }
 
-    if (uiState.showLongPausePicker) {
-        FullFocusWheelPickerDialog(
-            title = "Pausa Longa",
-            items = uiState.longPauseItems,
-            initialSelection = uiState.longPauseTime,
-            onDismiss = { onEvent(PomodoroSettingEvent.OnDismissPicker) },
-            onConfirm = {
-                onEvent(PomodoroSettingEvent.OnLongPauseTimeChange(it))
-            }
-        )
+        PomodoroSettingModalUiState.ShortBreakTimer -> {
+            FullFocusWheelPickerDialog(
+                title = stringResource(id = R.string.pausa_curta),
+                value = uiState.shortBreakTime.split(":")[0],
+                items = (1..60).map {
+                    String.format(LocalLocale.current.platformLocale, "%02d", it)
+                },
+                onConfirm = {
+                    onEvent(PomodoroSettingEvent.UpdateShortBreakTime(time = it))
+                },
+                onDismiss = {
+                    onEvent(PomodoroSettingEvent.CloseModal)
+                }
+            )
+        }
+
+        PomodoroSettingModalUiState.None -> {}
     }
 
     if (isPreview) {
         PomodoroSettingBottomSheetContent(
-            modifier = Modifier.padding(16.dp),
-            focoValue = uiState.focusTime,
-            pausaCurtaValue = uiState.shortPauseTime,
-            pausaLongaValue = uiState.longPauseTime,
-            onFocoClick = { onEvent(PomodoroSettingEvent.OnShowPicker(PickerType.FOCUS)) },
-            onPausaCurtaClick = { onEvent(PomodoroSettingEvent.OnShowPicker(PickerType.SHORT_PAUSE)) },
-            onPausaLongaClick = { onEvent(PomodoroSettingEvent.OnShowPicker(PickerType.LONG_PAUSE)) },
-            onSaveClick = onSave
+            uiState = uiState,
+            onEvent = onEvent
         )
     } else {
         ModalBottomSheet(
-            modifier = modifier,
-            onDismissRequest = onDismissRequest,
-            sheetState = sheetState
+            sheetState = sheetState,
+            onDismissRequest = onDismissRequest
         ) {
             PomodoroSettingBottomSheetContent(
-                modifier = Modifier.padding(16.dp),
-                focoValue = uiState.focusTime,
-                pausaCurtaValue = uiState.shortPauseTime,
-                pausaLongaValue = uiState.longPauseTime,
-                onFocoClick = { onEvent(PomodoroSettingEvent.OnShowPicker(PickerType.FOCUS)) },
-                onPausaCurtaClick = { onEvent(PomodoroSettingEvent.OnShowPicker(PickerType.SHORT_PAUSE)) },
-                onPausaLongaClick = { onEvent(PomodoroSettingEvent.OnShowPicker(PickerType.LONG_PAUSE)) },
-                onSaveClick = onSave
+                uiState = uiState,
+                onEvent = onEvent
             )
         }
     }
+
 }
 
 @Composable
 private fun PomodoroSettingBottomSheetContent(
     modifier: Modifier = Modifier,
-    focoValue: String,
-    pausaCurtaValue: String,
-    pausaLongaValue: String,
-    onFocoClick: () -> Unit,
-    onPausaCurtaClick: () -> Unit,
-    onPausaLongaClick: () -> Unit,
-    onSaveClick: () -> Unit
+    uiState: PomodoroSettingUiState,
+    onEvent: (PomodoroSettingEvent) -> Unit
 ) {
+
     Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
     ) {
         Text(
-            text = stringResource(R.string.configura_es_de_tempo),
-            style = MaterialTheme.typography.titleSmall
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(R.string.configurar_pomodoro),
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center
         )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            FullFocusInputWheelPicker(
-                modifier = Modifier.weight(1f),
-                label = "Foco",
-                value = focoValue,
-                onShowPicker = onFocoClick
+            Text(
+                text = stringResource(id = R.string.configura_es_de_tempo),
+                style = MaterialTheme.typography.bodySmall
             )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                FullFocusInputWheelPicker(
+                    modifier = Modifier.weight(1f),
+                    label = "Foco",
+                    value = uiState.focusTime,
+                    onShowPicker = {
+                        onEvent(PomodoroSettingEvent.ShowModal(modal = PomodoroSettingModalUiState.FocusTimer))
+                    }
+                )
 
-            FullFocusInputWheelPicker(
-                modifier = Modifier.weight(1f),
-                label = "Pausa curta",
-                value = pausaCurtaValue,
-                onShowPicker = onPausaCurtaClick
-            )
+                FullFocusInputWheelPicker(
+                    modifier = Modifier.weight(1f),
+                    label = "Pausa curta",
+                    value = uiState.shortBreakTime,
+                    onShowPicker = {
+                        onEvent(PomodoroSettingEvent.ShowModal(modal = PomodoroSettingModalUiState.ShortBreakTimer))
+                    }
+                )
 
-            FullFocusInputWheelPicker(
-                modifier = Modifier.weight(1f),
-                label = "Pausa longa",
-                value = pausaLongaValue,
-                onShowPicker = onPausaLongaClick
-            )
+                FullFocusInputWheelPicker(
+                    modifier = Modifier.weight(1f),
+                    label = "Pausa longa",
+                    value = uiState.longBreakTime,
+                    onShowPicker = {
+                        onEvent(PomodoroSettingEvent.ShowModal(modal = PomodoroSettingModalUiState.LongBreakTimer))
+                    }
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         Button(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
-            onClick = onSaveClick,
+            onClick = {
+                onEvent(PomodoroSettingEvent.OnSave)
+            }
         ) {
             Text(
-                text = stringResource(R.string.salvar),
-                style = MaterialTheme.typography.labelMedium.copy(
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                text = stringResource(id = R.string.salvar),
+                style = MaterialTheme.typography.labelLarge
             )
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(32.dp)
+        )
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
 @Composable
 private fun PomodoroSettingBottomSheetLightPreview() {
-
     FullFocusTheme(
         dynamicColor = false,
         darkTheme = false
     ) {
         PomodoroSettingBottomSheet(
+            sheetState = rememberModalBottomSheetState(),
+            onDismissRequest = { },
             uiState = PomodoroSettingUiState(),
-            onEvent = {},
-            onDismissRequest = {}
+            onEvent = {}
         )
     }
 }
@@ -227,15 +244,15 @@ private fun PomodoroSettingBottomSheetLightPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun PomodoroSettingBottomSheetDarkPreview() {
-
     FullFocusTheme(
         dynamicColor = false,
-        darkTheme = true
+        darkTheme = false
     ) {
         PomodoroSettingBottomSheet(
+            sheetState = rememberModalBottomSheetState(),
+            onDismissRequest = {},
             uiState = PomodoroSettingUiState(),
-            onEvent = {},
-            onDismissRequest = {}
+            onEvent = {}
         )
     }
 }

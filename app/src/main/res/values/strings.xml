@@ -10,4 +10,11 @@
     <string name="tempo_de_foco">Tempo de Foco</string>
     <string name="configura_es_de_tempo">Configurações de Tempo</string>
     <string name="salvar">Salvar</string>
+    <string name="configurar_pomodoro">Configurar Pomodoro</string>
+    <string name="confirmar">Confirmar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="cancelar_pomodoro">Cancelar Pomodoro</string>
+    <string name="escolha_como_deseja_cancelar">Escolha como deseja cancelar o pomodoro atual.</string>
+    <string name="salvar_progresso">Salvar progresso</string>
+    <string name="descartar">Descartar</string>
 </resources>

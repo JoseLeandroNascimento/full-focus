@@ -4,16 +4,21 @@ import com.joseleandro.fullfocus.ui.state.PomodoroModalUiState
 
 sealed interface PomodoroEvent {
 
-    data object OnPlay : PomodoroEvent
+    data class ShowModal(val modal: PomodoroModalUiState) : PomodoroEvent
 
-    data object OnPause : PomodoroEvent
+    data object CloseModal : PomodoroEvent
 
-    data object OnCancel : PomodoroEvent
+    data object Play : PomodoroEvent
 
-    data object OnRestart : PomodoroEvent
+    data object Pause : PomodoroEvent
 
-    data class OnShowModal(val modal: PomodoroModalUiState) : PomodoroEvent
+    data object Reverse : PomodoroEvent
 
-    data object OnCloseModal : PomodoroEvent
+    data object CancelAndSave : PomodoroEvent
 
+    data object CancelAndDelete : PomodoroEvent
+
+    data object Skip : PomodoroEvent
+
+    data object CompleteSession : PomodoroEvent
 }
