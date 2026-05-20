@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class PomodoroDataSourceImpl(
     private val pomodoroDao: PomodoroDao,
     private val sessionDao: SessionDao
@@ -23,11 +24,16 @@ class PomodoroDataSourceImpl(
     override val session: Flow<SessionEntity?>
         get() = sessionDao.getSessionCurrent()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override val focusCount: Flow<Int>
         get() = pomodoroDao.getPomodoroActive().flatMapLatest { pomodoro ->
             if (pomodoro == null) flowOf(0)
             else sessionDao.getFocusCountByPomodoroIdFlow(pomodoro.id)
+        }
+
+    override val completedPomodoroCount: Flow<Int>
+        get() = pomodoroDao.getPomodoroActive().flatMapLatest { pomodoro ->
+            if (pomodoro == null) flowOf(0)
+            else sessionDao.getCompletedPomodoroCountFlow(pomodoro.id)
         }
 
     override suspend fun play(focusTime: Long, shortPauseTime: Long, longPauseTime: Long, sessionsUntilLongPause: Int) {

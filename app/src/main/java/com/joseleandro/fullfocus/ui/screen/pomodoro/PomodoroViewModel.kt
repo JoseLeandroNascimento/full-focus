@@ -8,45 +8,61 @@ import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroModalUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PomodoroViewModel(
     private val pomodoroRepository: PomodoroRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PomodoroUiState())
-    val uiState = _uiState.asStateFlow()
+    private val _modal = MutableStateFlow<PomodoroModalUiState>(PomodoroModalUiState.None)
+
+    val uiState: StateFlow<PomodoroUiState> = combine(
+        pomodoroRepository.pomodoro,
+        _modal
+    ) { pomodoro, modal ->
+        PomodoroUiState(
+            isRunning = pomodoro.isRunning,
+            duration = pomodoro.duration,
+            pomodoroState = pomodoro.pomodoroState,
+            progressPercent = pomodoro.calcPercentTime(),
+            focusCount = pomodoro.focusCount,
+            completedPomodoroCount = pomodoro.completedPomodoroCount,
+            sessionsUntilLongPause = pomodoro.sessionsUntilLongPause,
+            modal = modal
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = PomodoroUiState()
+    )
 
     init {
-        viewModelScope.launch {
-            pomodoroRepository.pomodoro.collect { pomodoroDomain ->
-                _uiState.update { state ->
-                    state.copy(
-                        isRunning = pomodoroDomain.isRunning,
-                        duration = pomodoroDomain.duration,
-                        pomodoroState = pomodoroDomain.pomodoroState,
-                        progressPercent = pomodoroDomain.calcPercentTime(),
-                        focusCount = pomodoroDomain.focusCount,
-                        sessionsUntilLongPause = pomodoroDomain.sessionsUntilLongPause
-                    )
-                }
+        observeSessionCompletion()
+    }
 
-                if (pomodoroDomain.isRunning &&
-                    pomodoroDomain.duration > 0 &&
-                    pomodoroDomain.time >= pomodoroDomain.duration
-                ) {
+    private fun observeSessionCompletion() {
+        viewModelScope.launch {
+            pomodoroRepository.pomodoro
+                .distinctUntilChanged { old, new -> 
+                    old.isRunning == new.isRunning && old.time == new.time 
+                }
+                .filter { it.isRunning && it.duration > 0 && it.time >= it.duration }
+                .collect {
                     onEvent(PomodoroEvent.CompleteSession)
                 }
-            }
         }
     }
 
     fun onEvent(event: PomodoroEvent) {
         when (event) {
-            PomodoroEvent.CloseModal -> closeModal()
-            is PomodoroEvent.ShowModal -> showModal(modal = event.modal)
+            PomodoroEvent.CloseModal -> _modal.value = PomodoroModalUiState.None
+            is PomodoroEvent.ShowModal -> _modal.value = event.modal
             PomodoroEvent.CancelAndSave -> viewModelScope.launch { pomodoroRepository.cancelAndSave() }
             PomodoroEvent.CancelAndDelete -> viewModelScope.launch { pomodoroRepository.cancelAndDelete() }
             PomodoroEvent.Pause -> viewModelScope.launch { pomodoroRepository.pause() }
@@ -57,25 +73,9 @@ class PomodoroViewModel(
         }
     }
 
-    private fun closeModal() {
-        _uiState.update { state ->
-            state.copy(
-                modal = PomodoroModalUiState.None
-            )
-        }
-    }
-
-    private fun showModal(modal: PomodoroModalUiState) {
-        _uiState.update { state ->
-            state.copy(
-                modal = modal
-            )
-        }
-    }
-
     private fun PomodoroDomain.calcPercentTime(): Float {
-        if (this.duration == 0L) return 1f
-        val remaining = (this.duration - this.time).coerceAtLeast(0)
-        return (remaining.toFloat() / this.duration)
+        if (duration == 0L) return 1f
+        val remaining = (duration - time).coerceAtLeast(0)
+        return remaining.toFloat() / duration
     }
 }

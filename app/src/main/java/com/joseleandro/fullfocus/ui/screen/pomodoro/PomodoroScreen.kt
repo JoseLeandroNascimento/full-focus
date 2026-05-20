@@ -121,22 +121,8 @@ fun PomodoroScreen(
                 )
             ) {
 
-                val isFocus = uiState.pomodoroState == PomodoroState.FOCUS
-                val pomodoroIndex = if (isFocus) {
-                    uiState.focusCount + 1
-                } else {
-                    uiState.focusCount
-                }
-
-                // Ajuste para não mostrar o próximo índice se o atual ainda não começou a rodar após um skip/complete
-                val displayIndex = if (isFocus && uiState.progressPercent >= 1f && uiState.focusCount > 0) {
-                    uiState.focusCount
-                } else {
-                    pomodoroIndex
-                }
-
                 Text(
-                    text = "pomodoro ${displayIndex.coerceAtLeast(1)} de ${uiState.sessionsUntilLongPause}",
+                    text = "pomodoro ${uiState.completedPomodoroCount} de ${uiState.sessionsUntilLongPause}",
                     style = MaterialTheme.typography.bodySmall
                 )
 

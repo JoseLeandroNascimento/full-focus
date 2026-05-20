@@ -8,6 +8,7 @@ data class PomodoroUiState(
     val isRunning: Boolean = false,
     val pomodoroState: PomodoroState = PomodoroState.FOCUS,
     val focusCount: Int = 0,
+    val completedPomodoroCount: Int = 0,
     val sessionsUntilLongPause: Int = 4,
     val modal: PomodoroModalUiState = PomodoroModalUiState.None
 )

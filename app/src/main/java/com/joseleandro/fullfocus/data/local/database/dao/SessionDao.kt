@@ -27,5 +27,8 @@ interface SessionDao {
 
     @Query("SELECT COUNT(*) FROM session_table WHERE pomodoro_id = :pomodoroId AND state = 'FOCUS' AND (status = 'COMPLETED' OR status = 'SKIPPED')")
     fun getFocusCountByPomodoroIdFlow(pomodoroId: Long): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM session_table WHERE pomodoro_id = :pomodoroId AND state != 'FOCUS' AND (status = 'COMPLETED' OR status = 'SKIPPED')")
+    fun getCompletedPomodoroCountFlow(pomodoroId: Long): Flow<Int>
     
 }

@@ -12,6 +12,8 @@ interface PomodoroDataSource {
 
     val focusCount: Flow<Int>
 
+    val completedPomodoroCount: Flow<Int>
+
     suspend fun play(focusTime: Long, shortPauseTime: Long, longPauseTime: Long, sessionsUntilLongPause: Int)
 
     suspend fun pause()

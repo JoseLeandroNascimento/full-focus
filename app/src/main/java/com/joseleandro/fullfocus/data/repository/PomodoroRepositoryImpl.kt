@@ -24,40 +24,42 @@ class PomodoroRepositoryImpl(
         }
     }
 
-    override val pomodoro: Flow<PomodoroDomain>
-        get() = combine(
-            pomodoroSettingDataSource.pomodoroSetting,
-            pomodoroDataSource.session,
-            pomodoroDataSource.focusCount,
-            ticker
-        ) { pomodoroSettings, session, focusCount, now ->
-            if (session == null) {
-                PomodoroDomain(
-                    duration = pomodoroSettings.focusTime,
-                    time = 0,
-                    isRunning = false,
-                    pomodoroState = PomodoroState.FOCUS,
-                    focusCount = focusCount,
-                    sessionsUntilLongPause = pomodoroSettings.sessionsUntilLongPause
-                )
+    override val pomodoro: Flow<PomodoroDomain> = combine(
+        pomodoroSettingDataSource.pomodoroSetting,
+        pomodoroDataSource.session,
+        pomodoroDataSource.focusCount,
+        pomodoroDataSource.completedPomodoroCount,
+        ticker
+    ) { pomodoroSettings, session, focusCount, completedPomodoroCount, now ->
+        if (session == null) {
+            PomodoroDomain(
+                duration = pomodoroSettings.focusTime,
+                time = 0,
+                isRunning = false,
+                pomodoroState = PomodoroState.FOCUS,
+                focusCount = focusCount,
+                completedPomodoroCount = completedPomodoroCount,
+                sessionsUntilLongPause = pomodoroSettings.sessionsUntilLongPause
+            )
+        } else {
+            val isRunning = session.status == SessionStatus.RUNNING
+            val elapsedTime = if (isRunning) {
+                session.elapsedTime + (session.lastStartTime?.let { now - it } ?: 0L)
             } else {
-                val isRunning = session.status == SessionStatus.RUNNING
-                val elapsedTime = if (isRunning) {
-                    session.elapsedTime + (session.lastStartTime?.let { now - it } ?: 0L)
-                } else {
-                    session.elapsedTime
-                }
-
-                PomodoroDomain(
-                    time = elapsedTime,
-                    duration = session.duration,
-                    pomodoroState = session.state,
-                    isRunning = isRunning,
-                    focusCount = focusCount,
-                    sessionsUntilLongPause = pomodoroSettings.sessionsUntilLongPause
-                )
+                session.elapsedTime
             }
+
+            PomodoroDomain(
+                time = elapsedTime,
+                duration = session.duration,
+                pomodoroState = session.state,
+                isRunning = isRunning,
+                focusCount = focusCount,
+                completedPomodoroCount = completedPomodoroCount,
+                sessionsUntilLongPause = pomodoroSettings.sessionsUntilLongPause
+            )
         }
+    }
 
     override suspend fun play() {
         val setting = pomodoroSettingDataSource.pomodoroSetting.first()

@@ -8,5 +8,6 @@ data class PomodoroDomain(
     val pomodoroState: PomodoroState = PomodoroState.FOCUS,
     val isRunning: Boolean = false,
     val focusCount: Int = 0,
+    val completedPomodoroCount: Int = 0,
     val sessionsUntilLongPause: Int = 4
 )
