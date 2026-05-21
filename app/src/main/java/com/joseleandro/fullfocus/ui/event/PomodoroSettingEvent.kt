@@ -4,6 +4,8 @@ import com.joseleandro.fullfocus.ui.state.PomodoroSettingModalUiState
 
 sealed interface PomodoroSettingEvent {
 
+    data object LoadData: PomodoroSettingEvent
+
     data class UpdateFocusTime(val time: String) : PomodoroSettingEvent
 
     data class UpdateShortBreakTime(val time: String) : PomodoroSettingEvent
@@ -14,5 +16,7 @@ sealed interface PomodoroSettingEvent {
 
     data object CloseModal : PomodoroSettingEvent
 
-    data object OnSave: PomodoroSettingEvent
+    data class ChangedSetting(val value: Boolean) : PomodoroSettingEvent
+
+    data object OnSave : PomodoroSettingEvent
 }

@@ -15,6 +15,7 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.ui.component.FullFocusInputWheelPicker
 import com.joseleandro.fullfocus.ui.component.FullFocusWheelPickerDialog
+import com.joseleandro.fullfocus.ui.effect.PomodoroSettingEffect
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingModalUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingUiState
@@ -44,6 +46,18 @@ fun PomodoroSettingBottomSheet(
 
     val viewModel = koinViewModel<PomodoroSettingViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+
+        viewModel.onEvent(event = PomodoroSettingEvent.LoadData)
+
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                PomodoroSettingEffect.CloseBottomSheet -> onDismissRequest()
+            }
+        }
+    }
+
 
     PomodoroSettingBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -205,6 +219,7 @@ private fun PomodoroSettingBottomSheetContent(
         )
 
         Button(
+            enabled = uiState.changedSetting,
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
             onClick = {

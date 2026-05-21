@@ -54,9 +54,9 @@ fun FullFocusInputWheelPicker(
             value = value,
             onValueChange = {},
             readOnly = true,
-            textStyle = TextStyle(
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.ExtraBold
+            textStyle = MaterialTheme.typography.headlineSmall.copy(
+                fontWeight = FontWeight.ExtraBold,
+                textAlign = TextAlign.Center
             ),
             shape = MaterialTheme.shapes.medium,
             interactionSource = interactionSource,

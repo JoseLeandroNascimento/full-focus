@@ -3,10 +3,13 @@ package com.joseleandro.fullfocus.ui.screen.pomodoro_setting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
+import com.joseleandro.fullfocus.ui.effect.PomodoroSettingEffect
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingModalUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingUiState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -19,19 +22,8 @@ class PomodoroSettingViewModel(
     private val _uiState = MutableStateFlow(PomodoroSettingUiState())
     val uiState = _uiState.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            pomodoroSettingRepository.pomodoroSetting.collect { pomodoroSetting ->
-                _uiState.update { state ->
-                    state.copy(
-                        focusTime = pomodoroSetting.focusTime.formattedTime(),
-                        longBreakTime = pomodoroSetting.longPauseTime.formattedTime(),
-                        shortBreakTime = pomodoroSetting.shortPauseTime.formattedTime()
-                    )
-                }
-            }
-        }
-    }
+    private val _effect = MutableSharedFlow<PomodoroSettingEffect>()
+    val effect = _effect.asSharedFlow()
 
     fun onEvent(event: PomodoroSettingEvent) {
 
@@ -42,6 +34,23 @@ class PomodoroSettingViewModel(
             is PomodoroSettingEvent.UpdateLongBreakTime -> updateLongBreakTime(time = event.time)
             is PomodoroSettingEvent.UpdateShortBreakTime -> updateShortBreakTime(time = event.time)
             PomodoroSettingEvent.OnSave -> save()
+            is PomodoroSettingEvent.ChangedSetting -> changedSetting(value = event.value)
+            PomodoroSettingEvent.LoadData -> loadData()
+        }
+    }
+
+    private fun loadData() {
+        viewModelScope.launch {
+            pomodoroSettingRepository.pomodoroSetting.collect { pomodoroSetting ->
+                _uiState.update { state ->
+                    state.copy(
+                        changedSetting = false,
+                        focusTime = pomodoroSetting.focusTime.formattedTime(),
+                        longBreakTime = pomodoroSetting.longPauseTime.formattedTime(),
+                        shortBreakTime = pomodoroSetting.shortPauseTime.formattedTime()
+                    )
+                }
+            }
         }
     }
 
@@ -49,7 +58,8 @@ class PomodoroSettingViewModel(
         viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(
-                    focusTime = time
+                    focusTime = time.parseTimeToMillis().formattedTime(),
+                    changedSetting = true
                 )
             }
             closeModal()
@@ -60,7 +70,8 @@ class PomodoroSettingViewModel(
         viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(
-                    shortBreakTime = time
+                    shortBreakTime = time.parseTimeToMillis().formattedTime(),
+                    changedSetting = true
                 )
             }
             closeModal()
@@ -71,7 +82,8 @@ class PomodoroSettingViewModel(
         viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(
-                    longBreakTime = time
+                    longBreakTime = time.parseTimeToMillis().formattedTime(),
+                    changedSetting = true
                 )
             }
             closeModal()
@@ -86,6 +98,13 @@ class PomodoroSettingViewModel(
         }
     }
 
+    private fun changedSetting(value: Boolean) =
+        _uiState.update { state ->
+            state.copy(
+                changedSetting = value
+            )
+        }
+
     private fun save() {
 
         viewModelScope.launch {
@@ -94,6 +113,10 @@ class PomodoroSettingViewModel(
                 pomodoroSettingRepository.updateShortBreakTime(shortBreakTime.parseTimeToMillis())
                 pomodoroSettingRepository.updateLongBreakTime(longBreakTime.parseTimeToMillis())
             }
+
+            changedSetting(value = false)
+
+            _effect.emit(PomodoroSettingEffect.CloseBottomSheet)
         }
 
     }
