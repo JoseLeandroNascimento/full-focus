@@ -1,5 +1,6 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro_setting
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
@@ -36,6 +37,14 @@ class PomodoroSettingViewModel(
             PomodoroSettingEvent.OnSave -> save()
             is PomodoroSettingEvent.ChangedSetting -> changedSetting(value = event.value)
             PomodoroSettingEvent.LoadData -> loadData()
+            is PomodoroSettingEvent.UpdateFocusProgressColor -> updateFocusProgressColor(color = event.color)
+            is PomodoroSettingEvent.UpdateLongBreakProgressColor -> updateLongBreakProgressColor(
+                color = event.color
+            )
+
+            is PomodoroSettingEvent.UpdateShortBreakProgressColor -> updateShortBreakProgressColor(
+                color = event.color
+            )
         }
     }
 
@@ -47,10 +56,49 @@ class PomodoroSettingViewModel(
                         changedSetting = false,
                         focusTime = pomodoroSetting.focusTime.formattedTime(),
                         longBreakTime = pomodoroSetting.longPauseTime.formattedTime(),
-                        shortBreakTime = pomodoroSetting.shortPauseTime.formattedTime()
+                        shortBreakTime = pomodoroSetting.shortPauseTime.formattedTime(),
+                        focusProgressColor = pomodoroSetting.focusProgressColor,
+                        longBreakProgressColor = pomodoroSetting.longBreakProgressColor,
+                        shortBreakProgressColor = pomodoroSetting.shortBreakProgressColor
                     )
                 }
             }
+        }
+    }
+
+    private fun updateFocusProgressColor(color: Color) {
+        viewModelScope.launch {
+            _uiState.update { state ->
+                state.copy(
+                    focusProgressColor = color,
+                    changedSetting = true
+                )
+            }
+            closeModal()
+        }
+    }
+
+    private fun updateShortBreakProgressColor(color: Color) {
+        viewModelScope.launch {
+            _uiState.update { state ->
+                state.copy(
+                    shortBreakProgressColor = color,
+                    changedSetting = true
+                )
+            }
+            closeModal()
+        }
+    }
+
+    private fun updateLongBreakProgressColor(color: Color) {
+        viewModelScope.launch {
+            _uiState.update { state ->
+                state.copy(
+                    longBreakProgressColor = color,
+                    changedSetting = true
+                )
+            }
+            closeModal()
         }
     }
 
@@ -112,6 +160,9 @@ class PomodoroSettingViewModel(
                 pomodoroSettingRepository.updateFocusTime(focusTime.parseTimeToMillis())
                 pomodoroSettingRepository.updateShortBreakTime(shortBreakTime.parseTimeToMillis())
                 pomodoroSettingRepository.updateLongBreakTime(longBreakTime.parseTimeToMillis())
+                pomodoroSettingRepository.updateFocusProgressColor(color = focusProgressColor)
+                pomodoroSettingRepository.updateLongBreakProgressColor(color = longBreakProgressColor)
+                pomodoroSettingRepository.updateShortBreakProgressColor(color = shortBreakProgressColor)
             }
 
             changedSetting(value = false)

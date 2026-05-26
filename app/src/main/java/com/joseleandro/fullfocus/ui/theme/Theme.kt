@@ -8,7 +8,26 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+
+@Immutable
+data class PomodoroColors(
+    val focus: Color = Color.Unspecified,
+    val shortPause: Color = Color.Unspecified,
+    val longPause: Color = Color.Unspecified
+)
+
+val LocalPomodoroColors = staticCompositionLocalOf { PomodoroColors() }
+
+object FullFocusTheme {
+    val pomodoroColors: PomodoroColors
+        @Composable
+        get() = LocalPomodoroColors.current
+}
 
 private val DarkColorScheme = darkColorScheme(
     primary = Primary,
@@ -49,9 +68,17 @@ fun FullFocusTheme(
         else -> LightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+    val pomodoroColors = PomodoroColors(
+        focus = colorScheme.primary,
+        shortPause = ShortPause,
+        longPause = LongPause
     )
+
+    CompositionLocalProvider(LocalPomodoroColors provides pomodoroColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

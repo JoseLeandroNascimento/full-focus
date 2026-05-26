@@ -13,4 +13,10 @@ interface PomodoroSettingDataSource {
 
     suspend fun updateLongBreakTime(time: Long)
 
+    suspend fun updateFocusProgressColor(color: Long)
+
+    suspend fun updateShortBreakProgressColor(color: Long)
+
+    suspend fun updateLongBreakProgressColor(color: Long)
+
 }

@@ -8,7 +8,8 @@
     <string name="setting_pomodoro">setting pomodoro</string>
     <string name="menu">menu</string>
     <string name="tempo_de_foco">Tempo de Foco</string>
-    <string name="configura_es_de_tempo">Configurações de Tempo</string>
+    <string name="duracao_das_etapas">Duração das etapas</string>
+    <string name="cores_e_visual">Cores e Visual</string>
     <string name="salvar">Salvar</string>
     <string name="configurar_pomodoro">Configurar Pomodoro</string>
     <string name="confirmar">Confirmar</string>
@@ -17,4 +18,13 @@
     <string name="escolha_como_deseja_cancelar">Escolha como deseja cancelar o pomodoro atual.</string>
     <string name="salvar_progresso">Salvar progresso</string>
     <string name="descartar">Descartar</string>
+    <string name="pomodoro_de">pomodoro %1$d de %2$d</string>
+    <string name="estilo">Estilo</string>
+    <string name="defina_a_cor_que_representar_o_per_odo_de_na_interface">Defina a cor que representará o período de %1$s na interface.</string>
+    <string name="picker_color_foco">Foco</string>
+    <string name="picker_color_pausa_curta">Pausa curta</string>
+    <string name="picker_color_pausa_longa">Pausa longa</string>
+    <string name="visualiza_o">Visualização</string>
+    <string name="brilho">Brilho</string>
+    <string name="cor_da_etapa">Cor da Etapa</string>
 </resources>

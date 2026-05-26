@@ -41,6 +41,7 @@ dependencies {
 
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
+    implementation(libs.compose.colorpicker)
 
     implementation(libs.androidx.datastore)
     implementation(libs.androidx.datastore.core)

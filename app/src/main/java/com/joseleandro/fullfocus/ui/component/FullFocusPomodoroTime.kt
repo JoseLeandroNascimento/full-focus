@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,11 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
@@ -38,6 +40,7 @@ private const val POMODORO_TIME_WIDTH_STROKE = 40f
 @Composable
 fun FullFocusPomodoroTime(
     modifier: Modifier = Modifier,
+    colorProgress: Color = Color(0xFF25D9FF),
     size: Dp = 320.dp,
     @FloatRange(from = 0.0, to = 1.0)
     progress: Float = 0f,
@@ -59,7 +62,10 @@ fun FullFocusPomodoroTime(
 
         FullFocusPomodoroTimeBackgroundBar()
 
-        FullFocusPomodoroTimeProgressBar(progress = animatedProgress)
+        FullFocusPomodoroTimeProgressBar(
+            colorProgress = colorProgress,
+            progress = animatedProgress
+        )
 
         Surface(
             modifier = Modifier
@@ -84,6 +90,17 @@ fun FullFocusPomodoroTime(
                 ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
+
+                Icon(
+                    painter = painterResource(
+                        id = when (state) {
+                            PomodoroState.FOCUS -> R.drawable.ri_target_fill
+                            else -> R.drawable.uiw_coffee
+                        }
+                    ),
+                    contentDescription = null
+                )
 
                 Text(
                     text = currentTime.formattedTimer(),
@@ -139,6 +156,7 @@ private fun FullFocusPomodoroTimeBackgroundBar(modifier: Modifier = Modifier) {
 @Composable
 private fun FullFocusPomodoroTimeProgressBar(
     modifier: Modifier = Modifier,
+    colorProgress: Color,
     @FloatRange(from = 0.0, to = 1.0)
     progress: Float
 ) {
@@ -150,13 +168,7 @@ private fun FullFocusPomodoroTimeProgressBar(
 
         drawArc(
             startAngle = -90f,
-            brush = Brush.sweepGradient(
-                colors = listOf(
-                    Color(0xFF25D9FF),
-                    Color(0xFF39F3B2),
-                    Color(0xFF25D9FF)
-                )
-            ),
+            color = colorProgress,
             sweepAngle = progress * 360,
             useCenter = false,
             style = Stroke(

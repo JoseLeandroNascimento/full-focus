@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 import com.joseleandro.fullfocus.ui.component.FullFocusPomodoroTime
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroButton
@@ -57,7 +59,9 @@ fun PomodoroScreen(
     onEvent: (PomodoroEvent) -> Unit
 ) {
 
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
 
     Scaffold(
         topBar = {
@@ -99,7 +103,8 @@ fun PomodoroScreen(
         Column(
             modifier = Modifier
                 .padding(innerPadding)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(state = rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(
                 space = 32.dp,
                 alignment = Alignment.CenterVertically
@@ -110,6 +115,7 @@ fun PomodoroScreen(
             FullFocusPomodoroTime(
                 progress = uiState.progressPercent,
                 state = uiState.pomodoroState,
+                colorProgress = uiState.colorProgress,
                 timeTotal = uiState.duration
             )
 
@@ -122,85 +128,87 @@ fun PomodoroScreen(
             ) {
 
                 Text(
-                    text = "pomodoro ${uiState.completedPomodoroCount} de ${uiState.sessionsUntilLongPause}",
+                    text = stringResource(
+                        R.string.pomodoro_de,
+                        uiState.completedPomodoroCount,
+                        uiState.sessionsUntilLongPause
+                    ),
                     style = MaterialTheme.typography.bodySmall
                 )
 
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(
-                    space = 16.dp,
-                    alignment = Alignment.CenterHorizontally
-                )
-            ) {
-                if (uiState.isRunning) {
-                    PomodoroButton(
-                        onClick = { onEvent(PomodoroEvent.Pause) }
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(36.dp),
-                            painter = painterResource(id = R.drawable.material_symbols_pause_rounded),
-                            contentDescription = "pause"
-                        )
-                    }
-                } else {
-                    if (uiState.progressPercent < 1f) {
-                        // Paused state buttons
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(
+                        space = 16.dp,
+                        alignment = Alignment.CenterHorizontally
+                    )
+                ) {
+                    if (uiState.isRunning) {
                         PomodoroButton(
-                            onClick = { onEvent(PomodoroEvent.Skip) }
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(id = R.drawable.mage_next_fill),
-                                contentDescription = "skip"
-                            )
-                        }
-
-                        PomodoroButton(
-                            onClick = { onEvent(PomodoroEvent.Play) }
+                            onClick = { onEvent(PomodoroEvent.Pause) }
                         ) {
                             Icon(
                                 modifier = Modifier.size(36.dp),
-                                painter = painterResource(id = R.drawable.line_md_play_filled),
-                                contentDescription = "play"
-                            )
-                        }
-
-                        PomodoroButton(
-                            onClick = { onEvent(PomodoroEvent.Reverse) }
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(id = R.drawable.fa7_solid_rotate_back),
-                                contentDescription = "restart"
-                            )
-                        }
-
-                        PomodoroButton(
-                            onClick = { onEvent(PomodoroEvent.ShowModal(PomodoroModalUiState.CancelOptions)) }
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(id = R.drawable.material_symbols_close_rounded),
-                                contentDescription = "cancel"
+                                painter = painterResource(id = R.drawable.material_symbols_pause_rounded),
+                                contentDescription = "pause"
                             )
                         }
                     } else {
-                        // Initial state
-                        PomodoroButton(
-                            onClick = { onEvent(PomodoroEvent.Play) }
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(36.dp),
-                                painter = painterResource(id = R.drawable.line_md_play_filled),
-                                contentDescription = "play"
-                            )
+                        if (uiState.progressPercent < 1f) {
+                            PomodoroButton(
+                                onClick = { onEvent(PomodoroEvent.Skip) }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(id = R.drawable.mage_next_fill),
+                                    contentDescription = "skip"
+                                )
+                            }
+
+                            PomodoroButton(
+                                onClick = { onEvent(PomodoroEvent.Play) }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(36.dp),
+                                    painter = painterResource(id = R.drawable.line_md_play_filled),
+                                    contentDescription = "play"
+                                )
+                            }
+
+                            PomodoroButton(
+                                onClick = { onEvent(PomodoroEvent.Reverse) }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(id = R.drawable.fa7_solid_rotate_back),
+                                    contentDescription = "restart"
+                                )
+                            }
+
+                            PomodoroButton(
+                                onClick = { onEvent(PomodoroEvent.ShowModal(PomodoroModalUiState.CancelOptions)) }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(24.dp),
+                                    painter = painterResource(id = R.drawable.material_symbols_close_rounded),
+                                    contentDescription = "cancel"
+                                )
+                            }
+                        } else {
+                            PomodoroButton(
+                                onClick = { onEvent(PomodoroEvent.Play) }
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(36.dp),
+                                    painter = painterResource(id = R.drawable.line_md_play_filled),
+                                    contentDescription = "play"
+                                )
+                            }
                         }
                     }
                 }
             }
+
         }
     }
 
@@ -215,32 +223,17 @@ fun PomodoroScreen(
         }
 
         PomodoroModalUiState.CancelOptions -> {
-            AlertDialog(
-                onDismissRequest = { onEvent(PomodoroEvent.CloseModal) },
-                title = { Text(text = stringResource(R.string.cancelar_pomodoro)) },
-                text = { Text(text = stringResource(R.string.escolha_como_deseja_cancelar)) },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            onEvent(PomodoroEvent.CancelAndSave)
-                            onEvent(PomodoroEvent.CloseModal)
-                        }
-                    ) {
-                        Text(text = stringResource(R.string.salvar_progresso))
-                    }
+            ConfirmCancelPomodoroDialog(
+                onDismissRequest = {
+                    onEvent(PomodoroEvent.CloseModal)
                 },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            onEvent(PomodoroEvent.CancelAndDelete)
-                            onEvent(PomodoroEvent.CloseModal)
-                        }
-                    ) {
-                        Text(
-                            text = stringResource(R.string.descartar),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
+                onDiscard = {
+                    onEvent(PomodoroEvent.CancelAndSave)
+                    onEvent(PomodoroEvent.CloseModal)
+                },
+                onSaveProgress = {
+                    onEvent(PomodoroEvent.CancelAndDelete)
+                    onEvent(PomodoroEvent.CloseModal)
                 }
             )
         }
@@ -249,6 +242,35 @@ fun PomodoroScreen(
     }
 }
 
+@Composable
+private fun ConfirmCancelPomodoroDialog(
+    onDismissRequest: () -> Unit,
+    onDiscard: () -> Unit,
+    onSaveProgress: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = stringResource(R.string.cancelar_pomodoro)) },
+        text = { Text(text = stringResource(R.string.escolha_como_deseja_cancelar)) },
+        confirmButton = {
+            TextButton(
+                onClick = onSaveProgress
+            ) {
+                Text(text = stringResource(R.string.salvar_progresso))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDiscard
+            ) {
+                Text(
+                    text = stringResource(R.string.descartar),
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    )
+}
 
 @Preview
 @Composable
@@ -258,7 +280,9 @@ private fun PomodoroScreenLightPreview() {
         darkTheme = false
     ) {
         PomodoroScreen(
-            uiState = PomodoroUiState(),
+            uiState = PomodoroUiState(
+                colorProgress = Color(0xFF25D9FF)
+            ),
             onEvent = {}
         )
     }
@@ -272,7 +296,9 @@ private fun PomodoroScreenDarkPreview() {
         darkTheme = true
     ) {
         PomodoroScreen(
-            uiState = PomodoroUiState(),
+            uiState = PomodoroUiState(
+                colorProgress = Color(0xFF25D9FF)
+            ),
             onEvent = {}
         )
     }

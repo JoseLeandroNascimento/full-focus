@@ -42,4 +42,34 @@ class PomodoroSettingDataSourceImpl(
             )
         }
     }
+
+    override suspend fun updateFocusProgressColor(color: Long) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    focusProgressColor = color
+                )
+            )
+        }
+    }
+
+    override suspend fun updateShortBreakProgressColor(color: Long) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    shortBreakProgressColor = color
+                )
+            )
+        }
+    }
+
+    override suspend fun updateLongBreakProgressColor(color: Long) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    longBreakProgressColor = color
+                )
+            )
+        }
+    }
 }

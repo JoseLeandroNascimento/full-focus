@@ -2,8 +2,10 @@ package com.joseleandro.fullfocus.ui.screen.pomodoro
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 import com.joseleandro.fullfocus.domain.model.PomodoroDomain
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
+import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroModalUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
@@ -17,21 +19,28 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PomodoroViewModel(
-    private val pomodoroRepository: PomodoroRepository
+    private val pomodoroRepository: PomodoroRepository,
+    private val pomodoroSettingRepository: PomodoroSettingRepository
 ) : ViewModel() {
 
     private val _modal = MutableStateFlow<PomodoroModalUiState>(PomodoroModalUiState.None)
 
     val uiState: StateFlow<PomodoroUiState> = combine(
         pomodoroRepository.pomodoro,
+        pomodoroSettingRepository.pomodoroSetting,
         _modal
-    ) { pomodoro, modal ->
+    ) { pomodoro, pomodoroSetting, modal ->
         PomodoroUiState(
             isRunning = pomodoro.isRunning,
             duration = pomodoro.duration,
             pomodoroState = pomodoro.pomodoroState,
             progressPercent = pomodoro.calcPercentTime(),
             focusCount = pomodoro.focusCount,
+            colorProgress = when (pomodoro.pomodoroState) {
+                PomodoroState.FOCUS -> pomodoroSetting.focusProgressColor
+                PomodoroState.SHORT_PAUSE -> pomodoroSetting.shortBreakProgressColor
+                PomodoroState.LONG_PAUSE -> pomodoroSetting.longBreakProgressColor
+            },
             completedPomodoroCount = pomodoro.completedPomodoroCount,
             sessionsUntilLongPause = pomodoro.sessionsUntilLongPause,
             modal = modal
@@ -49,8 +58,8 @@ class PomodoroViewModel(
     private fun observeSessionCompletion() {
         viewModelScope.launch {
             pomodoroRepository.pomodoro
-                .distinctUntilChanged { old, new -> 
-                    old.isRunning == new.isRunning && old.time == new.time 
+                .distinctUntilChanged { old, new ->
+                    old.isRunning == new.isRunning && old.time == new.time
                 }
                 .filter { it.isRunning && it.duration > 0 && it.time >= it.duration }
                 .collect {
