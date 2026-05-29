@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.style.ExperimentalFoundationStyleApi
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -16,7 +16,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,9 +29,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
+import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 import com.joseleandro.fullfocus.ui.component.FullFocusPomodoroTime
 import com.joseleandro.fullfocus.ui.event.PomodoroEvent
+import com.joseleandro.fullfocus.ui.screen.pomodoro.component.ConfirmCancelPomodoroDialog
 import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroButton
+import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroFinishedSuccessDialog
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
 import com.joseleandro.fullfocus.ui.state.PomodoroModalUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
@@ -52,7 +54,8 @@ fun PomodoroScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationStyleApi::class)
 @Composable
 fun PomodoroScreen(
     uiState: PomodoroUiState,
@@ -204,6 +207,17 @@ fun PomodoroScreen(
                                     contentDescription = "play"
                                 )
                             }
+                            if (uiState.pomodoroState != PomodoroState.FOCUS) {
+                                PomodoroButton(
+                                    onClick = { onEvent(PomodoroEvent.Skip) }
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.size(24.dp),
+                                        painter = painterResource(id = R.drawable.mage_next_fill),
+                                        contentDescription = "skip"
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -238,39 +252,20 @@ fun PomodoroScreen(
             )
         }
 
+        PomodoroModalUiState.FocusFinished -> {
+            PomodoroFinishedSuccessDialog(
+                onDismissRequest = {
+                    onEvent(PomodoroEvent.CloseModal)
+                }
+            )
+        }
+
+        PomodoroModalUiState.LongBreakFinished -> TODO()
+        PomodoroModalUiState.ShortBreakFinished -> TODO()
         PomodoroModalUiState.None -> {}
     }
 }
 
-@Composable
-private fun ConfirmCancelPomodoroDialog(
-    onDismissRequest: () -> Unit,
-    onDiscard: () -> Unit,
-    onSaveProgress: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(text = stringResource(R.string.cancelar_pomodoro)) },
-        text = { Text(text = stringResource(R.string.escolha_como_deseja_cancelar)) },
-        confirmButton = {
-            TextButton(
-                onClick = onSaveProgress
-            ) {
-                Text(text = stringResource(R.string.salvar_progresso))
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDiscard
-            ) {
-                Text(
-                    text = stringResource(R.string.descartar),
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-    )
-}
 
 @Preview
 @Composable

@@ -3,6 +3,7 @@ package com.joseleandro.fullfocus.ui.screen.pomodoro
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
+import com.joseleandro.fullfocus.domain.effect.PomodoroEffect
 import com.joseleandro.fullfocus.domain.model.PomodoroDomain
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
@@ -13,7 +14,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -24,6 +24,7 @@ class PomodoroViewModel(
 ) : ViewModel() {
 
     private val _modal = MutableStateFlow<PomodoroModalUiState>(PomodoroModalUiState.None)
+
 
     val uiState: StateFlow<PomodoroUiState> = combine(
         pomodoroRepository.pomodoro,
@@ -53,17 +54,35 @@ class PomodoroViewModel(
 
     init {
         observeSessionCompletion()
+        observePomodoroEffect()
     }
 
     private fun observeSessionCompletion() {
         viewModelScope.launch {
+
             pomodoroRepository.pomodoro
-                .distinctUntilChanged { old, new ->
-                    old.isRunning == new.isRunning && old.time == new.time
-                }
                 .filter { it.isRunning && it.duration > 0 && it.time >= it.duration }
                 .collect {
                     onEvent(PomodoroEvent.CompleteSession)
+                }
+        }
+    }
+
+    private fun observePomodoroEffect() {
+
+        viewModelScope.launch {
+            pomodoroRepository.effect
+                .collect { pomodoroEffect ->
+                    when (pomodoroEffect) {
+                        PomodoroEffect.FocusFinished -> _modal.value =
+                            PomodoroModalUiState.FocusFinished
+
+                        PomodoroEffect.LongBreakFinished -> _modal.value =
+                            PomodoroModalUiState.ShortBreakFinished
+
+                        PomodoroEffect.ShortBreakFinished -> _modal.value =
+                            PomodoroModalUiState.LongBreakFinished
+                    }
                 }
         }
     }

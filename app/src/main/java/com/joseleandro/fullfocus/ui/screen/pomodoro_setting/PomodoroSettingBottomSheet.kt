@@ -42,11 +42,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.ui.component.FullFocusInputWheelPicker
 import com.joseleandro.fullfocus.ui.component.FullFocusWheelPickerDialog
-import com.joseleandro.fullfocus.ui.effect.PomodoroSettingEffect
+import com.joseleandro.fullfocus.domain.effect.PomodoroSettingEffect
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent.UpdateFocusTime
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent.UpdateLongBreakTime
@@ -469,11 +470,12 @@ private fun LabelSection(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+
         icon?.invoke()
 
         Text(
             text = label,
-            style = MaterialTheme.typography.titleSmall,
+            style = MaterialTheme.typography.titleSmall.copy(fontSize = 14.sp),
             color = MaterialTheme.colorScheme.primary
         )
     }

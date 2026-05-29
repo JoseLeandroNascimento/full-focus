@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
-import com.joseleandro.fullfocus.ui.effect.PomodoroSettingEffect
+import com.joseleandro.fullfocus.domain.effect.PomodoroSettingEffect
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingModalUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingUiState

@@ -1,4 +1,4 @@
-package com.joseleandro.fullfocus.ui.effect
+package com.joseleandro.fullfocus.domain.effect
 
 sealed interface PomodoroSettingEffect {
     data object CloseBottomSheet : PomodoroSettingEffect

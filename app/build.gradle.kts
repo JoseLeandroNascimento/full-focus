@@ -39,6 +39,9 @@ android {
 
 dependencies {
 
+    implementation(libs.lottie)
+    implementation(libs.lottie.compose)
+
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.compose.colorpicker)
