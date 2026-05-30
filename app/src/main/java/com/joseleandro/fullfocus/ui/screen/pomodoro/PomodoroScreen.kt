@@ -254,14 +254,31 @@ fun PomodoroScreen(
 
         PomodoroModalUiState.FocusFinished -> {
             PomodoroFinishedSuccessDialog(
+                type = PomodoroState.FOCUS,
                 onDismissRequest = {
                     onEvent(PomodoroEvent.CloseModal)
                 }
             )
         }
 
-        PomodoroModalUiState.LongBreakFinished -> TODO()
-        PomodoroModalUiState.ShortBreakFinished -> TODO()
+        PomodoroModalUiState.LongBreakFinished -> {
+            PomodoroFinishedSuccessDialog(
+                type = PomodoroState.LONG_PAUSE,
+                onDismissRequest = {
+                    onEvent(PomodoroEvent.CloseModal)
+                }
+            )
+        }
+
+        PomodoroModalUiState.ShortBreakFinished -> {
+            PomodoroFinishedSuccessDialog(
+                type = PomodoroState.SHORT_PAUSE,
+                onDismissRequest = {
+                    onEvent(PomodoroEvent.CloseModal)
+                }
+            )
+        }
+
         PomodoroModalUiState.None -> {}
     }
 }

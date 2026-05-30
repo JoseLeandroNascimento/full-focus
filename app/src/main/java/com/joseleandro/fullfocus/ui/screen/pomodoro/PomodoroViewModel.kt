@@ -78,10 +78,10 @@ class PomodoroViewModel(
                             PomodoroModalUiState.FocusFinished
 
                         PomodoroEffect.LongBreakFinished -> _modal.value =
-                            PomodoroModalUiState.ShortBreakFinished
+                            PomodoroModalUiState.LongBreakFinished
 
                         PomodoroEffect.ShortBreakFinished -> _modal.value =
-                            PomodoroModalUiState.LongBreakFinished
+                            PomodoroModalUiState.ShortBreakFinished
                     }
                 }
         }

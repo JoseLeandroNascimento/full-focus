@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,6 +53,7 @@ fun PomodoroFinishedSuccessDialog(
 
     if (isPreview) {
         PomodoroFinishedSuccessDialogContent(
+            type = type,
             onDismissRequest = onDismissRequest
         )
     } else {
@@ -59,6 +61,7 @@ fun PomodoroFinishedSuccessDialog(
             onDismissRequest = onDismissRequest
         ) {
             PomodoroFinishedSuccessDialogContent(
+                type = type,
                 onDismissRequest = onDismissRequest
             )
         }
@@ -68,10 +71,29 @@ fun PomodoroFinishedSuccessDialog(
 @Composable
 private fun PomodoroFinishedSuccessDialogContent(
     modifier: Modifier = Modifier,
+    type: PomodoroState,
     onDismissRequest: () -> Unit
 ) {
 
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.success))
+    val lottieRes = when (type) {
+        PomodoroState.FOCUS -> R.raw.success
+        PomodoroState.SHORT_PAUSE -> R.raw.party
+        PomodoroState.LONG_PAUSE -> R.raw.time
+    }
+
+    val titleRes = when (type) {
+        PomodoroState.FOCUS -> R.string.tempo_de_foco_terminado
+        PomodoroState.SHORT_PAUSE -> R.string.tempo_de_pausa_acabou
+        PomodoroState.LONG_PAUSE -> R.string.ciclo_concluido
+    }
+
+    val descriptionRes = when (type) {
+        PomodoroState.FOCUS -> R.string.bom_trabalho_agora_voc_pode_fazer_uma_pausa
+        PomodoroState.SHORT_PAUSE -> R.string.o_tempo_de_pausa_terminou_hora_de_voltar_ao_trabalho
+        PomodoroState.LONG_PAUSE -> R.string.bom_trabalho_continue_focado
+    }
+
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(lottieRes))
     var time by remember { mutableLongStateOf(COUNT_TIME) }
     var isPressed by remember { mutableStateOf(false) }
 
@@ -122,19 +144,18 @@ private fun PomodoroFinishedSuccessDialogContent(
 
                 LottieAnimation(
                     modifier = Modifier
-                        .size(100.dp)
-                        .padding(bottom = 16.dp),
+                        .size(140.dp),
                     composition = composition,
                     iterations = LottieConstants.IterateForever,
-                    clipSpec = LottieClipSpec.Progress(0.5f, 0.75f),
+                    clipSpec = LottieClipSpec.Progress(0f, 0.75f),
                 )
                 Text(
-                    text = "Tempo de foco terminado!",
-                    style = MaterialTheme.typography.titleLarge
+                    text = stringResource(titleRes),
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Text(
                     modifier = Modifier.padding(vertical = 8.dp),
-                    text = "Bom trabalho! Agora você pode fazer uma pausa.",
+                    text = stringResource(descriptionRes),
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center
                 )
@@ -144,7 +165,7 @@ private fun PomodoroFinishedSuccessDialogContent(
                     onClick = onDismissRequest,
                 ) {
                     Text(
-                        text = "Fechar"
+                        text = stringResource(R.string.fechar)
                     )
                 }
             }
@@ -193,7 +214,7 @@ private fun PomodoroFinishedSuccessDialogLightPreview() {
         darkTheme = false
     ) {
         PomodoroFinishedSuccessDialog(
-            type = PomodoroState.FOCUS,
+            type = PomodoroState.SHORT_PAUSE,
             onDismissRequest = {}
         )
     }
@@ -207,7 +228,7 @@ private fun PomodoroFinishedSuccessDialogDarkPreview() {
         darkTheme = true
     ) {
         PomodoroFinishedSuccessDialog(
-            type = PomodoroState.FOCUS,
+            type = PomodoroState.LONG_PAUSE,
             onDismissRequest = {}
         )
     }

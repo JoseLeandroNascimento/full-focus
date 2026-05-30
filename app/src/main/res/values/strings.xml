@@ -27,4 +27,11 @@
     <string name="visualiza_o">Visualização</string>
     <string name="brilho">Brilho</string>
     <string name="cor_da_etapa">Cor da Etapa</string>
+    <string name="tempo_de_foco_terminado">Tempo de foco terminado!</string>
+    <string name="bom_trabalho_agora_voc_pode_fazer_uma_pausa">Bom trabalho! Agora você pode fazer uma pausa.</string>
+    <string name="fechar">Fechar</string>
+    <string name="tempo_de_pausa_acabou">Tempo de Pausa Acabou</string>
+    <string name="o_tempo_de_pausa_terminou_hora_de_voltar_ao_trabalho">O tempo de pausa terminou! Hora de voltar ao trabalho.</string>
+    <string name="ciclo_concluido">Ciclo Concluído!</string>
+    <string name="bom_trabalho_continue_focado">Bom trabalho! continue focado.</string>
 </resources>
