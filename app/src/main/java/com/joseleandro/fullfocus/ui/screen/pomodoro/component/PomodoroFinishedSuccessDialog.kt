@@ -40,6 +40,7 @@ import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.milliseconds
 
 private const val COUNT_TIME = 10L
 
@@ -105,7 +106,7 @@ private fun PomodoroFinishedSuccessDialogContent(
 
     LaunchedEffect(Unit) {
         while (time > 0) {
-            delay(1_000)
+            delay(1_000.milliseconds)
             if (!isPressed)
                 time -= 1
         }
@@ -147,7 +148,7 @@ private fun PomodoroFinishedSuccessDialogContent(
                         .size(140.dp),
                     composition = composition,
                     iterations = LottieConstants.IterateForever,
-                    clipSpec = LottieClipSpec.Progress(0f, 0.75f),
+                    clipSpec = LottieClipSpec.Progress(0.2f, 0.75f),
                 )
                 Text(
                     text = stringResource(titleRes),

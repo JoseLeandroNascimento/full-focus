@@ -1,30 +1,25 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro_setting
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -33,8 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.painterResource
@@ -45,9 +38,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
+import com.joseleandro.fullfocus.core.model.Screen
+import com.joseleandro.fullfocus.core.model.SettingSound
+import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigation
+import com.joseleandro.fullfocus.domain.effect.PomodoroSettingEffect
+import com.joseleandro.fullfocus.ui.component.ConfigOptionColor
+import com.joseleandro.fullfocus.ui.component.ConfigOptionNav
+import com.joseleandro.fullfocus.ui.component.ConfigOptionSwitch
+import com.joseleandro.fullfocus.ui.component.FullFocusCardConfigSection
 import com.joseleandro.fullfocus.ui.component.FullFocusInputWheelPicker
 import com.joseleandro.fullfocus.ui.component.FullFocusWheelPickerDialog
-import com.joseleandro.fullfocus.domain.effect.PomodoroSettingEffect
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent.UpdateFocusTime
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent.UpdateLongBreakTime
@@ -69,6 +69,7 @@ fun PomodoroSettingBottomSheet(
 ) {
 
     val viewModel = koinViewModel<PomodoroSettingViewModel>()
+    val navigationViewModel = koinViewModel<FullFocusNavigation>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
@@ -83,7 +84,6 @@ fun PomodoroSettingBottomSheet(
         }
     }
 
-
     PomodoroSettingBottomSheet(
         onDismissRequest = {
             scope.launch {
@@ -96,7 +96,8 @@ fun PomodoroSettingBottomSheet(
         },
         sheetState = sheetState,
         uiState = uiState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        navigate = navigationViewModel::navigate
     )
 
 }
@@ -107,7 +108,8 @@ fun PomodoroSettingBottomSheet(
     onDismissRequest: () -> Unit,
     sheetState: SheetState,
     uiState: PomodoroSettingUiState,
-    onEvent: (PomodoroSettingEvent) -> Unit
+    onEvent: (PomodoroSettingEvent) -> Unit,
+    navigate: (Screen) -> Unit
 ) {
 
     val isPreview = LocalInspectionMode.current
@@ -203,7 +205,8 @@ fun PomodoroSettingBottomSheet(
         PomodoroSettingBottomSheetContent(
             uiState = uiState,
             onEvent = onEvent,
-            onDismissRequest = onDismissRequest
+            onDismissRequest = onDismissRequest,
+            navigate = navigate
         )
     } else {
         ModalBottomSheet(
@@ -213,7 +216,8 @@ fun PomodoroSettingBottomSheet(
             PomodoroSettingBottomSheetContent(
                 uiState = uiState,
                 onEvent = onEvent,
-                onDismissRequest = onDismissRequest
+                onDismissRequest = onDismissRequest,
+                navigate = navigate
             )
         }
     }
@@ -226,106 +230,110 @@ private fun PomodoroSettingBottomSheetContent(
     modifier: Modifier = Modifier,
     uiState: PomodoroSettingUiState,
     onEvent: (PomodoroSettingEvent) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
+    navigate: (Screen) -> Unit
 ) {
 
     Column(
         modifier = modifier
-            .verticalScroll(state = rememberScrollState())
             .fillMaxWidth()
+            .fillMaxHeight(.9f)
             .padding(horizontal = 16.dp)
     ) {
-        Box(
+
+        Column(
             modifier = Modifier
+                .weight(1f)
+                .verticalScroll(state = rememberScrollState())
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
         ) {
-            Text(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(alignment = Alignment.Center),
-                text = stringResource(R.string.configurar_pomodoro),
-                style = MaterialTheme.typography.titleMedium,
-                textAlign = TextAlign.Center
-            )
-
-            IconButton(
-                modifier = Modifier.align(alignment = Alignment.CenterEnd),
-                onClick = onDismissRequest
+                    .padding(bottom = 8.dp),
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.material_symbols_close_rounded),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(alignment = Alignment.Center),
+                    text = stringResource(R.string.configurar_pomodoro),
+                    style = MaterialTheme.typography.titleSmall,
+                    textAlign = TextAlign.Center
                 )
-            }
-        }
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
-
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            LabelSection(
-                label = stringResource(R.string.duracao_das_etapas),
-                icon = {
+                IconButton(
+                    modifier = Modifier.align(alignment = Alignment.CenterEnd),
+                    onClick = onDismissRequest
+                ) {
                     Icon(
-                        modifier = Modifier.size(18.dp),
-                        painter = painterResource(id = R.drawable.mingcute_time_line),
+                        painter = painterResource(id = R.drawable.material_symbols_close_rounded),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                FullFocusInputWheelPicker(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.foco),
-                    value = uiState.focusTime,
-                    onShowPicker = {
-                        onEvent(PomodoroSettingEvent.ShowModal(modal = PomodoroSettingModalUiState.FocusTimer))
+
+                LabelSection(
+                    label = stringResource(R.string.sessao),
+                    icon = {
+                        Icon(
+                            modifier = Modifier.size(18.dp),
+                            painter = painterResource(id = R.drawable.material_symbols_timer_outline_rounded),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
                 )
 
-                FullFocusInputWheelPicker(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.pausa_curta),
-                    value = uiState.shortBreakTime,
-                    onShowPicker = {
-                        onEvent(PomodoroSettingEvent.ShowModal(modal = PomodoroSettingModalUiState.ShortBreakTimer))
-                    }
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    FullFocusInputWheelPicker(
+                        modifier = Modifier.weight(1f),
+                        label = stringResource(R.string.foco),
+                        value = uiState.focusTime,
+                        onShowPicker = {
+                            onEvent(PomodoroSettingEvent.ShowModal(modal = PomodoroSettingModalUiState.FocusTimer))
+                        }
+                    )
 
-                FullFocusInputWheelPicker(
-                    modifier = Modifier.weight(1f),
-                    label = stringResource(R.string.pausa_longa),
-                    value = uiState.longBreakTime,
-                    onShowPicker = {
-                        onEvent(PomodoroSettingEvent.ShowModal(modal = PomodoroSettingModalUiState.LongBreakTimer))
-                    }
-                )
+                    FullFocusInputWheelPicker(
+                        modifier = Modifier.weight(1f),
+                        label = stringResource(R.string.pausa_curta),
+                        value = uiState.shortBreakTime,
+                        onShowPicker = {
+                            onEvent(PomodoroSettingEvent.ShowModal(modal = PomodoroSettingModalUiState.ShortBreakTimer))
+                        }
+                    )
+
+                    FullFocusInputWheelPicker(
+                        modifier = Modifier.weight(1f),
+                        label = stringResource(R.string.pausa_longa),
+                        value = uiState.longBreakTime,
+                        onShowPicker = {
+                            onEvent(PomodoroSettingEvent.ShowModal(modal = PomodoroSettingModalUiState.LongBreakTimer))
+                        }
+                    )
+                }
             }
-        }
 
-        Spacer(
-            modifier = Modifier.height(24.dp)
-        )
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            LabelSection(
-                label = stringResource(R.string.cores_e_visual),
-                icon = {
+            FullFocusCardConfigSection(
+                title = stringResource(R.string.cores_e_visual),
+                titleIcon = {
                     Icon(
                         modifier = Modifier.size(18.dp),
                         painter = painterResource(id = R.drawable.solar_pallete_2_linear),
@@ -333,20 +341,11 @@ private fun PomodoroSettingBottomSheetContent(
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-            )
-
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = MaterialTheme.shapes.medium,
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                border = BorderStroke(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                )
             ) {
-                Column {
-                    StyleColorItem(
-                        label = "Cor do Foco",
+                option {
+                    ConfigOptionColor(
+                        title = "Cor de Foco",
+                        subtitle = "Personalize a cor do timer de foco",
                         color = uiState.focusProgressColor,
                         onClick = {
                             onEvent(
@@ -359,13 +358,11 @@ private fun PomodoroSettingBottomSheetContent(
                             )
                         }
                     )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 12.dp),
-                        thickness = 0.5.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                    )
-                    StyleColorItem(
-                        label = "Cor da Pausa Curta",
+                }
+                option {
+                    ConfigOptionColor(
+                        title = "Cor da Pausa Curta",
+                        subtitle = "Personalize a cor da pausa curta",
                         color = uiState.shortBreakProgressColor,
                         onClick = {
                             onEvent(
@@ -378,13 +375,11 @@ private fun PomodoroSettingBottomSheetContent(
                             )
                         }
                     )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 12.dp),
-                        thickness = 0.5.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-                    )
-                    StyleColorItem(
-                        label = "Cor da Pausa Longa",
+                }
+                option {
+                    ConfigOptionColor(
+                        title = "Cor da Pausa Longa",
+                        subtitle = "Personalize a cor da pausa longa",
                         color = uiState.longBreakProgressColor,
                         onClick = {
                             onEvent(
@@ -400,15 +395,74 @@ private fun PomodoroSettingBottomSheetContent(
                 }
             }
 
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
+
+            FullFocusCardConfigSection(
+                title = "Som e notificação",
+                titleIcon = {
+                    Icon(
+                        modifier = Modifier.size(18.dp),
+                        painter = painterResource(id = R.drawable.basil_notification_on_outline),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            ) {
+                option {
+                    ConfigOptionSwitch(
+                        title = "Modo silencioso",
+                        subtitle = "Desativa todos os sons e vibrações",
+                        icon = R.drawable.mingcute_volume_mute_line,
+                        checked = uiState.silentMode,
+                        onCheckedChange = {
+                            onEvent(PomodoroSettingEvent.UpdateSilentMode(value = it))
+                        }
+                    )
+                }
+                option {
+                    ConfigOptionNav(
+                        title = "Som de foco",
+                        subtitle = "Ondas do mar",
+                        enabled = !uiState.silentMode,
+                        icon = R.drawable.wpf_audio_wave,
+                        onClick = {
+                            navigate(Screen.SittingSoundPomodoroScreen(type = SettingSound.SETTING_SOUND_FOCUS))
+                        }
+                    )
+                }
+                option {
+                    ConfigOptionNav(
+                        title = "Som de pausa",
+                        subtitle = "Cafeteria",
+                        enabled = !uiState.silentMode,
+                        icon = R.drawable.mynaui_coffee,
+                        onClick = {
+                            navigate(Screen.SittingSoundPomodoroScreen(type = SettingSound.SETTING_SOUND_BREAK))
+                        }
+                    )
+                }
+                option {
+                    ConfigOptionNav(
+                        title = "Configuração de Notificação",
+                        subtitle = "Gerenciar alertas do sistema",
+                        enabled = !uiState.silentMode,
+                        icon = R.drawable.basil_notification_on_outline,
+                        onClick = {}
+                    )
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
         }
 
-        Spacer(
-            modifier = Modifier.height(16.dp)
-        )
 
         Button(
             enabled = uiState.changedSetting,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
             shape = MaterialTheme.shapes.medium,
             onClick = {
                 onEvent(PomodoroSettingEvent.OnSave)
@@ -419,44 +473,9 @@ private fun PomodoroSettingBottomSheetContent(
                 style = MaterialTheme.typography.labelLarge
             )
         }
-        Spacer(
-            modifier = Modifier.height(32.dp)
-        )
+
     }
 
-}
-
-@Composable
-private fun StyleColorItem(
-    label: String,
-    color: Color,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Box(
-            modifier = Modifier
-                .size(24.dp)
-                .clip(CircleShape)
-                .background(color)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    shape = CircleShape
-                )
-        )
-    }
 }
 
 @Composable
@@ -493,7 +512,8 @@ private fun PomodoroSettingBottomSheetLightPreview() {
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = { },
             uiState = PomodoroSettingUiState(),
-            onEvent = {}
+            onEvent = {},
+            navigate = {}
         )
     }
 }
@@ -510,7 +530,8 @@ private fun PomodoroSettingBottomSheetDarkPreview() {
             sheetState = rememberModalBottomSheetState(),
             onDismissRequest = {},
             uiState = PomodoroSettingUiState(),
-            onEvent = {}
+            onEvent = {},
+            navigate = {}
         )
     }
 }

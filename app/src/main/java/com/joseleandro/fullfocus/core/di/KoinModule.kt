@@ -1,6 +1,8 @@
 package com.joseleandro.fullfocus.core.di
 
 import androidx.room.Room
+import com.joseleandro.fullfocus.core.util.VibrationHelper
+import com.joseleandro.fullfocus.core.util.VibrationHelperImpl
 import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigation
 import com.joseleandro.fullfocus.data.datasource.PomodoroDataSource
 import com.joseleandro.fullfocus.data.datasource.PomodoroDataSourceImpl
@@ -14,6 +16,7 @@ import com.joseleandro.fullfocus.data.repository.PomodoroRepositoryImpl
 import com.joseleandro.fullfocus.data.repository.PomodoroSettingRepositoryImpl
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
+import com.joseleandro.fullfocus.ui.screen.config_sound.ConfigSoundViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingViewModel
 import org.koin.android.ext.koin.androidContext
@@ -65,6 +68,12 @@ object KoinModule {
             )
         }
 
+        single<VibrationHelper> {
+            VibrationHelperImpl(
+                context = androidContext()
+            )
+        }
+
     }
 
     val uiModule = module {
@@ -74,6 +83,8 @@ object KoinModule {
         viewModelOf(::PomodoroViewModel)
 
         viewModelOf(::PomodoroSettingViewModel)
+
+        viewModelOf(::ConfigSoundViewModel)
 
     }
 }

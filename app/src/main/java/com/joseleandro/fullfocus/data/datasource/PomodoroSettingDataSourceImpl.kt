@@ -3,6 +3,7 @@ package com.joseleandro.fullfocus.data.datasource
 import android.content.Context
 import com.joseleandro.fullfocus.data.local.preferences.dataStore
 import com.joseleandro.fullfocus.data.local.preferences.model.PomodoroSetting
+import com.joseleandro.fullfocus.data.local.preferences.model.SoundBackground
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -68,6 +69,56 @@ class PomodoroSettingDataSourceImpl(
             state.copy(
                 pomodoroSetting = state.pomodoroSetting.copy(
                     longBreakProgressColor = color
+                )
+            )
+        }
+    }
+
+    override suspend fun updateVolumeSoundFocus(volume: Int) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    volumeFocus = volume
+                )
+            )
+        }
+    }
+
+    override suspend fun updateVolumeSoundPause(volume: Int) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    volumePause = volume
+                )
+            )
+        }
+    }
+
+    override suspend fun updateSoundFocus(sound: SoundBackground) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    soundFocus = sound
+                )
+            )
+        }
+    }
+
+    override suspend fun updateSoundPause(sound: SoundBackground) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    soundPause = sound
+                )
+            )
+        }
+    }
+
+    override suspend fun updateIsSoundEnabled(isEnabled: Boolean) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    isSoundEnabled = isEnabled
                 )
             )
         }

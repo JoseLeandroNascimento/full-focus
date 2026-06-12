@@ -14,4 +14,9 @@ fun PomodoroSetting.toDomain(): PomodoroSettingDomain =
         focusProgressColor = Color.fromColorLong(this.focusProgressColor),
         longBreakProgressColor = Color.fromColorLong(this.longBreakProgressColor),
         shortBreakProgressColor = Color.fromColorLong(this.shortBreakProgressColor),
+        soundFocus = this.soundFocus,
+        soundPause = this.soundPause,
+        volumeFocus = this.volumeFocus,
+        volumePause = this.volumePause,
+        isSoundEnabled = this.isSoundEnabled
     )

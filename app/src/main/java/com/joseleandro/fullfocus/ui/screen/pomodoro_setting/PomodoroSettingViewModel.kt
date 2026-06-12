@@ -3,8 +3,8 @@ package com.joseleandro.fullfocus.ui.screen.pomodoro_setting
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.domain.effect.PomodoroSettingEffect
+import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingModalUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingUiState
@@ -45,6 +45,8 @@ class PomodoroSettingViewModel(
             is PomodoroSettingEvent.UpdateShortBreakProgressColor -> updateShortBreakProgressColor(
                 color = event.color
             )
+
+            is PomodoroSettingEvent.UpdateSilentMode -> updateSilentMode(value = event.value)
         }
     }
 
@@ -135,6 +137,17 @@ class PomodoroSettingViewModel(
                 )
             }
             closeModal()
+        }
+    }
+
+    private fun updateSilentMode(value: Boolean) {
+        viewModelScope.launch {
+            _uiState.update { state ->
+                state.copy(
+                    silentMode = value,
+                    changedSetting = true
+                )
+            }
         }
     }
 

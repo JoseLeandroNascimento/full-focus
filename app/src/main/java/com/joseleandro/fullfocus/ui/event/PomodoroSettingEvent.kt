@@ -19,6 +19,8 @@ sealed interface PomodoroSettingEvent {
 
     data class UpdateLongBreakProgressColor(val color: Color) : PomodoroSettingEvent
 
+    data class UpdateSilentMode(val value: Boolean) : PomodoroSettingEvent
+
     data class ShowModal(val modal: PomodoroSettingModalUiState) : PomodoroSettingEvent
 
     data object CloseModal : PomodoroSettingEvent

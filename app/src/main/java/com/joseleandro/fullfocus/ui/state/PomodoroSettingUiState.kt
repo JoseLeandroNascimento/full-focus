@@ -10,5 +10,6 @@ data class PomodoroSettingUiState(
     val focusProgressColor: Color = Color.Unspecified,
     val shortBreakProgressColor: Color = Color.Unspecified,
     val longBreakProgressColor: Color = Color.Unspecified,
+    val silentMode: Boolean = false,
     val modal: PomodoroSettingModalUiState = PomodoroSettingModalUiState.None
 )

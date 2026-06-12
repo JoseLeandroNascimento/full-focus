@@ -2,6 +2,7 @@ package com.joseleandro.fullfocus.ui.screen.pomodoro
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.joseleandro.fullfocus.core.util.VibrationHelper
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 import com.joseleandro.fullfocus.domain.effect.PomodoroEffect
 import com.joseleandro.fullfocus.domain.model.PomodoroDomain
@@ -20,7 +21,8 @@ import kotlinx.coroutines.launch
 
 class PomodoroViewModel(
     private val pomodoroRepository: PomodoroRepository,
-    private val pomodoroSettingRepository: PomodoroSettingRepository
+    private val pomodoroSettingRepository: PomodoroSettingRepository,
+    private val vibrationHelper: VibrationHelper
 ) : ViewModel() {
 
     private val _modal = MutableStateFlow<PomodoroModalUiState>(PomodoroModalUiState.None)
@@ -73,6 +75,7 @@ class PomodoroViewModel(
         viewModelScope.launch {
             pomodoroRepository.effect
                 .collect { pomodoroEffect ->
+                    vibrationHelper.vibrate()
                     when (pomodoroEffect) {
                         PomodoroEffect.FocusFinished -> _modal.value =
                             PomodoroModalUiState.FocusFinished

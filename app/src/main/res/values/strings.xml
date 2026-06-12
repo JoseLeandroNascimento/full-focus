@@ -34,4 +34,7 @@
     <string name="o_tempo_de_pausa_terminou_hora_de_voltar_ao_trabalho">O tempo de pausa terminou! Hora de voltar ao trabalho.</string>
     <string name="ciclo_concluido">Ciclo Concluído!</string>
     <string name="bom_trabalho_continue_focado">Bom trabalho! continue focado.</string>
+    <string name="sessao">Sessão</string>
+    <string name="foco_option">Foco</string>
+    <string name="pausa_option">Pausa</string>
 </resources>

@@ -62,10 +62,6 @@ fun PomodoroScreen(
     onEvent: (PomodoroEvent) -> Unit
 ) {
 
-    val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = true
-    )
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -225,6 +221,23 @@ fun PomodoroScreen(
 
         }
     }
+
+    PomodoroModal(
+        uiState = uiState,
+        onEvent = onEvent
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PomodoroModal(
+    uiState: PomodoroUiState,
+    onEvent: (PomodoroEvent) -> Unit
+) {
+
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
 
     when (uiState.modal) {
         PomodoroModalUiState.PomodoroSetting -> {

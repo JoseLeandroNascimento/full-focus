@@ -8,4 +8,6 @@ sealed interface Screen {
     @Serializable
     data object PomodoroScreen : Screen
 
+    data class SittingSoundPomodoroScreen(val type: SettingSound) : Screen
+
 }

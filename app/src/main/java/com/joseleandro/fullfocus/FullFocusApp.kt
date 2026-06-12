@@ -8,6 +8,7 @@ import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.joseleandro.fullfocus.core.model.Screen
 import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigation
+import com.joseleandro.fullfocus.ui.screen.config_sound.ConfigSoundScreen
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -23,6 +24,9 @@ fun FullFocusApp(modifier: Modifier = Modifier) {
         entryProvider = entryProvider {
             entry<Screen.PomodoroScreen> {
                 PomodoroScreen()
+            }
+            entry<Screen.SittingSoundPomodoroScreen> {
+                ConfigSoundScreen(onNavigateBack = viewModel::onBack)
             }
         }
     )

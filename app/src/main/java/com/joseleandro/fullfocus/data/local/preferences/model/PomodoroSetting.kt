@@ -14,5 +14,10 @@ data class PomodoroSetting(
     val sessionsUntilLongPause: Int = 4,
     val focusProgressColor: Long = Primary.toColorLong(),
     val shortBreakProgressColor: Long = ShortPause.toColorLong(),
-    val longBreakProgressColor: Long = LongPause.toColorLong()
+    val longBreakProgressColor: Long = LongPause.toColorLong(),
+    val volumeFocus: Int = 50,
+    val volumePause: Int = 50,
+    val soundFocus: SoundBackground = SoundBackground.RAIN,
+    val soundPause: SoundBackground = SoundBackground.FOREST,
+    val isSoundEnabled: Boolean = true
 )
