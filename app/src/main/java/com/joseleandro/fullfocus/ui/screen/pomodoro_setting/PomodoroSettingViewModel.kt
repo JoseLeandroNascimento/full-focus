@@ -61,7 +61,8 @@ class PomodoroSettingViewModel(
                         shortBreakTime = pomodoroSetting.shortPauseTime.formattedTime(),
                         focusProgressColor = pomodoroSetting.focusProgressColor,
                         longBreakProgressColor = pomodoroSetting.longBreakProgressColor,
-                        shortBreakProgressColor = pomodoroSetting.shortBreakProgressColor
+                        shortBreakProgressColor = pomodoroSetting.shortBreakProgressColor,
+                        silentMode = !pomodoroSetting.isSoundEnabled
                     )
                 }
             }
@@ -176,6 +177,7 @@ class PomodoroSettingViewModel(
                 pomodoroSettingRepository.updateFocusProgressColor(color = focusProgressColor)
                 pomodoroSettingRepository.updateLongBreakProgressColor(color = longBreakProgressColor)
                 pomodoroSettingRepository.updateShortBreakProgressColor(color = shortBreakProgressColor)
+                pomodoroSettingRepository.updateIsSoundEnabled(isEnabled = !silentMode)
             }
 
             changedSetting(value = false)

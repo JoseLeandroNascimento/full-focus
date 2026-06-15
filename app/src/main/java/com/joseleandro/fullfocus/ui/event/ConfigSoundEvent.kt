@@ -14,4 +14,6 @@ sealed interface ConfigSoundEvent {
     data class ChangeSound(val sound: SoundBackground) : ConfigSoundEvent
 
     data object ResetVolume : ConfigSoundEvent
+
+    data object StopPreview : ConfigSoundEvent
 }

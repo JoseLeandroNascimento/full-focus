@@ -2,6 +2,7 @@ package com.joseleandro.fullfocus.ui.screen.pomodoro
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.joseleandro.fullfocus.core.util.BackgroundSoundPlayer
 import com.joseleandro.fullfocus.core.util.VibrationHelper
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
 import com.joseleandro.fullfocus.domain.effect.PomodoroEffect
@@ -15,14 +16,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class PomodoroViewModel(
     private val pomodoroRepository: PomodoroRepository,
     private val pomodoroSettingRepository: PomodoroSettingRepository,
-    private val vibrationHelper: VibrationHelper
+    private val vibrationHelper: VibrationHelper,
+    private val backgroundSoundPlayer: BackgroundSoundPlayer,
 ) : ViewModel() {
 
     private val _modal = MutableStateFlow<PomodoroModalUiState>(PomodoroModalUiState.None)
@@ -57,6 +61,31 @@ class PomodoroViewModel(
     init {
         observeSessionCompletion()
         observePomodoroEffect()
+        observeSoundPlayback()
+    }
+
+    private fun observeSoundPlayback() {
+        viewModelScope.launch {
+            combine(
+                pomodoroRepository.pomodoro.map { it.isRunning to it.pomodoroState }.distinctUntilChanged(),
+                pomodoroSettingRepository.pomodoroSetting
+            ) { (isRunning, state), settings ->
+                Triple(isRunning, state, settings)
+            }.collect { (isRunning, state, settings) ->
+                if (isRunning && settings.isSoundEnabled) {
+                    val sound = if (state == PomodoroState.FOCUS) settings.soundFocus else settings.soundPause
+                    val volume = if (state == PomodoroState.FOCUS) settings.volumeFocus else settings.volumePause
+
+                    if (sound != null && sound.soundRes != null) {
+                        backgroundSoundPlayer.play(sound.soundRes, volume / 100f)
+                    } else {
+                        backgroundSoundPlayer.stop()
+                    }
+                } else {
+                    backgroundSoundPlayer.stop()
+                }
+            }
+        }
     }
 
     private fun observeSessionCompletion() {
@@ -108,5 +137,9 @@ class PomodoroViewModel(
         if (duration == 0L) return 1f
         val remaining = (duration - time).coerceAtLeast(0)
         return remaining.toFloat() / duration
+    }
+
+    override fun onCleared() {
+        backgroundSoundPlayer.release()
     }
 }

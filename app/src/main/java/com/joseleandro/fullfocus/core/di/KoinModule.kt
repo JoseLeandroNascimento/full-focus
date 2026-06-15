@@ -1,6 +1,7 @@
 package com.joseleandro.fullfocus.core.di
 
 import androidx.room.Room
+import com.joseleandro.fullfocus.core.util.BackgroundSoundPlayer
 import com.joseleandro.fullfocus.core.util.VibrationHelper
 import com.joseleandro.fullfocus.core.util.VibrationHelperImpl
 import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigation
@@ -70,6 +71,12 @@ object KoinModule {
 
         single<VibrationHelper> {
             VibrationHelperImpl(
+                context = androidContext()
+            )
+        }
+
+        single {
+            BackgroundSoundPlayer(
                 context = androidContext()
             )
         }

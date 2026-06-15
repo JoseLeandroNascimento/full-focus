@@ -1,6 +1,5 @@
 package com.joseleandro.fullfocus.ui.screen.config_sound
 
-import android.media.MediaPlayer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,12 +31,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
+import com.joseleandro.fullfocus.core.model.SettingSound
 import com.joseleandro.fullfocus.data.local.preferences.model.SoundBackground
 import com.joseleandro.fullfocus.ui.event.ConfigSoundEvent
 import com.joseleandro.fullfocus.ui.state.ConfigSoundUiState
@@ -53,11 +51,32 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ConfigSoundScreen(
-    onNavigateBack: () -> Unit
+    typeSettingSound: SettingSound,
+    onNavigateBack: () -> Unit,
 ) {
 
     val viewModel = koinViewModel<ConfigSoundViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.onEvent(ConfigSoundEvent.StopPreview)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+
+        val tabSelected = when (typeSettingSound) {
+            SettingSound.SETTING_SOUND_BREAK -> TabConfigSound.BREAK_OPTIONS
+            SettingSound.SETTING_SOUND_FOCUS -> TabConfigSound.FOCUS_OPTIONS
+        }
+
+        viewModel.onEvent(
+            event = ConfigSoundEvent.OnSelectTab(
+                tab = tabSelected
+            )
+        )
+    }
 
     ConfigSoundScreen(
         uiState = uiState,
@@ -71,42 +90,11 @@ fun ConfigSoundScreen(
 fun ConfigSoundScreen(
     uiState: ConfigSoundUiState,
     onEvent: (ConfigSoundEvent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
 ) {
-
-    val context = LocalContext.current
-    var mediaPlayer by remember { mutableStateOf<MediaPlayer?>(null) }
 
     var sliderValue by remember(uiState.currentVolume) {
         mutableFloatStateOf(uiState.currentVolume.toFloat())
-    }
-
-    fun playSound(resId: Int) {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = MediaPlayer.create(context, resId).apply {
-            val vol = sliderValue / 100f
-            setVolume(vol, vol)
-            isLooping = true
-            start()
-        }
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            mediaPlayer?.release()
-        }
-    }
-
-    LaunchedEffect(uiState.selectedTab) {
-        mediaPlayer?.stop()
-        mediaPlayer?.release()
-        mediaPlayer = null
-    }
-
-    LaunchedEffect(sliderValue) {
-        val vol = sliderValue / 100f
-        mediaPlayer?.setVolume(vol, vol)
     }
 
     Scaffold(
@@ -256,16 +244,7 @@ fun ConfigSoundScreen(
                             sound = sound,
                             isSelected = isSelected,
                             onSelect = {
-
                                 onEvent(ConfigSoundEvent.ChangeSound(sound))
-
-                                if (sound.soundRes != null) {
-                                    playSound(sound.soundRes)
-                                } else {
-                                    mediaPlayer?.stop()
-                                    mediaPlayer?.release()
-                                    mediaPlayer = null
-                                }
                             }
                         )
                     }
@@ -279,7 +258,7 @@ fun ConfigSoundScreen(
 fun SoundItem(
     sound: SoundBackground,
     isSelected: Boolean,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
 ) {
     OutlinedCard(
         onClick = onSelect,
@@ -326,13 +305,6 @@ fun SoundItem(
         }
     }
 }
-
-data class SoundOption(
-    val name: String,
-    val description: String,
-    val icon: Int,
-    val soundRes: Int?
-)
 
 @Preview
 @Composable

@@ -13,7 +13,7 @@ import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun FullFocusApp(modifier: Modifier = Modifier) {
+fun FullFocusApp() {
 
     val viewModel = koinViewModel<FullFocusNavigation>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -26,7 +26,11 @@ fun FullFocusApp(modifier: Modifier = Modifier) {
                 PomodoroScreen()
             }
             entry<Screen.SittingSoundPomodoroScreen> {
-                ConfigSoundScreen(onNavigateBack = viewModel::onBack)
+                it.type
+                ConfigSoundScreen(
+                    typeSettingSound = it.type,
+                    onNavigateBack = viewModel::onBack
+                )
             }
         }
     )
