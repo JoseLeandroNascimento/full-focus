@@ -7,4 +7,5 @@ data class ConfigSoundUiState(
     val currentVolume: Int = 0,
     val selectedSound: SoundBackground? = null,
     val selectedTab: TabConfigSound = TabConfigSound.FOCUS_OPTIONS,
+    val isPreviewPlaying: Boolean = false
 )

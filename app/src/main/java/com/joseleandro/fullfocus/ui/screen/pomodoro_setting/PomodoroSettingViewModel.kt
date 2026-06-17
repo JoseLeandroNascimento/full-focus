@@ -62,6 +62,8 @@ class PomodoroSettingViewModel(
                         focusProgressColor = pomodoroSetting.focusProgressColor,
                         longBreakProgressColor = pomodoroSetting.longBreakProgressColor,
                         shortBreakProgressColor = pomodoroSetting.shortBreakProgressColor,
+                        soundFocus = pomodoroSetting.soundFocus,
+                        soundPause = pomodoroSetting.soundPause,
                         silentMode = !pomodoroSetting.isSoundEnabled
                     )
                 }

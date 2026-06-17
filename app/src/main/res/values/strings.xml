@@ -37,4 +37,19 @@
     <string name="sessao">Sessão</string>
     <string name="foco_option">Foco</string>
     <string name="pausa_option">Pausa</string>
+    <string name="escolha_o_som_de_fundo">Escolha o som de fundo</string>
+    <string name="som_e_notifica_o">Som e notificação</string>
+    <string name="modo_silencioso">Modo silencioso</string>
+    <string name="desativa_todos_os_sons_e_vibracoes">Desativa todos os sons e vibrações</string>
+    <string name="som_de_foco">Som de foco</string>
+    <string name="som_de_pausa">Som de pausa</string>
+    <string name="configura_o_de_notificacao">Configuração de Notificação</string>
+    <string name="gerenciar_alertas_do_sistema">Gerenciar alertas do sistema</string>
+    <string name="cor_da_pausa_longa">Cor da Pausa Longa</string>
+    <string name="personalize_a_cor_da_pausa_longa">Personalize a cor da pausa longa</string>
+    <string name="cor_da_pausa_curta">Cor da Pausa Curta</string>
+    <string name="personalize_a_cor_da_pausa_curta">Personalize a cor da pausa curta</string>
+    <string name="cor_de_foco">Cor de Foco</string>
+    <string name="personalize_a_cor_do_timer_de_foco">Personalize a cor do timer de foco</string>
+    <string name="volume_do_som">Volume do Som</string>
 </resources>

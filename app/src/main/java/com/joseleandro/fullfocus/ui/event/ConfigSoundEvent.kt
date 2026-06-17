@@ -5,8 +5,6 @@ import com.joseleandro.fullfocus.ui.screen.config_sound.TabConfigSound
 
 sealed interface ConfigSoundEvent {
 
-    data object OnLoad: ConfigSoundEvent
-
     data class OnSelectTab(val tab: TabConfigSound) : ConfigSoundEvent
 
     data class ChangeVolume(val volume: Int) : ConfigSoundEvent

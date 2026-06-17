@@ -22,6 +22,8 @@ class ConfigSoundViewModel(
 ) : ViewModel() {
 
     private val _selectedTab = MutableStateFlow(TabConfigSound.FOCUS_OPTIONS)
+    private val _isPreviewPlaying = MutableStateFlow(false)
+    private val _localSelectedSound = MutableStateFlow<SoundBackground?>(null)
 
     private val _soundSettings = pomodoroSettingRepository.pomodoroSetting
         .map { setting ->
@@ -35,13 +37,18 @@ class ConfigSoundViewModel(
 
     val uiState: StateFlow<ConfigSoundUiState> = combine(
         _soundSettings,
-        _selectedTab
-    ) { settings, selectedTab ->
+        _selectedTab,
+        _isPreviewPlaying,
+        _localSelectedSound
+    ) { settings, selectedTab, isPreviewPlaying, localSelectedSound ->
         val isFocus = selectedTab == TabConfigSound.FOCUS_OPTIONS
+        val remoteSound = if (isFocus) settings.soundFocus else settings.soundPause
+
         ConfigSoundUiState(
             currentVolume = if (isFocus) settings.volumeFocus else settings.volumePause,
-            selectedSound = if (isFocus) settings.soundFocus else settings.soundPause,
-            selectedTab = selectedTab
+            selectedSound = localSelectedSound ?: remoteSound,
+            selectedTab = selectedTab,
+            isPreviewPlaying = isPreviewPlaying
         )
     }.stateIn(
         scope = viewModelScope,
@@ -52,30 +59,66 @@ class ConfigSoundViewModel(
     fun onEvent(event: ConfigSoundEvent) {
         when (event) {
             is ConfigSoundEvent.OnSelectTab -> {
-                _selectedTab.value = event.tab
-                backgroundSoundPlayer.stop()
+                selectTab(tab = event.tab)
             }
+
             is ConfigSoundEvent.ChangeSound -> {
-                updateSound(event.sound)
-                playSoundPreview(event.sound)
+                changeSound(sound = event.sound)
             }
+
             is ConfigSoundEvent.ChangeVolume -> {
-                updateVolume(event.volume)
-                backgroundSoundPlayer.updateVolume(event.volume / 100f)
+                changeVolume(event.volume)
             }
+
             ConfigSoundEvent.ResetVolume -> resetVolume()
-            ConfigSoundEvent.OnLoad -> {}
-            ConfigSoundEvent.StopPreview -> backgroundSoundPlayer.stop()
+            ConfigSoundEvent.StopPreview -> stopPreview()
         }
     }
 
-    private fun playSoundPreview(sound: SoundBackground) {
+    private fun selectTab(tab: TabConfigSound) {
+        _selectedTab.value = tab
+        _localSelectedSound.value = null
+        stopPreview()
+    }
+
+    private fun changeSound(sound: SoundBackground) {
+        val currentSelected = uiState.value.selectedSound
+
+        // Atualiza o estado local imediatamente para feedback visual
+        _localSelectedSound.value = sound
+        updateSound(sound)
+
+        if (currentSelected == sound) {
+            // Se já era o selecionado, alterna o preview
+            if (_isPreviewPlaying.value) {
+                stopPreview()
+            } else {
+                startPreview(sound)
+            }
+        } else {
+            // Se é um diferente, seleciona e SEMPRE começa a tocar o preview direto
+            startPreview(sound)
+        }
+    }
+
+    private fun startPreview(sound: SoundBackground) {
         if (sound.soundRes != null) {
             val volume = uiState.value.currentVolume
             backgroundSoundPlayer.play(sound.soundRes, volume / 100f)
+            _isPreviewPlaying.value = true
         } else {
-            backgroundSoundPlayer.stop()
+            stopPreview()
         }
+    }
+
+    private fun stopPreview() {
+        backgroundSoundPlayer.stop()
+        _isPreviewPlaying.value = false
+    }
+
+    private fun changeVolume(volume: Int) {
+        updateVolume(volume = volume)
+        backgroundSoundPlayer.updateVolume(volume = volume / 100f)
     }
 
     private fun resetVolume() {
@@ -87,8 +130,13 @@ class ConfigSoundViewModel(
     private fun updateVolume(volume: Int) {
         viewModelScope.launch {
             when (_selectedTab.value) {
-                TabConfigSound.FOCUS_OPTIONS -> pomodoroSettingRepository.updateVolumeSoundFocus(volume)
-                TabConfigSound.BREAK_OPTIONS -> pomodoroSettingRepository.updateVolumeSoundPause(volume)
+                TabConfigSound.FOCUS_OPTIONS -> pomodoroSettingRepository.updateVolumeSoundFocus(
+                    volume
+                )
+
+                TabConfigSound.BREAK_OPTIONS -> pomodoroSettingRepository.updateVolumeSoundPause(
+                    volume
+                )
             }
         }
     }

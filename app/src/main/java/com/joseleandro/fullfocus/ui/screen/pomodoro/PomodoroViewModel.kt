@@ -66,6 +66,7 @@ class PomodoroViewModel(
 
     private fun observeSoundPlayback() {
         viewModelScope.launch {
+            var wasRunning = false
             combine(
                 pomodoroRepository.pomodoro.map { it.isRunning to it.pomodoroState }.distinctUntilChanged(),
                 pomodoroSettingRepository.pomodoroSetting
@@ -73,6 +74,7 @@ class PomodoroViewModel(
                 Triple(isRunning, state, settings)
             }.collect { (isRunning, state, settings) ->
                 if (isRunning && settings.isSoundEnabled) {
+                    wasRunning = true
                     val sound = if (state == PomodoroState.FOCUS) settings.soundFocus else settings.soundPause
                     val volume = if (state == PomodoroState.FOCUS) settings.volumeFocus else settings.volumePause
 
@@ -81,8 +83,9 @@ class PomodoroViewModel(
                     } else {
                         backgroundSoundPlayer.stop()
                     }
-                } else {
+                } else if (wasRunning) {
                     backgroundSoundPlayer.stop()
+                    wasRunning = false
                 }
             }
         }

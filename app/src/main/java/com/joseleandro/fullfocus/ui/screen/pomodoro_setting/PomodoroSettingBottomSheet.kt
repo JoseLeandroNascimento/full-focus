@@ -1,6 +1,5 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro_setting
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -344,8 +343,8 @@ private fun PomodoroSettingBottomSheetContent(
             ) {
                 option {
                     ConfigOptionColor(
-                        title = "Cor de Foco",
-                        subtitle = "Personalize a cor do timer de foco",
+                        title = stringResource(R.string.cor_de_foco),
+                        subtitle = stringResource(R.string.personalize_a_cor_do_timer_de_foco),
                         color = uiState.focusProgressColor,
                         onClick = {
                             onEvent(
@@ -361,8 +360,8 @@ private fun PomodoroSettingBottomSheetContent(
                 }
                 option {
                     ConfigOptionColor(
-                        title = "Cor da Pausa Curta",
-                        subtitle = "Personalize a cor da pausa curta",
+                        title = stringResource(R.string.cor_da_pausa_curta),
+                        subtitle = stringResource(R.string.personalize_a_cor_da_pausa_curta),
                         color = uiState.shortBreakProgressColor,
                         onClick = {
                             onEvent(
@@ -378,8 +377,8 @@ private fun PomodoroSettingBottomSheetContent(
                 }
                 option {
                     ConfigOptionColor(
-                        title = "Cor da Pausa Longa",
-                        subtitle = "Personalize a cor da pausa longa",
+                        title = stringResource(R.string.cor_da_pausa_longa),
+                        subtitle = stringResource(R.string.personalize_a_cor_da_pausa_longa),
                         color = uiState.longBreakProgressColor,
                         onClick = {
                             onEvent(
@@ -400,7 +399,7 @@ private fun PomodoroSettingBottomSheetContent(
             )
 
             FullFocusCardConfigSection(
-                title = "Som e notificação",
+                title = stringResource(R.string.som_e_notifica_o),
                 titleIcon = {
                     Icon(
                         modifier = Modifier.size(18.dp),
@@ -412,8 +411,8 @@ private fun PomodoroSettingBottomSheetContent(
             ) {
                 option {
                     ConfigOptionSwitch(
-                        title = "Modo silencioso",
-                        subtitle = "Desativa todos os sons e vibrações",
+                        title = stringResource(R.string.modo_silencioso),
+                        subtitle = stringResource(R.string.desativa_todos_os_sons_e_vibracoes),
                         icon = R.drawable.mingcute_volume_mute_line,
                         checked = uiState.silentMode,
                         onCheckedChange = {
@@ -423,8 +422,8 @@ private fun PomodoroSettingBottomSheetContent(
                 }
                 option {
                     ConfigOptionNav(
-                        title = "Som de foco",
-                        subtitle = "Ondas do mar",
+                        title = stringResource(R.string.som_de_foco),
+                        subtitle = uiState.soundFocus?.title ?: "",
                         enabled = !uiState.silentMode,
                         icon = R.drawable.wpf_audio_wave,
                         onClick = {
@@ -434,8 +433,8 @@ private fun PomodoroSettingBottomSheetContent(
                 }
                 option {
                     ConfigOptionNav(
-                        title = "Som de pausa",
-                        subtitle = "Cafeteria",
+                        title = stringResource(R.string.som_de_pausa),
+                        subtitle = uiState.soundPause?.title ?: "",
                         enabled = !uiState.silentMode,
                         icon = R.drawable.mynaui_coffee,
                         onClick = {
@@ -445,8 +444,8 @@ private fun PomodoroSettingBottomSheetContent(
                 }
                 option {
                     ConfigOptionNav(
-                        title = "Configuração de Notificação",
-                        subtitle = "Gerenciar alertas do sistema",
+                        title = stringResource(R.string.configura_o_de_notificacao),
+                        subtitle = stringResource(R.string.gerenciar_alertas_do_sistema),
                         enabled = !uiState.silentMode,
                         icon = R.drawable.basil_notification_on_outline,
                         onClick = {}
@@ -462,7 +461,9 @@ private fun PomodoroSettingBottomSheetContent(
 
         Button(
             enabled = uiState.changedSetting,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
             shape = MaterialTheme.shapes.medium,
             onClick = {
                 onEvent(PomodoroSettingEvent.OnSave)
