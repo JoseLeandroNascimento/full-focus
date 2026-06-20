@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joseleandro.fullfocus.R
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 class FullFocusCardConfigSectionScope {
@@ -83,10 +84,10 @@ fun FullFocusCardConfigSection(
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
             border = BorderStroke(
                 width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.6f)
             )
         ) {
             Column {
@@ -150,7 +151,7 @@ private fun ConfigOptionBase(
             if (subtitle != null) {
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -205,7 +206,7 @@ fun FullFocusCardConfigSectionScope.ConfigOptionColor(
     title: String,
     subtitle: String? = null,
     @DrawableRes icon: Int? = null,
-    color: Color,
+    color: ColorStyle,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
@@ -230,7 +231,7 @@ fun FullFocusCardConfigSectionScope.ConfigOptionColor(
                 modifier = Modifier
                     .size(22.dp)
                     .clip(CircleShape)
-                    .background(color)
+                    .background(color.asBrush())
                     .border(
                         width = 1.dp,
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
@@ -340,7 +341,7 @@ private fun FullFocusCardConfigSectionLightPreview() {
                     ConfigOptionColor(
                         title = "Cor de foco",
                         subtitle = "Escolha sua cor favorita",
-                        color = MaterialTheme.colorScheme.primary,
+                        color = ColorStyle.fromColor(MaterialTheme.colorScheme.primary),
                         onClick = {}
                     )
                 }

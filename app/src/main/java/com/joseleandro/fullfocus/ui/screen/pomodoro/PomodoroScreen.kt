@@ -38,6 +38,7 @@ import com.joseleandro.fullfocus.ui.screen.pomodoro.component.PomodoroFinishedSu
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingBottomSheet
 import com.joseleandro.fullfocus.ui.state.PomodoroModalUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroUiState
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -306,7 +307,7 @@ private fun PomodoroScreenLightPreview() {
     ) {
         PomodoroScreen(
             uiState = PomodoroUiState(
-                colorProgress = Color(0xFF25D9FF)
+                colorProgress = ColorStyle.fromColor(Color(0xFF25D9FF))
             ),
             onEvent = {}
         )
@@ -322,7 +323,7 @@ private fun PomodoroScreenDarkPreview() {
     ) {
         PomodoroScreen(
             uiState = PomodoroUiState(
-                colorProgress = Color(0xFF25D9FF)
+                colorProgress = ColorStyle.fromColor(Color(0xFF25D9FF))
             ),
             onEvent = {}
         )

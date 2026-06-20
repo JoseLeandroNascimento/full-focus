@@ -36,10 +36,10 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ConfigSoundScreen(
     typeSettingSound: SettingSound,
+    viewModel: ConfigSoundViewModel = koinViewModel<ConfigSoundViewModel>(),
     onNavigateBack: () -> Unit,
 ) {
 
-    val viewModel = koinViewModel<ConfigSoundViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     DisposableEffect(Unit) {

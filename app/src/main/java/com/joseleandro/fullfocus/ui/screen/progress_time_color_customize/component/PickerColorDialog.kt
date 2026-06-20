@@ -1,6 +1,5 @@
-package com.joseleandro.fullfocus.ui.screen.pomodoro_setting.component
+package com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.component
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -9,8 +8,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,7 +20,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.skydoves.colorpicker.compose.AlphaTile
@@ -32,68 +28,29 @@ import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import com.joseleandro.fullfocus.R
-
-enum class PickerColorType(@get:StringRes val label: Int) {
-    FOCUS_PICKER_COLOR(label = R.string.picker_color_foco),
-    SHORT_BREAK_PICKER_COLOR(label = R.string.picker_color_pausa_curta),
-    LONG_BREAK_PICKER_COLOR(label = R.string.picker_color_pausa_longa)
-}
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 
 @Composable
 fun PickerColorDialog(
     type: PickerColorType,
-    color: Color,
-    onDismissRequest: () -> Unit,
-    onConfirm: (color: Color) -> Unit,
-    onCancel: () -> Unit
+    color: ColorStyle,
+    onConfirm: (ColorStyle) -> Unit,
+    onCancel: () -> Unit,
+    onDismissRequest: () -> Unit
 ) {
-
     val controller = rememberColorPickerController()
-    var colorSelect by remember { mutableStateOf(color) }
+    var selectedColor by remember { mutableStateOf(color) }
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirm(colorSelect)
-                }
-            ) {
-                Text(
-                    text = stringResource(R.string.confirmar)
-                )
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onCancel
-            ) {
-                Text(
-                    text = stringResource(R.string.cancelar)
-                )
-            }
-        },
         title = {
-            Text(
-                text = stringResource(R.string.cor_da_etapa),
-                style = MaterialTheme.typography.titleLarge
-            )
+            Text(text = stringResource(R.string.cor_personalizada))
         },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(state = rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = stringResource(
-                        R.string.defina_a_cor_que_representar_o_per_odo_de_na_interface,
-                        stringResource(type.label).lowercase()
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -119,7 +76,7 @@ fun PickerColorDialog(
                         Text(
                             text = stringResource(type.label),
                             style = MaterialTheme.typography.titleMedium,
-                            color = colorSelect
+                            color = selectedColor.getPrimaryColor()
                         )
                     }
                 }
@@ -129,13 +86,14 @@ fun PickerColorDialog(
                         .fillMaxWidth()
                         .aspectRatio(1f),
                     controller = controller,
-                    initialColor = color,
+                    initialColor = color.getPrimaryColor(),
                     onColorChanged = { colorEnvelope: ColorEnvelope ->
-                        colorSelect = colorEnvelope.color
+                        selectedColor = ColorStyle.fromColor(colorEnvelope.color)
                     }
                 )
 
                 Column(
+                    modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
@@ -150,6 +108,16 @@ fun PickerColorDialog(
                         controller = controller,
                     )
                 }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(selectedColor) }) {
+                Text(text = stringResource(R.string.confirmar))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancel) {
+                Text(text = stringResource(R.string.cancelar))
             }
         }
     )

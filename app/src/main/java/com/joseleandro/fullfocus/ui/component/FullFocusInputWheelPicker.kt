@@ -47,7 +47,9 @@ fun FullFocusInputWheelPicker(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),

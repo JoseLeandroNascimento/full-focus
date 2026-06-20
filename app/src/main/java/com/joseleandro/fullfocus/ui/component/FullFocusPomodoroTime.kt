@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 private const val POMODORO_TIME_WIDTH_STROKE = 40f
@@ -40,7 +41,7 @@ private const val POMODORO_TIME_WIDTH_STROKE = 40f
 @Composable
 fun FullFocusPomodoroTime(
     modifier: Modifier = Modifier,
-    colorProgress: Color = Color(0xFF25D9FF),
+    colorProgress: ColorStyle = ColorStyle.fromColor(Color(0xFF25D9FF)),
     size: Dp = 320.dp,
     @FloatRange(from = 0.0, to = 1.0)
     progress: Float = 0f,
@@ -156,7 +157,7 @@ private fun FullFocusPomodoroTimeBackgroundBar(modifier: Modifier = Modifier) {
 @Composable
 private fun FullFocusPomodoroTimeProgressBar(
     modifier: Modifier = Modifier,
-    colorProgress: Color,
+    colorProgress: ColorStyle,
     @FloatRange(from = 0.0, to = 1.0)
     progress: Float
 ) {
@@ -168,7 +169,7 @@ private fun FullFocusPomodoroTimeProgressBar(
 
         drawArc(
             startAngle = -90f,
-            color = colorProgress,
+            brush = colorProgress.asBrush(),
             sweepAngle = progress * 360,
             useCenter = false,
             style = Stroke(

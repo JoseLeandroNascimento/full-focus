@@ -52,4 +52,10 @@
     <string name="cor_de_foco">Cor de Foco</string>
     <string name="personalize_a_cor_do_timer_de_foco">Personalize a cor do timer de foco</string>
     <string name="volume_do_som">Volume do Som</string>
+    <string name="cores_predefinidas">Cores predefinidas</string>
+    <string name="cor_personalizada">Cor personalizada</string>
+    <string name="estilo_solido">Sólido</string>
+    <string name="estilo_gradiente">Gradiente</string>
+    <string name="personalizar_estilo_visual">Personalizar visual</string>
+    <string name="escolha_a_cor_que_melhor_representa_o_periodo_de_1s">Escolha a cor que melhor representa o período de %1$s.</string>
 </resources>

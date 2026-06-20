@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStore
 import androidx.datastore.core.Serializer
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStore
 import com.joseleandro.fullfocus.data.local.preferences.model.Setting
 import kotlinx.coroutines.Dispatchers
@@ -15,11 +16,16 @@ import java.io.OutputStream
 
 object SettingsSerializer : Serializer<Setting> {
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
+
     override val defaultValue: Setting = Setting()
 
     override suspend fun readFrom(input: InputStream): Setting =
         try {
-            Json.decodeFromString<Setting>(
+            json.decodeFromString<Setting>(
                 input.readBytes().decodeToString()
             )
         } catch (serialization: SerializationException) {
@@ -29,7 +35,7 @@ object SettingsSerializer : Serializer<Setting> {
     override suspend fun writeTo(t: Setting, output: OutputStream) {
         withContext(Dispatchers.IO) {
             output.write(
-                Json.encodeToString(t)
+                json.encodeToString(t)
                     .encodeToByteArray()
             )
         }
@@ -39,4 +45,7 @@ object SettingsSerializer : Serializer<Setting> {
 val Context.dataStore: DataStore<Setting> by dataStore(
     fileName = "settings.json",
     serializer = SettingsSerializer,
+    corruptionHandler = ReplaceFileCorruptionHandler {
+        SettingsSerializer.defaultValue
+    }
 )

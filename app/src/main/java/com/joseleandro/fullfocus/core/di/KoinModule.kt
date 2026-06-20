@@ -19,6 +19,7 @@ import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.ui.screen.config_sound.ConfigSoundViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroViewModel
+import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.ProgressTimeColorCustomizeViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
@@ -92,6 +93,8 @@ object KoinModule {
         viewModelOf(::PomodoroSettingViewModel)
 
         viewModelOf(::ConfigSoundViewModel)
+
+        viewModelOf(::ProgressTimeColorCustomizeViewModel)
 
     }
 }

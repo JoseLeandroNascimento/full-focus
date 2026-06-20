@@ -4,6 +4,7 @@ import android.content.Context
 import com.joseleandro.fullfocus.data.local.preferences.dataStore
 import com.joseleandro.fullfocus.data.local.preferences.model.PomodoroSetting
 import com.joseleandro.fullfocus.data.local.preferences.model.SoundBackground
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -44,7 +45,7 @@ class PomodoroSettingDataSourceImpl(
         }
     }
 
-    override suspend fun updateFocusProgressColor(color: Long) {
+    override suspend fun updateFocusProgressColor(color: ColorStyle) {
         context.dataStore.updateData { state ->
             state.copy(
                 pomodoroSetting = state.pomodoroSetting.copy(
@@ -54,7 +55,7 @@ class PomodoroSettingDataSourceImpl(
         }
     }
 
-    override suspend fun updateShortBreakProgressColor(color: Long) {
+    override suspend fun updateShortBreakProgressColor(color: ColorStyle) {
         context.dataStore.updateData { state ->
             state.copy(
                 pomodoroSetting = state.pomodoroSetting.copy(
@@ -64,7 +65,7 @@ class PomodoroSettingDataSourceImpl(
         }
     }
 
-    override suspend fun updateLongBreakProgressColor(color: Long) {
+    override suspend fun updateLongBreakProgressColor(color: ColorStyle) {
         context.dataStore.updateData { state ->
             state.copy(
                 pomodoroSetting = state.pomodoroSetting.copy(

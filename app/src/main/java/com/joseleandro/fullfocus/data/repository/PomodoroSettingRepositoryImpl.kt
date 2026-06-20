@@ -1,12 +1,11 @@
 package com.joseleandro.fullfocus.data.repository
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toColorLong
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingDataSource
 import com.joseleandro.fullfocus.data.local.mapper.toDomain
 import com.joseleandro.fullfocus.data.local.preferences.model.SoundBackground
 import com.joseleandro.fullfocus.domain.model.PomodoroSettingDomain
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -29,16 +28,16 @@ class PomodoroSettingRepositoryImpl(
         pomodoroSettingDataSource.updateLongBreakTime(time = time)
     }
 
-    override suspend fun updateFocusProgressColor(color: Color) {
-        pomodoroSettingDataSource.updateFocusProgressColor(color = color.toColorLong())
+    override suspend fun updateFocusProgressColor(color: ColorStyle) {
+        pomodoroSettingDataSource.updateFocusProgressColor(color = color)
     }
 
-    override suspend fun updateShortBreakProgressColor(color: Color) {
-        pomodoroSettingDataSource.updateShortBreakProgressColor(color = color.toColorLong())
+    override suspend fun updateShortBreakProgressColor(color: ColorStyle) {
+        pomodoroSettingDataSource.updateShortBreakProgressColor(color = color)
     }
 
-    override suspend fun updateLongBreakProgressColor(color: Color) {
-        pomodoroSettingDataSource.updateLongBreakProgressColor(color = color.toColorLong())
+    override suspend fun updateLongBreakProgressColor(color: ColorStyle) {
+        pomodoroSettingDataSource.updateLongBreakProgressColor(color = color)
     }
 
     override suspend fun updateVolumeSoundFocus(volume: Int) {

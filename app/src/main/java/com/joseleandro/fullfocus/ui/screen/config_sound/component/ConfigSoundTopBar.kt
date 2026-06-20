@@ -22,7 +22,7 @@ fun ConfigSoundTopBar(
         title = {
             Text(
                 text = "Sons do Cronômetro",
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
         },

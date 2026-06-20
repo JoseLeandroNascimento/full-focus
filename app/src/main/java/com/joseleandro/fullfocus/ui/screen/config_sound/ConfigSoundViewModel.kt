@@ -16,6 +16,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+private const val VOLUME_SOUND_BREAK = 50
+private const val VOLUME_SOUND_FOCUS = 70
+
 class ConfigSoundViewModel(
     private val pomodoroSettingRepository: PomodoroSettingRepository,
     private val backgroundSoundPlayer: BackgroundSoundPlayer,
@@ -84,19 +87,16 @@ class ConfigSoundViewModel(
     private fun changeSound(sound: SoundBackground) {
         val currentSelected = uiState.value.selectedSound
 
-        // Atualiza o estado local imediatamente para feedback visual
         _localSelectedSound.value = sound
         updateSound(sound)
 
         if (currentSelected == sound) {
-            // Se já era o selecionado, alterna o preview
             if (_isPreviewPlaying.value) {
                 stopPreview()
             } else {
                 startPreview(sound)
             }
         } else {
-            // Se é um diferente, seleciona e SEMPRE começa a tocar o preview direto
             startPreview(sound)
         }
     }
@@ -122,7 +122,9 @@ class ConfigSoundViewModel(
     }
 
     private fun resetVolume() {
-        val defaultVolume = if (_selectedTab.value == TabConfigSound.FOCUS_OPTIONS) 70 else 50
+        val defaultVolume =
+            if (_selectedTab.value == TabConfigSound.FOCUS_OPTIONS) VOLUME_SOUND_FOCUS else VOLUME_SOUND_BREAK
+
         updateVolume(defaultVolume)
         backgroundSoundPlayer.updateVolume(defaultVolume / 100f)
     }

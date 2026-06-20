@@ -1,7 +1,7 @@
 package com.joseleandro.fullfocus.ui.event
 
-import androidx.compose.ui.graphics.Color
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingModalUiState
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 
 sealed interface PomodoroSettingEvent {
 
@@ -13,11 +13,11 @@ sealed interface PomodoroSettingEvent {
 
     data class UpdateLongBreakTime(val time: String) : PomodoroSettingEvent
 
-    data class UpdateFocusProgressColor(val color: Color) : PomodoroSettingEvent
+    data class UpdateFocusProgressColor(val color: ColorStyle) : PomodoroSettingEvent
 
-    data class UpdateShortBreakProgressColor(val color: Color) : PomodoroSettingEvent
+    data class UpdateShortBreakProgressColor(val color: ColorStyle) : PomodoroSettingEvent
 
-    data class UpdateLongBreakProgressColor(val color: Color) : PomodoroSettingEvent
+    data class UpdateLongBreakProgressColor(val color: ColorStyle) : PomodoroSettingEvent
 
     data class UpdateSilentMode(val value: Boolean) : PomodoroSettingEvent
 

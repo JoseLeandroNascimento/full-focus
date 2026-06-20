@@ -2,6 +2,7 @@ package com.joseleandro.fullfocus.data.datasource
 
 import com.joseleandro.fullfocus.data.local.preferences.model.PomodoroSetting
 import com.joseleandro.fullfocus.data.local.preferences.model.SoundBackground
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 import kotlinx.coroutines.flow.Flow
 
 interface PomodoroSettingDataSource {
@@ -14,11 +15,11 @@ interface PomodoroSettingDataSource {
 
     suspend fun updateLongBreakTime(time: Long)
 
-    suspend fun updateFocusProgressColor(color: Long)
+    suspend fun updateFocusProgressColor(color: ColorStyle)
 
-    suspend fun updateShortBreakProgressColor(color: Long)
+    suspend fun updateShortBreakProgressColor(color: ColorStyle)
 
-    suspend fun updateLongBreakProgressColor(color: Long)
+    suspend fun updateLongBreakProgressColor(color: ColorStyle)
 
     suspend fun updateVolumeSoundFocus(volume: Int)
 

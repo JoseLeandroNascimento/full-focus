@@ -1,7 +1,7 @@
 package com.joseleandro.fullfocus.ui.state
 
-import androidx.compose.ui.graphics.Color
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroState
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 
 data class PomodoroUiState(
     val duration: Long = 0,
@@ -11,6 +11,6 @@ data class PomodoroUiState(
     val focusCount: Int = 0,
     val completedPomodoroCount: Int = 0,
     val sessionsUntilLongPause: Int = 4,
-    val colorProgress: Color = Color.Unspecified,
+    val colorProgress: ColorStyle = ColorStyle.Solid(0),
     val modal: PomodoroModalUiState = PomodoroModalUiState.None
 )

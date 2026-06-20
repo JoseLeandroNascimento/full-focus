@@ -1,6 +1,5 @@
 package com.joseleandro.fullfocus.ui.screen.pomodoro_setting
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.domain.effect.PomodoroSettingEffect
@@ -8,6 +7,7 @@ import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.ui.event.PomodoroSettingEvent
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingModalUiState
 import com.joseleandro.fullfocus.ui.state.PomodoroSettingUiState
+import com.joseleandro.fullfocus.ui.theme.ColorStyle
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -71,7 +71,7 @@ class PomodoroSettingViewModel(
         }
     }
 
-    private fun updateFocusProgressColor(color: Color) {
+    private fun updateFocusProgressColor(color: ColorStyle) {
         viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(
@@ -83,7 +83,7 @@ class PomodoroSettingViewModel(
         }
     }
 
-    private fun updateShortBreakProgressColor(color: Color) {
+    private fun updateShortBreakProgressColor(color: ColorStyle) {
         viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(
@@ -95,7 +95,7 @@ class PomodoroSettingViewModel(
         }
     }
 
-    private fun updateLongBreakProgressColor(color: Color) {
+    private fun updateLongBreakProgressColor(color: ColorStyle) {
         viewModelScope.launch {
             _uiState.update { state ->
                 state.copy(
