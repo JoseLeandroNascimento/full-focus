@@ -58,4 +58,10 @@
     <string name="estilo_gradiente">Gradiente</string>
     <string name="personalizar_estilo_visual">Personalizar visual</string>
     <string name="escolha_a_cor_que_melhor_representa_o_periodo_de_1s">Escolha a cor que melhor representa o período de %1$s.</string>
+    <string name="configuracoes_de_notificacao">Configurações de notificação</string>
+    <string name="notificacoes_de_pomodoro">Notificações de Pomodoro</string>
+    <string name="exibir_notificacoes">Exibir notificações</string>
+    <string name="vibracao">Vibrar</string>
+    <string name="som">Som</string>
+    <string name="voltar">voltar</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.joseleandro.fullfocus.domain.model
 
+import com.joseleandro.fullfocus.data.local.preferences.model.SoundAlarm
 import com.joseleandro.fullfocus.data.local.preferences.model.SoundBackground
 import com.joseleandro.fullfocus.ui.theme.ColorStyle
 
@@ -15,5 +16,8 @@ data class PomodoroSettingDomain(
     val volumePause: Int = 0,
     val soundFocus: SoundBackground? = null,
     val soundPause: SoundBackground? = null,
-    val isSoundEnabled: Boolean = true
+    val isSoundEnabled: Boolean = true,
+    val alertSoundFocus: SoundAlarm? = null,
+    val alertSoundPause: SoundAlarm? = null,
+    val isVibrationEnabled: Boolean = true
 )

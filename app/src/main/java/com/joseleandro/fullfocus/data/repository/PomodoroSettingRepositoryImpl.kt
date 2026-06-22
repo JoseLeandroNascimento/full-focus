@@ -2,6 +2,7 @@ package com.joseleandro.fullfocus.data.repository
 
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingDataSource
 import com.joseleandro.fullfocus.data.local.mapper.toDomain
+import com.joseleandro.fullfocus.data.local.preferences.model.SoundAlarm
 import com.joseleandro.fullfocus.data.local.preferences.model.SoundBackground
 import com.joseleandro.fullfocus.domain.model.PomodoroSettingDomain
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
@@ -58,5 +59,17 @@ class PomodoroSettingRepositoryImpl(
 
     override suspend fun updateIsSoundEnabled(isEnabled: Boolean) {
         pomodoroSettingDataSource.updateIsSoundEnabled(isEnabled = isEnabled)
+    }
+
+    override suspend fun updateIsVibrationEnabled(isEnabled: Boolean) {
+        pomodoroSettingDataSource.updateIsVibrationEnabled(isEnabled = isEnabled)
+    }
+
+    override suspend fun updateAlertSoundFocus(sound: SoundAlarm?) {
+        pomodoroSettingDataSource.updateAlertSoundFocus(sound = sound)
+    }
+
+    override suspend fun updateAlertSoundPause(sound: SoundAlarm?) {
+        pomodoroSettingDataSource.updateAlertSoundPause(sound = sound)
     }
 }

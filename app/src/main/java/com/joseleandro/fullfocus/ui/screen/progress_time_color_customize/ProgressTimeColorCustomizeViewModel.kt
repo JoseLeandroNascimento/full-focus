@@ -2,7 +2,7 @@ package com.joseleandro.fullfocus.ui.screen.progress_time_color_customize
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.joseleandro.fullfocus.domain.effect.PickerColorEffect
+import com.joseleandro.fullfocus.domain.effect.ProgressTimeColorCustomizeEffect
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.ui.event.PickerColorEvent
 import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.component.PickerColorType
@@ -22,7 +22,7 @@ class ProgressTimeColorCustomizeViewModel(
     private val _uiState = MutableStateFlow(PickerColorUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val _effect = MutableSharedFlow<PickerColorEffect>()
+    private val _effect = MutableSharedFlow<ProgressTimeColorCustomizeEffect>()
     val effect = _effect.asSharedFlow()
 
     fun init(type: PickerColorType, initialColor: ColorStyle) {
@@ -46,13 +46,13 @@ class ProgressTimeColorCustomizeViewModel(
             PickerColorEvent.OnConfirm -> {
                 viewModelScope.launch {
                     saveColor(_uiState.value.type, _uiState.value.selectedColor)
-                    _effect.emit(PickerColorEffect.ConfirmColor(_uiState.value.selectedColor))
+                    _effect.emit(ProgressTimeColorCustomizeEffect.ConfirmColor(_uiState.value.selectedColor))
                 }
             }
 
             PickerColorEvent.OnCancel -> {
                 viewModelScope.launch {
-                    _effect.emit(PickerColorEffect.NavigateBack)
+                    _effect.emit(ProgressTimeColorCustomizeEffect.NavigateBack)
                 }
             }
         }

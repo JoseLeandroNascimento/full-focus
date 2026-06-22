@@ -1,6 +1,7 @@
 package com.joseleandro.fullfocus.data.datasource
 
 import com.joseleandro.fullfocus.data.local.preferences.model.PomodoroSetting
+import com.joseleandro.fullfocus.data.local.preferences.model.SoundAlarm
 import com.joseleandro.fullfocus.data.local.preferences.model.SoundBackground
 import com.joseleandro.fullfocus.ui.theme.ColorStyle
 import kotlinx.coroutines.flow.Flow
@@ -30,5 +31,11 @@ interface PomodoroSettingDataSource {
     suspend fun updateSoundPause(sound: SoundBackground)
 
     suspend fun updateIsSoundEnabled(isEnabled: Boolean)
+
+    suspend fun updateIsVibrationEnabled(isEnabled: Boolean)
+
+    suspend fun updateAlertSoundFocus(sound: SoundAlarm?)
+
+    suspend fun updateAlertSoundPause(sound: SoundAlarm?)
 
 }

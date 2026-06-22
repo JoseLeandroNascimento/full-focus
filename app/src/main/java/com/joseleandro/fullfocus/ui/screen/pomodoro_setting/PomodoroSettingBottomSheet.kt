@@ -320,46 +320,46 @@ private fun PomodoroSettingBottomSheetContent(
                         title = stringResource(R.string.cor_de_foco),
                         subtitle = stringResource(R.string.personalize_a_cor_do_timer_de_foco),
                         color = uiState.focusProgressColor,
-                onClick = {
-                    navigate(
-                        Screen.PickerColorScreen(
-                            type = PickerColorType.FOCUS_PICKER_COLOR,
-                            initialColor = uiState.focusProgressColor
-                        )
+                        onClick = {
+                            navigate(
+                                Screen.ProgressTimeColorCustomizeScreen(
+                                    type = PickerColorType.FOCUS_PICKER_COLOR,
+                                    initialColor = uiState.focusProgressColor
+                                )
+                            )
+                        }
                     )
                 }
-            )
-        }
-        option {
-            ConfigOptionColor(
-                title = stringResource(R.string.cor_da_pausa_curta),
-                subtitle = stringResource(R.string.personalize_a_cor_da_pausa_curta),
-                color = uiState.shortBreakProgressColor,
-                onClick = {
-                    navigate(
-                        Screen.PickerColorScreen(
-                            type = PickerColorType.SHORT_BREAK_PICKER_COLOR,
-                            initialColor = uiState.shortBreakProgressColor
-                        )
+                option {
+                    ConfigOptionColor(
+                        title = stringResource(R.string.cor_da_pausa_curta),
+                        subtitle = stringResource(R.string.personalize_a_cor_da_pausa_curta),
+                        color = uiState.shortBreakProgressColor,
+                        onClick = {
+                            navigate(
+                                Screen.ProgressTimeColorCustomizeScreen(
+                                    type = PickerColorType.SHORT_BREAK_PICKER_COLOR,
+                                    initialColor = uiState.shortBreakProgressColor
+                                )
+                            )
+                        }
                     )
                 }
-            )
-        }
-        option {
-            ConfigOptionColor(
-                title = stringResource(R.string.cor_da_pausa_longa),
-                subtitle = stringResource(R.string.personalize_a_cor_da_pausa_longa),
-                color = uiState.longBreakProgressColor,
-                onClick = {
-                    navigate(
-                        Screen.PickerColorScreen(
-                            type = PickerColorType.LONG_BREAK_PICKER_COLOR,
-                            initialColor = uiState.longBreakProgressColor
-                        )
+                option {
+                    ConfigOptionColor(
+                        title = stringResource(R.string.cor_da_pausa_longa),
+                        subtitle = stringResource(R.string.personalize_a_cor_da_pausa_longa),
+                        color = uiState.longBreakProgressColor,
+                        onClick = {
+                            navigate(
+                                Screen.ProgressTimeColorCustomizeScreen(
+                                    type = PickerColorType.LONG_BREAK_PICKER_COLOR,
+                                    initialColor = uiState.longBreakProgressColor
+                                )
+                            )
+                        }
                     )
                 }
-            )
-        }
             }
 
             FullFocusCardConfigSection(
@@ -412,7 +412,9 @@ private fun PomodoroSettingBottomSheetContent(
                         subtitle = stringResource(R.string.gerenciar_alertas_do_sistema),
                         enabled = !uiState.silentMode,
                         icon = R.drawable.basil_notification_on_outline,
-                        onClick = {}
+                        onClick = {
+                            navigate(Screen.NotificationSettingScreen)
+                        }
                     )
                 }
             }

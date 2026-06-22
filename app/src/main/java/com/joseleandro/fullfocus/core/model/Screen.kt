@@ -10,9 +10,16 @@ sealed interface Screen {
     @Serializable
     data object PomodoroScreen : Screen
 
+    @Serializable
     data class SittingSoundPomodoroScreen(val type: SettingSound) : Screen
 
     @Serializable
-    data class PickerColorScreen(val type: PickerColorType, val initialColor: ColorStyle) : Screen
+    data class ProgressTimeColorCustomizeScreen(
+        val type: PickerColorType,
+        val initialColor: ColorStyle
+    ) : Screen
+
+    @Serializable
+    data object NotificationSettingScreen : Screen
 
 }

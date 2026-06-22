@@ -45,7 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.domain.effect.PickerColorEffect
+import com.joseleandro.fullfocus.domain.effect.ProgressTimeColorCustomizeEffect
 import com.joseleandro.fullfocus.ui.event.PickerColorEvent
 import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.component.PickerColorDialog
 import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.component.PickerColorType
@@ -115,8 +115,8 @@ fun ProgressTimeColorCustomizeScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is PickerColorEffect.ConfirmColor -> onConfirm(effect.color)
-                PickerColorEffect.NavigateBack -> onNavigateBack()
+                is ProgressTimeColorCustomizeEffect.ConfirmColor -> onConfirm(effect.color)
+                ProgressTimeColorCustomizeEffect.NavigateBack -> onNavigateBack()
             }
         }
     }

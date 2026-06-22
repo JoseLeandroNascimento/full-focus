@@ -3,6 +3,7 @@ package com.joseleandro.fullfocus.data.datasource
 import android.content.Context
 import com.joseleandro.fullfocus.data.local.preferences.dataStore
 import com.joseleandro.fullfocus.data.local.preferences.model.PomodoroSetting
+import com.joseleandro.fullfocus.data.local.preferences.model.SoundAlarm
 import com.joseleandro.fullfocus.data.local.preferences.model.SoundBackground
 import com.joseleandro.fullfocus.ui.theme.ColorStyle
 import kotlinx.coroutines.flow.Flow
@@ -120,6 +121,36 @@ class PomodoroSettingDataSourceImpl(
             state.copy(
                 pomodoroSetting = state.pomodoroSetting.copy(
                     isSoundEnabled = isEnabled
+                )
+            )
+        }
+    }
+
+    override suspend fun updateIsVibrationEnabled(isEnabled: Boolean) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    isVibrationEnabled = isEnabled
+                )
+            )
+        }
+    }
+
+    override suspend fun updateAlertSoundFocus(sound: SoundAlarm?) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    alertSoundFocus = sound
+                )
+            )
+        }
+    }
+
+    override suspend fun updateAlertSoundPause(sound: SoundAlarm?) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    alertSoundPause = sound
                 )
             )
         }

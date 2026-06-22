@@ -8,9 +8,10 @@ import androidx.navigation3.ui.NavDisplay
 import com.joseleandro.fullfocus.core.model.Screen
 import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigation
 import com.joseleandro.fullfocus.ui.screen.config_sound.ConfigSoundScreen
+import com.joseleandro.fullfocus.ui.screen.notification_setting.NotificationSettingScreen
+import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
 import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.ProgressTimeColorCustomizeScreen
 import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.ProgressTimeColorCustomizeViewModel
-import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -35,7 +36,7 @@ fun FullFocusApp() {
                     onNavigateBack = onBack
                 )
             }
-            entry<Screen.PickerColorScreen> { screen ->
+            entry<Screen.ProgressTimeColorCustomizeScreen> { screen ->
                 ProgressTimeColorCustomizeScreen(
                     type = screen.type,
                     initialColor = screen.initialColor,
@@ -44,6 +45,12 @@ fun FullFocusApp() {
                     onConfirm = {
                         navigationViewModel.onBack()
                     }
+                )
+            }
+
+            entry<Screen.NotificationSettingScreen> {
+                NotificationSettingScreen(
+                    onNavigateBack = onBack
                 )
             }
         }

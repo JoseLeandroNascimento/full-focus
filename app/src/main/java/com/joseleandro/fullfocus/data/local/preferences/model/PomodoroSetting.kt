@@ -19,5 +19,8 @@ data class PomodoroSetting(
     val volumePause: Int = 50,
     val soundFocus: SoundBackground = SoundBackground.RAIN,
     val soundPause: SoundBackground = SoundBackground.FOREST,
-    val isSoundEnabled: Boolean = true
+    val isSoundEnabled: Boolean = true,
+    val alertSoundFocus: SoundAlarm? = SoundAlarm.ALARM_1,
+    val alertSoundPause: SoundAlarm? = SoundAlarm.ALARM_1,
+    val isVibrationEnabled: Boolean = true
 )

@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -68,15 +69,18 @@ class PomodoroViewModel(
         viewModelScope.launch {
             var wasRunning = false
             combine(
-                pomodoroRepository.pomodoro.map { it.isRunning to it.pomodoroState }.distinctUntilChanged(),
+                pomodoroRepository.pomodoro.map { it.isRunning to it.pomodoroState }
+                    .distinctUntilChanged(),
                 pomodoroSettingRepository.pomodoroSetting
             ) { (isRunning, state), settings ->
                 Triple(isRunning, state, settings)
             }.collect { (isRunning, state, settings) ->
                 if (isRunning && settings.isSoundEnabled) {
                     wasRunning = true
-                    val sound = if (state == PomodoroState.FOCUS) settings.soundFocus else settings.soundPause
-                    val volume = if (state == PomodoroState.FOCUS) settings.volumeFocus else settings.volumePause
+                    val sound =
+                        if (state == PomodoroState.FOCUS) settings.soundFocus else settings.soundPause
+                    val volume =
+                        if (state == PomodoroState.FOCUS) settings.volumeFocus else settings.volumePause
 
                     if (sound != null && sound.soundRes != null) {
                         backgroundSoundPlayer.play(sound.soundRes, volume / 100f)
@@ -105,20 +109,55 @@ class PomodoroViewModel(
     private fun observePomodoroEffect() {
 
         viewModelScope.launch {
-            pomodoroRepository.effect
-                .collect { pomodoroEffect ->
+
+            pomodoroRepository.effect.collect { effect ->
+                val settings = pomodoroSettingRepository.pomodoroSetting.first()
+
+                if (settings.isVibrationEnabled) {
                     vibrationHelper.vibrate()
-                    when (pomodoroEffect) {
-                        PomodoroEffect.FocusFinished -> _modal.value =
+                }
+
+                when (effect) {
+                    PomodoroEffect.FocusFinished -> {
+                        _modal.value =
                             PomodoroModalUiState.FocusFinished
 
-                        PomodoroEffect.LongBreakFinished -> _modal.value =
+                        settings.alertSoundFocus?.let {
+                            backgroundSoundPlayer.play(
+                                resId = settings.alertSoundFocus.soundRes,
+                                volume = 1f,
+                                looping = false
+                            )
+                        }
+                    }
+
+                    PomodoroEffect.LongBreakFinished -> {
+                        _modal.value =
                             PomodoroModalUiState.LongBreakFinished
 
-                        PomodoroEffect.ShortBreakFinished -> _modal.value =
+                        settings.alertSoundPause?.let {
+                            backgroundSoundPlayer.play(
+                                resId = settings.alertSoundPause.soundRes,
+                                volume = 1f,
+                                looping = false
+                            )
+                        }
+                    }
+
+                    PomodoroEffect.ShortBreakFinished -> {
+                        _modal.value =
                             PomodoroModalUiState.ShortBreakFinished
+                        settings.alertSoundPause?.let {
+                            backgroundSoundPlayer.play(
+                                resId = settings.alertSoundPause.soundRes,
+                                volume = 1f,
+                                looping = false
+                            )
+                        }
                     }
                 }
+
+            }
         }
     }
 

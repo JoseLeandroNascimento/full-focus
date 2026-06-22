@@ -1,6 +1,5 @@
 package com.joseleandro.fullfocus.ui.component
 
-import android.widget.Switch
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -26,7 +25,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -123,7 +121,8 @@ private fun ConfigOptionBase(
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null && enabled) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(vertical = 14.dp, horizontal = 16.dp).graphicsLayer{
+            .padding(vertical = 14.dp, horizontal = 16.dp)
+            .graphicsLayer {
                 this.alpha = alpha
             },
         verticalAlignment = Alignment.CenterVertically,
