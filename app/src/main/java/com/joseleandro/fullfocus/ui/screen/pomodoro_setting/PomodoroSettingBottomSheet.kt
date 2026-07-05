@@ -4,15 +4,19 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -103,7 +107,7 @@ fun PomodoroSettingBottomSheet(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun PomodoroSettingBottomSheet(
     onDismissRequest: () -> Unit,
@@ -177,7 +181,10 @@ fun PomodoroSettingBottomSheet(
     } else {
         ModalBottomSheet(
             sheetState = sheetState,
-            onDismissRequest = onDismissRequest
+            onDismissRequest = onDismissRequest,
+            contentWindowInsets = {
+                WindowInsets(left = 0, top = 0, right = 0, bottom = 0)
+            }
         ) {
             PomodoroSettingBottomSheetContent(
                 uiState = uiState,
@@ -191,6 +198,7 @@ fun PomodoroSettingBottomSheet(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PomodoroSettingBottomSheetContent(
     modifier: Modifier = Modifier,
@@ -376,7 +384,7 @@ private fun PomodoroSettingBottomSheetContent(
                 option {
                     ConfigOptionSwitch(
                         title = stringResource(R.string.modo_silencioso),
-                        subtitle = stringResource(R.string.desativa_todos_os_sons_e_vibracoes),
+                        subtitle = stringResource(R.string.desativa_todos_os_sons),
                         icon = R.drawable.mingcute_volume_mute_line,
                         checked = uiState.silentMode,
                         onCheckedChange = {
@@ -425,15 +433,16 @@ private fun PomodoroSettingBottomSheetContent(
         }
 
         Surface(
-            modifier = Modifier.fillMaxWidth(),
-            tonalElevation = 2.dp,
-            shadowElevation = 4.dp
+            modifier = Modifier
+                .fillMaxWidth(),
+            color = BottomSheetDefaults.ContainerColor,
         ) {
             Button(
                 enabled = uiState.changedSetting,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .navigationBarsPadding(),
                 shape = MaterialTheme.shapes.medium,
                 onClick = {
                     onEvent(PomodoroSettingEvent.OnSave)

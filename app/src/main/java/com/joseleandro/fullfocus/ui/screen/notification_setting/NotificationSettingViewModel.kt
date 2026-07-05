@@ -4,6 +4,7 @@ import androidx.annotation.RawRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.joseleandro.fullfocus.core.util.BackgroundSoundPlayer
+import com.joseleandro.fullfocus.core.util.VibrationHelper
 import com.joseleandro.fullfocus.data.local.preferences.model.SoundAlarm
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.ui.event.NotificationSettingEvent
@@ -16,7 +17,8 @@ import kotlinx.coroutines.launch
 
 class NotificationSettingViewModel(
     private val backgroundSoundPlayer: BackgroundSoundPlayer,
-    private val pomodoroSettingRepository: PomodoroSettingRepository
+    private val pomodoroSettingRepository: PomodoroSettingRepository,
+    private val vibrationHelper: VibrationHelper
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(NotificationSettingUiState())
@@ -51,6 +53,9 @@ class NotificationSettingViewModel(
     private fun updateVibrationEnabled(isEnabled: Boolean) {
         viewModelScope.launch {
             pomodoroSettingRepository.updateIsVibrationEnabled(isEnabled = isEnabled)
+            if (isEnabled) {
+                vibrationHelper.vibrate(duration = 500L)
+            }
         }
     }
 

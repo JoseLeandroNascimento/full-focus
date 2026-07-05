@@ -91,7 +91,7 @@ fun NotificationSettingScreen(
             item {
                 FullFocusCardConfigSection(
                     modifier = Modifier.padding(horizontal = 16.dp),
-                    title = "Personalização por Etapa",
+                    title = stringResource(R.string.personalizacao_por_etapa),
                     titleIcon = {
                         Icon(
                             painter = painterResource(id = R.drawable.material_symbols_timer_outline_rounded),
@@ -103,8 +103,8 @@ fun NotificationSettingScreen(
                 ) {
                     option {
                         ConfigOptionNav(
-                            title = "Alerta de Foco Concluído",
-                            subtitle = "Toque suave: Zen Bell",
+                            title = stringResource(R.string.alerta_de_foco_concluido),
+                            subtitle = uiState.alertSoundFocus?.let { stringResource(id = it.title) },
                             icon = R.drawable.sound,
                             onClick = {
                                 onEvent(NotificationSettingEvent.ShowModal(modal = NotificationSettingModalUiState.AlertSoundFocus))
@@ -113,8 +113,8 @@ fun NotificationSettingScreen(
                     }
                     option {
                         ConfigOptionNav(
-                            title = "Alerta de Pausa Concluída",
-                            subtitle = "Toque vibrante: Morning Bird",
+                            title = stringResource(R.string.alerta_de_pausa_concluida),
+                            subtitle = uiState.alertSoundPause?.let { stringResource(id = it.title) },
                             icon = R.drawable.sound,
                             onClick = {
                                 onEvent(NotificationSettingEvent.ShowModal(modal = NotificationSettingModalUiState.AlertSoundPause))
@@ -123,86 +123,13 @@ fun NotificationSettingScreen(
                     }
                     option {
                         ConfigOptionSwitch(
-                            title = "Vibração Inteligente",
-                            subtitle = "Padrão curto para pausas e longo para foco",
+                            title = stringResource(R.string.vibracao_inteligente),
+                            subtitle = stringResource(R.string.padrao_curto_para_pausas_e_longo_para_foco),
                             icon = R.drawable.solar_smartphone_vibration_linear,
                             checked = uiState.isVibrationEnabled,
                             onCheckedChange = {
                                 onEvent(NotificationSettingEvent.UpdateVibrationEnabled(isEnabled = it))
                             }
-                        )
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            item {
-                FullFocusCardConfigSection(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    title = "Visibilidade e Foco",
-                    titleIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.basil_notification_on_outline),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                ) {
-                    option {
-                        ConfigOptionSwitch(
-                            title = "Auto-limpeza",
-                            subtitle = "Remover notificação anterior ao iniciar novo ciclo",
-                            icon = R.drawable.material_symbols_close_rounded,
-                            checked = true,
-                            onCheckedChange = {}
-                        )
-                    }
-                    option {
-                        ConfigOptionSwitch(
-                            title = "Timer na Barra de Status",
-                            subtitle = "Exibir contagem regressiva fixa durante o foco",
-                            icon = R.drawable.mingcute_time_line,
-                            checked = true,
-                            onCheckedChange = {}
-                        )
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-
-            // SEÇÃO: INTELIGÊNCIA (Funcionalidade Útil: Antecipação e Respeito)
-            item {
-                FullFocusCardConfigSection(
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    title = "Configurações Inteligentes",
-                    titleIcon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.mdi_timer_cog_outline),
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                ) {
-                    option {
-                        ConfigOptionSwitch(
-                            title = "Alerta de Proximidade",
-                            subtitle = "Sinal sutil faltando 1 minuto para o fim",
-                            icon = R.drawable.fluent_alert_12_regular,
-                            checked = false,
-                            onCheckedChange = {}
-                        )
-                    }
-                    option {
-                        ConfigOptionSwitch(
-                            title = "Ignorar Silencioso",
-                            subtitle = "Alertas sonoros mesmo se o celular estiver no vibrar",
-                            icon = R.drawable.mingcute_volume_mute_line,
-                            checked = false,
-                            onCheckedChange = {}
                         )
                     }
                 }

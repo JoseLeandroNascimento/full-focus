@@ -40,7 +40,7 @@
     <string name="escolha_o_som_de_fundo">Escolha o som de fundo</string>
     <string name="som_e_notifica_o">Som e notificação</string>
     <string name="modo_silencioso">Modo silencioso</string>
-    <string name="desativa_todos_os_sons_e_vibracoes">Desativa todos os sons e vibrações</string>
+    <string name="desativa_todos_os_sons">Desativa todos os sons</string>
     <string name="som_de_foco">Som de foco</string>
     <string name="som_de_pausa">Som de pausa</string>
     <string name="configura_o_de_notificacao">Configuração de Notificação</string>
@@ -64,4 +64,12 @@
     <string name="vibracao">Vibrar</string>
     <string name="som">Som</string>
     <string name="voltar">voltar</string>
+    <string name="personalizacao_por_etapa">Personalização por Etapa</string>
+    <string name="alerta_de_foco_concluido">Alerta de Foco Concluído</string>
+    <string name="alerta_de_pausa_concluida">Alerta de Pausa Concluída</string>
+    <string name="vibracao_inteligente">Vibração Inteligente</string>
+    <string name="alarme_padrao">Alarme padrão</string>
+    <string name="alarme_novo">Alarme novo</string>
+    <string name="alarme_universitario">Alarme universitário</string>
+    <string name="padrao_curto_para_pausas_e_longo_para_foco">Padrão curto para pausas e longo para foco</string>
 </resources>
