@@ -4,7 +4,7 @@ import androidx.room.Room
 import com.joseleandro.fullfocus.core.util.BackgroundSoundPlayer
 import com.joseleandro.fullfocus.core.util.VibrationHelper
 import com.joseleandro.fullfocus.core.util.VibrationHelperImpl
-import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigation
+import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigationViewModel
 import com.joseleandro.fullfocus.data.datasource.PomodoroDataSource
 import com.joseleandro.fullfocus.data.datasource.PomodoroDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingDataSource
@@ -87,7 +87,7 @@ object KoinModule {
 
     val uiModule = module {
 
-        viewModelOf(::FullFocusNavigation)
+        viewModelOf(::FullFocusNavigationViewModel)
 
         viewModelOf(::PomodoroViewModel)
 

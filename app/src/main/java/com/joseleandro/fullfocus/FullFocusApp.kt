@@ -6,8 +6,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.joseleandro.fullfocus.core.model.Screen
-import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigation
+import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.config_sound.ConfigSoundScreen
+import com.joseleandro.fullfocus.ui.screen.main.MainScreen
 import com.joseleandro.fullfocus.ui.screen.notification_setting.NotificationSettingScreen
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
 import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.ProgressTimeColorCustomizeScreen
@@ -17,7 +18,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun FullFocusApp() {
 
-    val navigationViewModel = koinViewModel<FullFocusNavigation>()
+    val navigationViewModel = koinViewModel<FullFocusNavigationViewModel>()
     val uiState by navigationViewModel.uiState.collectAsStateWithLifecycle()
 
     val onBack = navigationViewModel::onBack
@@ -26,6 +27,9 @@ fun FullFocusApp() {
         onBack = onBack,
         backStack = uiState.backStack,
         entryProvider = entryProvider {
+            entry<Screen.MainScreen> {
+                MainScreen()
+            }
             entry<Screen.PomodoroScreen> {
                 PomodoroScreen()
             }

@@ -46,7 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.core.model.Screen
 import com.joseleandro.fullfocus.core.model.SettingSound
-import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigation
+import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigationViewModel
 import com.joseleandro.fullfocus.domain.effect.PomodoroSettingEffect
 import com.joseleandro.fullfocus.ui.component.ConfigOptionColor
 import com.joseleandro.fullfocus.ui.component.ConfigOptionNav
@@ -74,7 +74,7 @@ fun PomodoroSettingBottomSheet(
 ) {
 
     val viewModel = koinViewModel<PomodoroSettingViewModel>()
-    val navigationViewModel = koinViewModel<FullFocusNavigation>()
+    val navigationViewModel = koinViewModel<FullFocusNavigationViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
