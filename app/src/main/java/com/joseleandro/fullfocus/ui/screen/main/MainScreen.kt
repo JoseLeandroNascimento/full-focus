@@ -1,5 +1,8 @@
 package com.joseleandro.fullfocus.ui.screen.main
 
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.joseleandro.fullfocus.core.model.TabScreen
+import com.joseleandro.fullfocus.core.model.index
 import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.main.component.MainBarItem
 import com.joseleandro.fullfocus.ui.screen.main.component.MainBottomNavigationBar
@@ -52,6 +56,60 @@ fun MainScreen() {
             NavDisplay(
                 backStack = uiState.tabStack,
                 onBack = navigationViewModel::onBack,
+                transitionSpec = {
+                    val initialTab = initialState as? TabScreen
+                    val targetTab = targetState as? TabScreen
+
+                    val isForward = if (initialTab != null && targetTab != null) {
+                        targetTab.index > initialTab.index
+                    } else {
+                        true
+                    }
+
+                    if (isForward) {
+                        slideInHorizontally(initialOffsetX = { -it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { it })
+                    } else {
+                        slideInHorizontally(initialOffsetX = { it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { -it })
+                    }
+                },
+                popTransitionSpec = {
+                    val initialTab = initialState as? TabScreen
+                    val targetTab = targetState as? TabScreen
+
+                    val isForward = if (initialTab != null && targetTab != null) {
+                        targetTab.index > initialTab.index
+                    } else {
+                        false
+                    }
+
+                    if (isForward) {
+                        slideInHorizontally(initialOffsetX = { -it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { it })
+                    } else {
+                        slideInHorizontally(initialOffsetX = { it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { -it })
+                    }
+                },
+                predictivePopTransitionSpec = {
+                    val initialTab = initialState as? TabScreen
+                    val targetTab = targetState as? TabScreen
+
+                    val isForward = if (initialTab != null && targetTab != null) {
+                        targetTab.index > initialTab.index
+                    } else {
+                        false
+                    }
+
+                    if (isForward) {
+                        slideInHorizontally(initialOffsetX = { -it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { it })
+                    } else {
+                        slideInHorizontally(initialOffsetX = { it }) togetherWith
+                                slideOutHorizontally(targetOffsetX = { -it })
+                    }
+                },
                 entryProvider = entryProvider {
 
                     entry<TabScreen.PomodoroTabScreen> {

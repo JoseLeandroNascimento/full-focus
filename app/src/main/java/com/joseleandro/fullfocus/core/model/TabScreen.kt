@@ -28,3 +28,6 @@ interface TabScreen {
 
     }
 }
+
+val TabScreen.index: Int
+    get() = TabScreen.items.indexOfFirst { it.route == this }
