@@ -12,6 +12,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.ui.NavDisplay
 import com.joseleandro.fullfocus.core.model.TabScreen
 import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.main.component.MainBarItem
@@ -47,19 +49,24 @@ fun MainScreen() {
                 .fillMaxSize()
         ) {
 
-            when (uiState.tabSelected) {
-                TabScreen.PomodoroTabScreen -> {
-                    PomodoroScreen()
-                }
+            NavDisplay(
+                backStack = uiState.tabStack,
+                onBack = navigationViewModel::onBack,
+                entryProvider = entryProvider {
 
-                TabScreen.ScoreTabScreen -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                    ) {
-                        Text(text = "Em breve: Tela de Score")
+                    entry<TabScreen.PomodoroTabScreen> {
+                        PomodoroScreen()
+                    }
+
+                    entry<TabScreen.ScoreTabScreen> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                        ) {
+                            Text(text = "Em breve: Tela de Score")
+                        }
                     }
                 }
-            }
+            )
         }
     }
 }
