@@ -74,4 +74,5 @@
     <string name="padrao_curto_para_pausas_e_longo_para_foco">Padrão curto para pausas e longo para foco</string>
     <string name="icon_tab_pomodoro">Icon tab pomodoro</string>
     <string name="score">Score</string>
+    <string name="atividade_do_mes">Atividade do mês %1$s</string>
 </resources>

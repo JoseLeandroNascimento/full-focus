@@ -1,15 +1,28 @@
 package com.joseleandro.fullfocus.ui.component
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -17,6 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.painterResource
@@ -24,12 +39,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.joseleandro.fullfocus.R
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import com.kizitonwose.calendar.compose.CalendarState
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
+import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.daysOfWeek
 import java.time.format.TextStyle
 
@@ -37,95 +54,165 @@ val daysOfWeek = daysOfWeek()
 
 @Composable
 fun FullFocusCalendarStrike(
-    modifier: Modifier = Modifier, state: CalendarState = rememberCalendarState()
+    modifier: Modifier = Modifier,
+    state: CalendarState = rememberCalendarState(),
+    onDayClick: (CalendarDay) -> Unit = {}
 ) {
+    HorizontalCalendar(
+        modifier = modifier.padding(horizontal = 16.dp),
+        state = state,
+        monthHeader = { calendarMonth ->
+            MonthHeaderStriker(
+                calendarMonth = calendarMonth
+            )
+        },
+        dayContent = { calendarDay ->
+            val focused = calendarDay.date.dayOfWeek == state.firstVisibleMonth.weekDays.first()
+                .first().date.dayOfWeek
 
-    HorizontalCalendar(modifier = modifier, state = state, monthHeader = { calendarMonth ->
-        Column(
-            modifier = Modifier.fillMaxWidth()
+            DayStrike(
+                calendarDay = calendarDay,
+                focused = focused,
+                onClick = { onDayClick(calendarDay) }
+            )
+        }
+    )
+}
+
+@Composable
+fun MonthHeaderStriker(
+    modifier: Modifier = Modifier,
+    calendarMonth: CalendarMonth
+) {
+    Column(
+        modifier = modifier.padding(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Atividade do mês"
+                text = calendarMonth.yearMonth.month.getDisplayName(
+                    TextStyle.FULL,
+                    LocalLocale.current.platformLocale
+                ).replaceFirstChar { it.uppercase() },
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
 
-                daysOfWeek.forEach { dayOfWeek ->
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.clip(RoundedCornerShape(16.dp))
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(R.drawable.fluent_emoji_flat_fire),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        modifier = Modifier.weight(1f),
-                        text = dayOfWeek.getDisplayName(
-                            TextStyle.SHORT, LocalLocale.current.platformLocale
-                        ),
-                        style = MaterialTheme.typography.titleSmall,
-                        textAlign = TextAlign.Center
+                        text = "12 dias",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     )
                 }
             }
         }
-    }, dayContent = { calendarDay ->
-
-        val focused = calendarDay.date.dayOfWeek == state.firstVisibleMonth.weekDays.first()
-            .first().date.dayOfWeek
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            DayStrike(
-                calendarDay = calendarDay, focused = focused
-            )
+            daysOfWeek.forEach { dayOfWeek ->
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = dayOfWeek.getDisplayName(
+                        TextStyle.SHORT, LocalLocale.current.platformLocale
+                    ).uppercase(),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
+                    ),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
-    })
+    }
 }
 
 @Composable
 fun DayStrike(
-    modifier: Modifier = Modifier, calendarDay: CalendarDay, focused: Boolean = false
+    modifier: Modifier = Modifier,
+    calendarDay: CalendarDay,
+    focused: Boolean = false,
+    onClick: () -> Unit = {}
 ) {
+    val scale by animateFloatAsState(
+        targetValue = if (focused) 1.15f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "scale"
+    )
 
     val transitionAnim = updateTransition(targetState = focused, label = "focused")
-    val background by transitionAnim.animateColor(label = "background") { focused ->
-        when (focused) {
-            true -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = .6f)
-            false -> Color.Transparent
-        }
+    val background by transitionAnim.animateColor(label = "background") { isFocused ->
+        if (isFocused) MaterialTheme.colorScheme.primary else Color.Transparent
     }
 
-    val labelColor by transitionAnim.animateColor(label = "label") { focused ->
-        when (focused) {
-            true -> MaterialTheme.colorScheme.onSurface
-            false -> MaterialTheme.colorScheme.onSurfaceVariant
-        }
+    val labelColor by transitionAnim.animateColor(label = "label") { isFocused ->
+        if (isFocused) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
     }
 
     Box(
-        modifier = modifier.size(40.dp), contentAlignment = Alignment.Center
+        modifier = modifier
+            .size(48.dp)
+            .scale(scale)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
         Surface(
-            modifier = Modifier.size(32.dp), shape = CircleShape, color = background
+            modifier = Modifier.size(36.dp),
+            shape = RoundedCornerShape(10.dp),
+            color = background,
+            tonalElevation = if (focused) 2.dp else 0.dp
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
                     text = calendarDay.date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.bodySmall.copy(
+                    style = MaterialTheme.typography.bodyMedium.copy(
                         color = labelColor,
-                        fontWeight = if (focused) FontWeight.Bold else FontWeight.Normal,
+                        fontWeight = if (focused) FontWeight.ExtraBold else FontWeight.Medium,
                     )
                 )
             }
         }
 
-        if (focused) {
+        AnimatedVisibility(
+            visible = focused,
+            enter = fadeIn() + scaleIn(initialScale = 0.5f),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(4.dp)
+        ) {
             Image(
                 painter = painterResource(R.drawable.fluent_emoji_flat_fire),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(14.dp)
-                    .align(Alignment.TopEnd)
+                contentDescription = "Strike active",
+                modifier = Modifier.size(14.dp)
             )
         }
     }
