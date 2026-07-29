@@ -60,11 +60,18 @@ fun ScoreScreenContent(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Dashboard",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Column() {
+                        Text(
+                            text = "Estatísticas",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Seu foco, suas evoluções.",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Normal
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = {}) {
