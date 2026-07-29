@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,6 +21,7 @@ import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.main.component.MainBarItem
 import com.joseleandro.fullfocus.ui.screen.main.component.MainBottomNavigationBar
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
+import com.joseleandro.fullfocus.ui.screen.score.ScoreScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -117,11 +116,7 @@ fun MainScreen() {
                     }
 
                     entry<TabScreen.ScoreTabScreen> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "Em breve: Tela de Score")
-                        }
+                        ScoreScreen()
                     }
                 }
             )

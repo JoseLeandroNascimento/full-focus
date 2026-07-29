@@ -38,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joseleandro.fullfocus.R
@@ -48,6 +49,7 @@ import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.daysOfWeek
+import java.time.LocalDate
 import java.time.format.TextStyle
 
 val daysOfWeek = daysOfWeek()
@@ -56,23 +58,32 @@ val daysOfWeek = daysOfWeek()
 fun FullFocusCalendarStrike(
     modifier: Modifier = Modifier,
     state: CalendarState = rememberCalendarState(),
+    showMonthHeader: Boolean = true,
+    daySize: Dp = 40.dp,
     onDayClick: (CalendarDay) -> Unit = {}
 ) {
     HorizontalCalendar(
-        modifier = modifier.padding(horizontal = 16.dp),
+        modifier = modifier,
         state = state,
         monthHeader = { calendarMonth ->
-            MonthHeaderStriker(
-                calendarMonth = calendarMonth
-            )
+            if (showMonthHeader) {
+                MonthHeaderStriker(
+                    calendarMonth = calendarMonth
+                )
+            }
         },
         dayContent = { calendarDay ->
+            val today = LocalDate.now()
+            val isToday = calendarDay.date == today
+
             val focused = calendarDay.date.dayOfWeek == state.firstVisibleMonth.weekDays.first()
                 .first().date.dayOfWeek
 
             DayStrike(
+                modifier = Modifier.size(daySize),
                 calendarDay = calendarDay,
                 focused = focused,
+                isToday = isToday,
                 onClick = { onDayClick(calendarDay) }
             )
         }
@@ -139,11 +150,11 @@ fun MonthHeaderStriker(
                     modifier = Modifier.weight(1f),
                     text = dayOfWeek.getDisplayName(
                         TextStyle.SHORT, LocalLocale.current.platformLocale
-                    ).uppercase(),
-                    style = MaterialTheme.typography.labelMedium.copy(
+                    ).take(1).uppercase(), // Apenas a primeira letra (S, T, Q...)
+                    style = MaterialTheme.typography.labelSmall.copy(
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.sp
+                        letterSpacing = 0.sp
                     ),
                     textAlign = TextAlign.Center
                 )
@@ -157,6 +168,7 @@ fun DayStrike(
     modifier: Modifier = Modifier,
     calendarDay: CalendarDay,
     focused: Boolean = false,
+    isToday: Boolean = false,
     onClick: () -> Unit = {}
 ) {
     val scale by animateFloatAsState(
@@ -179,26 +191,40 @@ fun DayStrike(
 
     Box(
         modifier = modifier
-            .size(48.dp)
             .scale(scale)
             .clip(RoundedCornerShape(12.dp))
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Surface(
-            modifier = Modifier.size(36.dp),
-            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier.size(28.dp),
+            shape = RoundedCornerShape(8.dp),
             color = background,
             tonalElevation = if (focused) 2.dp else 0.dp
         ) {
             Box(contentAlignment = Alignment.Center) {
-                Text(
-                    text = calendarDay.date.dayOfMonth.toString(),
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = labelColor,
-                        fontWeight = if (focused) FontWeight.ExtraBold else FontWeight.Medium,
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = calendarDay.date.dayOfMonth.toString(),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = labelColor,
+                            fontWeight = if (focused || isToday) FontWeight.ExtraBold else FontWeight.Medium,
+                            fontSize = 10.sp
+                        )
                     )
-                )
+                    
+                    if (isToday && !focused) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 1.dp)
+                                .size(2.dp)
+                                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                        )
+                    }
+                }
             }
         }
 
@@ -207,12 +233,12 @@ fun DayStrike(
             enter = fadeIn() + scaleIn(initialScale = 0.5f),
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(4.dp)
+                .padding(2.dp)
         ) {
             Image(
                 painter = painterResource(R.drawable.fluent_emoji_flat_fire),
                 contentDescription = "Strike active",
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(12.dp)
             )
         }
     }
@@ -221,15 +247,20 @@ fun DayStrike(
 @Preview
 @Composable
 private fun DayStrikeLightPreview() {
-
     val state = rememberCalendarState()
-    FullFocusTheme(
-        dynamicColor = false, darkTheme = false
-    ) {
-        DayStrike(
-            calendarDay = state.firstVisibleMonth.weekDays.first().first(),
-            focused = true
-        )
+    FullFocusTheme(dynamicColor = false, darkTheme = false) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            DayStrike(
+                calendarDay = state.firstVisibleMonth.weekDays.first().first(),
+                focused = true,
+                isToday = true
+            )
+            DayStrike(
+                calendarDay = state.firstVisibleMonth.weekDays.first().first(),
+                focused = false,
+                isToday = true
+            )
+        }
     }
 }
 

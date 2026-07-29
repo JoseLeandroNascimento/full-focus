@@ -14,10 +14,11 @@ O componente `FullFocusCalendarStrike` foi completamente renovado para oferecer 
 - **Interatividade:** Adicionado `Modifier.clickable` com efeito ripple e uma animação de escala (`spring`) que faz o dia "saltar" levemente quando está focado.
 - **Animação do Ícone:** O ícone de fogo agora aparece com uma animação de `fadeIn` + `scaleIn`, tornando a transição visual mais agradável.
 
-### 3. Melhorias de Usabilidade
-- Adicionado suporte a cliques (`onDayClick`) no componente principal.
-- Melhor contraste de cores entre o estado focado e o estado normal.
-- Ajustes de padding e alinhamento para melhor visualização em diferentes tamanhos de tela.
+### 3. Melhorias de Usabilidade e Indicação do Dia Atual
+- **Indicador de "Hoje":** Adicionamos uma lógica para identificar o dia atual (`LocalDate.now()`). Quando o dia no calendário corresponde ao dia de hoje, um pequeno ponto na cor primária é exibido logo abaixo do número (caso não esteja selecionado).
+- **Tipografia Dinâmica:** O dia atual ganha peso extra (`FontWeight.ExtraBold`) para se destacar mesmo sem estar selecionado.
+- **Suporte a Cliques:** Adicionado suporte a cliques (`onDayClick`) no componente principal.
+- **Melhorias Visuais:** Ajustes de padding e alinhamento para melhor visualização em diferentes tamanhos de tela.
 
 ## Resultado Visual
 

@@ -22,6 +22,7 @@ import com.joseleandro.fullfocus.ui.screen.notification_setting.NotificationSett
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro_setting.PomodoroSettingViewModel
 import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.ProgressTimeColorCustomizeViewModel
+import com.joseleandro.fullfocus.ui.screen.score.ScoreViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -98,6 +99,8 @@ object KoinModule {
         viewModelOf(::ProgressTimeColorCustomizeViewModel)
 
         viewModelOf(::NotificationSettingViewModel)
+
+        viewModelOf(::ScoreViewModel)
 
     }
 }
