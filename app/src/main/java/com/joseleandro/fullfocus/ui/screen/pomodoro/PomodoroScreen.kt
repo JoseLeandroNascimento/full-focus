@@ -256,11 +256,11 @@ private fun PomodoroModal(
                     onEvent(PomodoroEvent.CloseModal)
                 },
                 onDiscard = {
-                    onEvent(PomodoroEvent.CancelAndSave)
+                    onEvent(PomodoroEvent.CancelAndDelete)
                     onEvent(PomodoroEvent.CloseModal)
                 },
                 onSaveProgress = {
-                    onEvent(PomodoroEvent.CancelAndDelete)
+                    onEvent(PomodoroEvent.CancelAndSave)
                     onEvent(PomodoroEvent.CloseModal)
                 }
             )

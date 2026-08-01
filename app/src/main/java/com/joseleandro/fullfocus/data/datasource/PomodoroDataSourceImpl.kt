@@ -117,9 +117,15 @@ class PomodoroDataSourceImpl(
         val currentPomodoro = pomodoroDao.getPomodoroActive().first() ?: return
         val currentSession = sessionDao.getSessionCurrent().first()
         if (currentSession != null) {
+            val now = System.currentTimeMillis()
+            val additionalElapsed = if (currentSession.status == SessionStatus.RUNNING) {
+                currentSession.lastStartTime?.let { now - it } ?: 0L
+            } else 0L
+
             sessionDao.update(
                 currentSession.copy(
                     status = SessionStatus.CANCEL,
+                    elapsedTime = currentSession.elapsedTime + additionalElapsed,
                     lastStartTime = null
                 )
             )
@@ -134,9 +140,15 @@ class PomodoroDataSourceImpl(
 
     override suspend fun skip(focusTime: Long, shortPauseTime: Long, longPauseTime: Long, sessionsUntilLongPause: Int) {
         val currentSession = sessionDao.getSessionCurrent().first() ?: return
+        val now = System.currentTimeMillis()
+        val additionalElapsed = if (currentSession.status == SessionStatus.RUNNING) {
+            currentSession.lastStartTime?.let { now - it } ?: 0L
+        } else 0L
+
         sessionDao.update(
             currentSession.copy(
                 status = SessionStatus.SKIPPED,
+                elapsedTime = currentSession.elapsedTime + additionalElapsed,
                 lastStartTime = null
             )
         )

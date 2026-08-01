@@ -1,82 +1,96 @@
 package com.joseleandro.fullfocus.ui.screen.score
 
 import androidx.lifecycle.ViewModel
-import com.joseleandro.fullfocus.R
+import androidx.lifecycle.viewModelScope
+import com.joseleandro.fullfocus.domain.repository.StatisticRepository
+import com.joseleandro.fullfocus.ui.state.AchievementUiState
+import com.joseleandro.fullfocus.ui.state.ScoreUiState
+import com.joseleandro.fullfocus.ui.state.WeeklyHistoryData
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import java.time.LocalDate
+import java.time.YearMonth
 
-class ScoreViewModel : ViewModel() {
+@OptIn(ExperimentalCoroutinesApi::class)
+class ScoreViewModel(
+    private val statisticRepository: StatisticRepository
+) : ViewModel() {
 
+    private val _selectedDate = MutableStateFlow(LocalDate.now())
     private val _uiState = MutableStateFlow(ScoreUiState())
     val uiState: StateFlow<ScoreUiState> = _uiState.asStateFlow()
 
     init {
-        _uiState.value = ScoreUiState(
-            totalHoursMonth = "48h 32m",
-            totalFocusTimeToday = "04:20",
-            focusSessionsCompleted = 386,
-            pomodorosCompleted = 386, // Seguindo exemplo da imagem
-            dailyStreak = 12,
-            highestStreak = 21,
-            streakFreezes = 1,
-            averageFocusTime = "3h 15m",
-            weeklyGoalProgress = "20/35",
-            monthlyGoalDays = 16,
-            monthlyGoalTotal = 31,
-            consistencyRate = 87,
-            currentMonthLabel = "Maio 2025",
-            calendarMonthName = "Julho",
-            monthlyStrikeLabel = "12 dias",
-            weeklyActivity = listOf(
-                WeeklyHistoryData("Seg", "Abr", 0.4f),
-                WeeklyHistoryData("Ter", "Abr", 0.6f),
-                WeeklyHistoryData("Qua", "Abr", 0.85f),
-                WeeklyHistoryData("Qui", "Mai", 0.55f),
-                WeeklyHistoryData("Sex", "Mai", 0.65f),
-                WeeklyHistoryData("Sáb", "Mai", 0.75f),
-                WeeklyHistoryData("Dom", "Mai", 0.95f, "11h")
-            ),
-            achievements = listOf(
-                AchievementUiState("1", "Primeira semana", "7 dias seguidos", R.drawable.fluent_emoji_flat_fire, true, 0xFFFF8C00),
-                AchievementUiState("2", "Um mês focado", "30 dias seguidos", R.drawable.mynaui_coffee, true, 0xFFE91E63),
-                AchievementUiState("3", "Foco extremo", "100 pomodoros", R.drawable.boxicons_timer, true, 0xFF9C27B0),
-                AchievementUiState("4", "Disciplina total", "15 dias seguidos", R.drawable.lucide_lab_farm, false, 0xFF4CAF50)
+        loadStatistics()
+    }
+
+    private fun loadStatistics() {
+        _selectedDate.flatMapLatest { date ->
+            statisticRepository.getStatisticsByMonth(date)
+        }.onEach { stats ->
+            _uiState.value = _uiState.value.copy(
+                dailyStreak = stats.dailyStreak,
+                highestStreak = stats.highestStreak,
+                totalFocusTimeToday = stats.totalFocusTimeToday.formattedTime(),
+                totalHoursMonth = stats.totalFocusTimeMonth.formattedTime(),
+                focusSessionsCompleted = stats.focusSessionsCompleted,
+                pomodorosCompleted = stats.pomodorosCompleted,
+                averageFocusTime = stats.averageFocusTimePerDay.formattedTime(),
+                weeklyGoalProgress = stats.weeklyGoalProgress,
+                monthlyGoalDays = stats.monthlyGoalDays,
+                monthlyGoalTotal = stats.monthlyGoalTotal,
+                consistencyRate = stats.consistencyRate,
+                currentMonthLabel = stats.currentMonthLabel,
+                calendarMonthName = stats.calendarMonthName,
+                monthlyStrikeLabel = "${stats.monthlyGoalDays} dias",
+                focusedDates = stats.focusedDates,
+                currentYearMonth = YearMonth.from(_selectedDate.value),
+                weeklyActivity = stats.weeklyActivity.map { (label, progress, timeLabel) ->
+                    WeeklyHistoryData(
+                        label = label,
+                        subLabel = stats.calendarMonthName.take(3),
+                        value = progress,
+                        timeLabel = timeLabel
+                    )
+                },
+                achievements = stats.achievements.map { achievement ->
+                    AchievementUiState(
+                        id = achievement.id,
+                        title = achievement.title,
+                        description = achievement.description,
+                        iconRes = achievement.iconRes,
+                        isUnlocked = achievement.isUnlocked,
+                        colorHex = achievement.colorHex
+                    )
+                }
             )
-        )
+        }.launchIn(viewModelScope)
     }
 
     fun onPreviousMonth() {
-        // Lógica mockada para mudar mês
+        _selectedDate.value = _selectedDate.value.minusMonths(1)
     }
 
     fun onNextMonth() {
-        // Lógica mockada para mudar mês
+        val nextMonth = _selectedDate.value.plusMonths(1)
+        if (!nextMonth.isAfter(LocalDate.now())) {
+            _selectedDate.value = nextMonth
+        }
     }
 
     fun onChartPeriodSelected(period: String) {
-        val newActivity = if (period == "Por semana") {
-            listOf(
-                WeeklyHistoryData("Seg", "Abr", 0.4f),
-                WeeklyHistoryData("Ter", "Abr", 0.6f),
-                WeeklyHistoryData("Qua", "Abr", 0.85f),
-                WeeklyHistoryData("Qui", "Mai", 0.55f),
-                WeeklyHistoryData("Sex", "Mai", 0.65f),
-                WeeklyHistoryData("Sáb", "Mai", 0.75f),
-                WeeklyHistoryData("Dom", "Mai", 0.95f, "11h")
-            )
-        } else {
-            listOf(
-                WeeklyHistoryData("Sem 1", "Mai", 0.7f, "32h"),
-                WeeklyHistoryData("Sem 2", "Mai", 0.5f, "24h"),
-                WeeklyHistoryData("Sem 3", "Mai", 0.9f, "42h"),
-                WeeklyHistoryData("Sem 4", "Mai", 0.8f, "38h")
-            )
-        }
+        _uiState.value = _uiState.value.copy(selectedChartPeriod = period)
+    }
 
-        _uiState.value = _uiState.value.copy(
-            selectedChartPeriod = period,
-            weeklyActivity = newActivity
-        )
+    private fun Long.formattedTime(): String {
+        val totalMinutes = this / (1000 * 60)
+        val hours = totalMinutes / 60
+        val minutes = totalMinutes % 60
+        return if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
     }
 }

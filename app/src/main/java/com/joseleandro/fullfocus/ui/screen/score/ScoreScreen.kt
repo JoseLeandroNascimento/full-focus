@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,6 +31,9 @@ import com.joseleandro.fullfocus.ui.component.FullFocusHeroStreakCard
 import com.joseleandro.fullfocus.ui.component.FullFocusMonthlyActivityCard
 import com.joseleandro.fullfocus.ui.component.FullFocusStatCard
 import com.joseleandro.fullfocus.ui.component.FullFocusWeeklyChart
+import com.joseleandro.fullfocus.ui.state.AchievementUiState
+import com.joseleandro.fullfocus.ui.state.ScoreUiState
+import com.joseleandro.fullfocus.ui.state.WeeklyHistoryData
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -47,7 +51,6 @@ fun ScoreScreen() {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScoreScreenContent(
     uiState: ScoreUiState,
@@ -55,32 +58,10 @@ fun ScoreScreenContent(
     onNextMonth: () -> Unit = {},
     onChartPeriodSelected: (String) -> Unit = {}
 ) {
-
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Column() {
-                        Text(
-                            text = "Estatísticas",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Seu foco, suas evoluções.",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Normal
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = {}) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.material_symbols_menu_rounded),
-                            contentDescription = null
-                        )
-                    }
-                }
+            ScoreTopAppBar(
+                onMenuClick = {}
             )
         }
     ) { innerPadding ->
@@ -89,68 +70,20 @@ fun ScoreScreenContent(
                 .padding(innerPadding)
                 .fillMaxSize(),
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            
-            // 1. Destaque de Streak
+
             item {
                 FullFocusHeroStreakCard(
                     streak = uiState.dailyStreak,
-                    highestStreak = uiState.highestStreak,
-                    streakFreezes = uiState.streakFreezes
+                    highestStreak = uiState.highestStreak
                 )
             }
 
-            // 2. Estatísticas Principais (Bento Grid)
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        FullFocusStatCard(
-                            modifier = Modifier.weight(1f),
-                            title = "Tempo de Foco",
-                            value = uiState.totalHoursMonth,
-                            iconRes = R.drawable.mingcute_time_line,
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                        FullFocusStatCard(
-                            modifier = Modifier.weight(1f),
-                            title = "Pomodoros",
-                            value = uiState.pomodorosCompleted.toString(),
-                            iconRes = R.drawable.boxicons_timer,
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        FullFocusStatCard(
-                            modifier = Modifier.weight(1f),
-                            title = "Meta Semanal",
-                            value = uiState.weeklyGoalProgress,
-                            iconRes = R.drawable.ri_target_fill,
-                            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                        FullFocusStatCard(
-                            modifier = Modifier.weight(1f),
-                            title = "Consistência",
-                            value = "${uiState.consistencyRate}%",
-                            iconRes = R.drawable.outline_bar_chart_24,
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
+                StatsGrid(uiState = uiState)
             }
 
-            // 3. Atividade Mensal (Calendário)
             item {
                 FullFocusMonthlyActivityCard(
                     monthLabel = uiState.currentMonthLabel,
@@ -163,13 +96,14 @@ fun ScoreScreenContent(
                     calendarContent = {
                         FullFocusCalendarStrike(
                             showMonthHeader = false,
-                            daySize = 36.dp
+                            daySize = 36.dp,
+                            focusedDates = uiState.focusedDates,
+                            currentMonth = uiState.currentYearMonth
                         )
                     }
                 )
             }
 
-            // 4. Histórico Semanal
             item {
                 FullFocusWeeklyChart(
                     activity = uiState.weeklyActivity,
@@ -179,12 +113,93 @@ fun ScoreScreenContent(
                 )
             }
 
-            // 5. Conquistas
             item {
                 FullFocusAchievementSection(
                     achievements = uiState.achievements
                 )
             }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScoreTopAppBar(
+    onMenuClick: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Column {
+                Text(
+                    text = stringResource(R.string.estat_sticas),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(R.string.seu_foco_suas_evolucoes),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = onMenuClick
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.material_symbols_menu_rounded),
+                    contentDescription = "Menu"
+                )
+            }
+        }
+    )
+}
+
+@Composable
+private fun StatsGrid(uiState: ScoreUiState) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            FullFocusStatCard(
+                modifier = Modifier.weight(1f),
+                title = "Tempo de Foco",
+                value = uiState.totalHoursMonth,
+                iconRes = R.drawable.mingcute_time_line,
+                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            FullFocusStatCard(
+                modifier = Modifier.weight(1f),
+                title = "Pomodoros",
+                value = uiState.pomodorosCompleted.toString(),
+                iconRes = R.drawable.boxicons_timer,
+                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            FullFocusStatCard(
+                modifier = Modifier.weight(1f),
+                title = "Meta Semanal",
+                value = uiState.weeklyGoalProgress,
+                iconRes = R.drawable.ri_target_fill,
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f),
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            FullFocusStatCard(
+                modifier = Modifier.weight(1f),
+                title = "Consistência",
+                value = "${uiState.consistencyRate}%",
+                iconRes = R.drawable.game_icons_hiking,
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+            )
         }
     }
 }
@@ -200,7 +215,6 @@ private fun ScoreScreenDarkPreview() {
                 pomodorosCompleted = 386,
                 dailyStreak = 12,
                 highestStreak = 21,
-                streakFreezes = 1,
                 weeklyGoalProgress = "20/35",
                 monthlyGoalDays = 16,
                 monthlyGoalTotal = 31,
@@ -213,8 +227,22 @@ private fun ScoreScreenDarkPreview() {
                     WeeklyHistoryData("19-25", "Mai", 0.95f, "10h 45m")
                 ),
                 achievements = listOf(
-                    AchievementUiState("1", "Primeira semana", "7 dias seguidos", R.drawable.fluent_emoji_flat_fire, true, 0xFFFF8C00),
-                    AchievementUiState("2", "Um mês focado", "30 dias seguidos", R.drawable.mynaui_coffee, true, 0xFFE91E63)
+                    AchievementUiState(
+                        "1",
+                        "Primeira semana",
+                        "7 dias seguidos",
+                        R.drawable.fluent_emoji_flat_fire,
+                        true,
+                        0xFFFF8C00
+                    ),
+                    AchievementUiState(
+                        "2",
+                        "Um mês focado",
+                        "30 dias seguidos",
+                        R.drawable.mynaui_coffee,
+                        true,
+                        0xFFE91E63
+                    )
                 )
             )
         )
@@ -232,7 +260,6 @@ private fun ScoreScreenLightPreview() {
                 pomodorosCompleted = 386,
                 dailyStreak = 12,
                 highestStreak = 21,
-                streakFreezes = 1,
                 weeklyGoalProgress = "20/35",
                 monthlyGoalDays = 16,
                 monthlyGoalTotal = 31,
@@ -251,8 +278,22 @@ private fun ScoreScreenLightPreview() {
                     WeeklyHistoryData("Dom", "Mai", 0.95f, "11h")
                 ),
                 achievements = listOf(
-                    AchievementUiState("1", "Primeira semana", "7 dias seguidos", R.drawable.fluent_emoji_flat_fire, true, 0xFFFF8C00),
-                    AchievementUiState("2", "Um mês focado", "30 dias seguidos", R.drawable.mynaui_coffee, true, 0xFFE91E63)
+                    AchievementUiState(
+                        "1",
+                        "Primeira semana",
+                        "7 dias seguidos",
+                        R.drawable.fluent_emoji_flat_fire,
+                        true,
+                        0xFFFF8C00
+                    ),
+                    AchievementUiState(
+                        "2",
+                        "Um mês focado",
+                        "30 dias seguidos",
+                        R.drawable.mynaui_coffee,
+                        true,
+                        0xFFE91E63
+                    )
                 )
             )
         )

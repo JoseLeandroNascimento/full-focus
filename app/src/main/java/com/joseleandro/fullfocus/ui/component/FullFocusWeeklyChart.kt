@@ -37,7 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.ui.screen.score.WeeklyHistoryData
+import com.joseleandro.fullfocus.ui.state.WeeklyHistoryData
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 @Composable
@@ -56,7 +56,8 @@ fun FullFocusWeeklyChart(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = CardDefaults.outlinedCardBorder()
+        border = CardDefaults.outlinedCardBorder(),
+        shape = MaterialTheme.shapes.extraLarge
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -72,7 +73,7 @@ fun FullFocusWeeklyChart(
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
-                
+
                 Box {
                     Card(
                         onClick = { expanded = true },
@@ -105,11 +106,11 @@ fun FullFocusWeeklyChart(
                     ) {
                         periodOptions.forEach { option ->
                             DropdownMenuItem(
-                                text = { 
+                                text = {
                                     Text(
                                         text = option,
                                         style = MaterialTheme.typography.labelMedium
-                                    ) 
+                                    )
                                 },
                                 onClick = {
                                     onPeriodSelected(option)
@@ -148,17 +149,22 @@ fun FullFocusWeeklyChart(
 
                 // Área do Gráfico
                 Row(
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.Bottom
                 ) {
                     activity.forEachIndexed { index, data ->
                         val animatedValue = remember { Animatable(0f) }
-                        
+
                         LaunchedEffect(data.value) {
                             animatedValue.animateTo(
                                 targetValue = data.value,
-                                animationSpec = tween(durationMillis = 1000, delayMillis = index * 50)
+                                animationSpec = tween(
+                                    durationMillis = 1000,
+                                    delayMillis = index * 50
+                                )
                             )
                         }
 
@@ -186,7 +192,7 @@ fun FullFocusWeeklyChart(
                             ) {
                                 val barWidth = size.width
                                 val barHeight = size.height * animatedValue.value
-                                
+
                                 drawRoundRect(
                                     color = barColor.copy(alpha = if (index == activity.lastIndex) 1f else 0.2f),
                                     topLeft = Offset(0f, size.height - barHeight),
@@ -194,7 +200,7 @@ fun FullFocusWeeklyChart(
                                     cornerRadius = CornerRadius(4.dp.toPx(), 4.dp.toPx())
                                 )
                             }
-                            
+
                             // Dia da semana / Label em baixo
                             Text(
                                 text = data.label,

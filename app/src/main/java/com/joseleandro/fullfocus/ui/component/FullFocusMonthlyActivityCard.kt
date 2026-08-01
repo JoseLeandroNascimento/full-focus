@@ -94,7 +94,8 @@ fun FullFocusMonthlyActivityCard(
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface
             ),
-            border = CardDefaults.outlinedCardBorder()
+            border = CardDefaults.outlinedCardBorder(),
+            shape = MaterialTheme.shapes.extraLarge
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
@@ -146,10 +147,11 @@ fun FullFocusMonthlyActivityCard(
             modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
-            )
+            ),
+            shape = MaterialTheme.shapes.extraLarge
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {

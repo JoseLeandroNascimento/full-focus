@@ -13,3 +13,6 @@ val Pink40 = Color(0xFF7D5260)
 val Primary = Color(0xFF25D9FF)
 val ShortPause = Color(0xFFF44336)
 val LongPause = Color(0xFFE91E63)
+
+val Gold = Color(0xFFFFD700)
+val GoldContainer = Color(0xFFFFECB3)

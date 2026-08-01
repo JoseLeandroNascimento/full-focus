@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +51,7 @@ import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.daysOfWeek
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.format.TextStyle
 
 val daysOfWeek = daysOfWeek()
@@ -57,11 +59,24 @@ val daysOfWeek = daysOfWeek()
 @Composable
 fun FullFocusCalendarStrike(
     modifier: Modifier = Modifier,
-    state: CalendarState = rememberCalendarState(),
+    focusedDates: List<LocalDate> = emptyList(),
+    currentMonth: YearMonth = YearMonth.now(),
     showMonthHeader: Boolean = true,
     daySize: Dp = 40.dp,
     onDayClick: (CalendarDay) -> Unit = {}
 ) {
+    val state = rememberCalendarState(
+        startMonth = currentMonth.minusMonths(12),
+        endMonth = currentMonth.plusMonths(12),
+        firstVisibleMonth = currentMonth,
+        firstDayOfWeek = daysOfWeek.first()
+    )
+
+    // Synchronize state when currentMonth changes from outside
+    LaunchedEffect(currentMonth) {
+        state.scrollToMonth(currentMonth)
+    }
+
     HorizontalCalendar(
         modifier = modifier,
         state = state,
@@ -75,9 +90,7 @@ fun FullFocusCalendarStrike(
         dayContent = { calendarDay ->
             val today = LocalDate.now()
             val isToday = calendarDay.date == today
-
-            val focused = calendarDay.date.dayOfWeek == state.firstVisibleMonth.weekDays.first()
-                .first().date.dayOfWeek
+            val focused = focusedDates.contains(calendarDay.date)
 
             DayStrike(
                 modifier = Modifier.size(daySize),

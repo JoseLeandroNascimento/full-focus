@@ -1,6 +1,8 @@
-package com.joseleandro.fullfocus.ui.screen.score
+package com.joseleandro.fullfocus.ui.state
 
 import androidx.annotation.DrawableRes
+import java.time.LocalDate
+import java.time.YearMonth
 
 data class ScoreUiState(
     val totalHoursMonth: String = "0h",
@@ -9,7 +11,6 @@ data class ScoreUiState(
     val pomodorosCompleted: Int = 0,
     val dailyStreak: Int = 0,
     val highestStreak: Int = 0,
-    val streakFreezes: Int = 0,
     val averageFocusTime: String = "0h",
     val weeklyGoalProgress: String = "0/0",
     val monthlyGoalDays: Int = 0,
@@ -21,7 +22,9 @@ data class ScoreUiState(
     val calendarMonthName: String = "Julho",
     val monthlyStrikeLabel: String = "12 dias",
     val selectedChartPeriod: String = "Por semana",
-    val chartPeriodOptions: List<String> = listOf("Por semana", "Por mês")
+    val chartPeriodOptions: List<String> = listOf("Por semana", "Por mês"),
+    val focusedDates: List<LocalDate> = emptyList(),
+    val currentYearMonth: YearMonth = YearMonth.now()
 )
 
 data class WeeklyHistoryData(

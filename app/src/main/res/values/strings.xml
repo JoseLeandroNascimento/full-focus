@@ -75,4 +75,6 @@
     <string name="icon_tab_pomodoro">Icon tab pomodoro</string>
     <string name="score">Score</string>
     <string name="atividade_do_mes">Atividade do mês %1$s</string>
+    <string name="estat_sticas">Estatísticas</string>
+    <string name="seu_foco_suas_evolucoes">Seu foco, suas evoluções.</string>
 </resources>

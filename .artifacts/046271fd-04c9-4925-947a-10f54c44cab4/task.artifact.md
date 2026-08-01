@@ -1,0 +1,5 @@
+- [x] Add `createdAt` to `SessionEntity.kt`
+- [x] Set `createdAt` in `PomodoroDataSourceImpl.kt`
+- [x] Update grouping logic in `StatisticPomodoroDataSourceImpl.kt`
+- [x] Clean up `ScoreViewModel.kt` (remove mocks)
+- [x] Verify build and statistics display

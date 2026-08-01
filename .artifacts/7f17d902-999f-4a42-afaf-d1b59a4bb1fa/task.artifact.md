@@ -1,0 +1,12 @@
+- [x] Create implementation plan
+- [x] Refactor `FullFocusHeroStreakCard.kt` (Initial)
+- [x] Improve "Melhor recorde" display (v1)
+- [x] Redesign `RecordCard` for better aesthetics (v2)
+- [x] Minimalist & Data-Driven Hero Card (v3)
+    - [x] Remove background "noise" (gradient/icons)
+    - [x] Update card styling to use outlined surface style
+    - [x] Add `LinearProgressIndicator` for record progress
+    - [x] Implement minimalist stat badges for Record and Freezes
+    - [x] Restore `streakFreezes` parameter
+- [x] Verify with Previews
+- [x] Create walkthrough

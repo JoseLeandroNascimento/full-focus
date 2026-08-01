@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Transaction
 import com.joseleandro.fullfocus.data.local.database.model.PomodoroEntity
+import com.joseleandro.fullfocus.data.local.database.model.PomodoroWithSessions
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -12,6 +14,13 @@ interface PomodoroDao {
 
     @Query("SELECT * FROM pomodoro_table WHERE completed = 0 ORDER BY id DESC LIMIT 1")
     fun getPomodoroActive(): Flow<PomodoroEntity?>
+
+    @Query("SELECT * FROM pomodoro_table WHERE completed = 1")
+    fun getPomodorosCompleted(): Flow<List<PomodoroEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM pomodoro_table")
+    fun getAllPomodorosWithSessions(): Flow<List<PomodoroWithSessions>>
 
     @Insert
     suspend fun save(data: PomodoroEntity): Long

@@ -25,5 +25,6 @@ data class SessionEntity(
     val elapsedTime: Long = 0,
     val lastStartTime: Long? = null,
     val state: PomodoroState,
-    val status: SessionStatus
+    val status: SessionStatus,
+    val createdAt: Long = System.currentTimeMillis()
 )

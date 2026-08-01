@@ -14,7 +14,7 @@ const val FULL_FOCUS_DATABASE = "FULL_FOCUS_DATABASE"
         PomodoroEntity::class,
         SessionEntity::class
     ],
-    version = 3
+    version = 4
 )
 abstract class FullFocusDataBase : RoomDatabase() {
 

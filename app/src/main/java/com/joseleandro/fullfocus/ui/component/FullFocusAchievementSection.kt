@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.ui.screen.score.AchievementUiState
+import com.joseleandro.fullfocus.ui.state.AchievementUiState
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
 
 @Composable
