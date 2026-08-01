@@ -47,6 +47,7 @@ fun ScoreScreen() {
         uiState = uiState,
         onPreviousMonth = viewModel::onPreviousMonth,
         onNextMonth = viewModel::onNextMonth,
+        onMonthChanged = viewModel::onMonthChanged,
         onChartPeriodSelected = viewModel::onChartPeriodSelected
     )
 }
@@ -56,6 +57,7 @@ fun ScoreScreenContent(
     uiState: ScoreUiState,
     onPreviousMonth: () -> Unit = {},
     onNextMonth: () -> Unit = {},
+    onMonthChanged: (java.time.YearMonth) -> Unit = {},
     onChartPeriodSelected: (String) -> Unit = {}
 ) {
     Scaffold(
@@ -98,7 +100,8 @@ fun ScoreScreenContent(
                             showMonthHeader = false,
                             daySize = 36.dp,
                             focusedDates = uiState.focusedDates,
-                            currentMonth = uiState.currentYearMonth
+                            currentMonth = uiState.currentYearMonth,
+                            onMonthChanged = onMonthChanged
                         )
                     }
                 )

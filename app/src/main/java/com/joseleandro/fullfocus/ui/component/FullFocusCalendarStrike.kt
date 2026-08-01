@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,6 +64,7 @@ fun FullFocusCalendarStrike(
     currentMonth: YearMonth = YearMonth.now(),
     showMonthHeader: Boolean = true,
     daySize: Dp = 40.dp,
+    onMonthChanged: (YearMonth) -> Unit = {},
     onDayClick: (CalendarDay) -> Unit = {}
 ) {
     val state = rememberCalendarState(
@@ -74,7 +76,19 @@ fun FullFocusCalendarStrike(
 
     // Synchronize state when currentMonth changes from outside
     LaunchedEffect(currentMonth) {
-        state.scrollToMonth(currentMonth)
+        if (state.firstVisibleMonth.yearMonth != currentMonth) {
+            state.animateScrollToMonth(currentMonth)
+        }
+    }
+
+    // Notify when user scrolls manually
+    LaunchedEffect(state) {
+        snapshotFlow { state.firstVisibleMonth.yearMonth }
+            .collect { month ->
+                if (month != currentMonth) {
+                    onMonthChanged(month)
+                }
+            }
     }
 
     HorizontalCalendar(

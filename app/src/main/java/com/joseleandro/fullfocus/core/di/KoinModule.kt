@@ -9,8 +9,6 @@ import com.joseleandro.fullfocus.data.datasource.PomodoroDataSource
 import com.joseleandro.fullfocus.data.datasource.PomodoroDataSourceImpl
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingDataSource
 import com.joseleandro.fullfocus.data.datasource.PomodoroSettingDataSourceImpl
-import com.joseleandro.fullfocus.data.datasource.StatisticPomodoroDataSource
-import com.joseleandro.fullfocus.data.datasource.StatisticPomodoroDataSourceImpl
 import com.joseleandro.fullfocus.data.local.database.FULL_FOCUS_DATABASE
 import com.joseleandro.fullfocus.data.local.database.FullFocusDataBase
 import com.joseleandro.fullfocus.data.local.database.dao.PomodoroDao
@@ -21,6 +19,7 @@ import com.joseleandro.fullfocus.data.repository.StatisticRepositoryImpl
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.domain.repository.StatisticRepository
+import com.joseleandro.fullfocus.domain.usecase.GetStatisticsUseCase
 import com.joseleandro.fullfocus.ui.screen.config_sound.ConfigSoundViewModel
 import com.joseleandro.fullfocus.ui.screen.notification_setting.NotificationSettingViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroViewModel
@@ -71,19 +70,18 @@ object KoinModule {
 
         single<StatisticRepository> {
             StatisticRepositoryImpl(
-                statisticDataSource = get()
+                pomodoroDao = get()
+            )
+        }
+
+        single {
+            GetStatisticsUseCase(
+                repository = get()
             )
         }
 
         single<PomodoroDataSource> {
             PomodoroDataSourceImpl(
-                pomodoroDao = get(),
-                sessionDao = get()
-            )
-        }
-
-        single<StatisticPomodoroDataSource> {
-            StatisticPomodoroDataSourceImpl(
                 pomodoroDao = get(),
                 sessionDao = get()
             )

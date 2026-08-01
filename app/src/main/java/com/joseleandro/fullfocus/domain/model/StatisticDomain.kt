@@ -15,6 +15,7 @@ data class StatisticDomain(
     val monthlyGoalTotal: Int = 0,
     val consistencyRate: Int = 0,
     val weeklyActivity: List<Triple<String, Float, String>> = emptyList(), // Day label, progress (0.0 to 1.0), and time label
+    val monthlyActivity: List<Triple<String, Float, String>> = emptyList(), // Week label (Sem 1...), progress, and time label
     val currentMonthLabel: String = "",
     val calendarMonthName: String = "",
     val focusedDates: List<LocalDate> = emptyList(),

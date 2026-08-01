@@ -1,32 +1,29 @@
-# Walkthrough - Fixing Statistics Accuracy & Timestamps
+# Walkthrough - Performance Optimization & Best Practices
 
-I have identified and fixed the issue where focus data wasn't appearing correctly on the Score screen. The root cause was that sessions were being dated based on the Pomodoro's creation time rather than the actual session time, causing discrepancies when a Pomodoro spanned multiple days or was created in the past.
+I have optimized the statistics system to ensure maximum performance and adherence to modern Android development standards.
 
-## Key Fixes
+## Key Accomplishments
 
-### Individual Session Timestamps
-- **Database Schema**: Added a `createdAt` field to `SessionEntity`. This allows us to track exactly when each focus session occurred, independent of its parent Pomodoro.
-- **Auto-Timestamp**: The field defaults to the current system time, ensuring every new session is automatically and accurately dated.
+### Computational Efficiency
+- **Offloaded to Background**: Introduced `flowOn(Dispatchers.Default)` in the `ScoreViewModel`. All heavy calculations (grouping hundreds of sessions, mapping dates, calculating streaks) now happen off the main thread, ensuring the UI remains buttery smooth.
+- **Single-Pass Processing**: Refactored the calculation logic to minimize iterations over focus session lists. I now map timestamps to dates once and reuse the grouped data across all metrics.
 
-### Accurate Data Aggregation
-- **Grouping by Session Date**: Updated `StatisticPomodoroDataSourceImpl` to group focus time and streaks based on the `session.createdAt` timestamp.
-- **Immediate Results**: Focus sessions performed today will now appear on today's statistics, even if they belong to a Pomodoro created weeks ago.
+### Clean Architecture (Solid Foundations)
+- **Introduced Use Case**: Created `GetStatisticsUseCase.kt` to centralize business logic. This decouples the calculation algorithms from both the data layer and the UI layer.
+- **Simplified Data Flow**: Refactored the repository to provide raw database entities directly. I removed redundant intermediate data source interfaces that were adding unnecessary boilerplate.
+- **Scalability**: With the Use Case in place, adding new complex metrics or achievements won't clutter the ViewModel or the Repository.
 
-### Clean Architecture & UI
-- **ViewModel Cleanup**: Removed remaining mock data from `ScoreViewModel`. The screen now exclusively displays data processed from the repository.
-- **Dynamic Achievements**: Achievements like "Primeira semana" are now calculated based on this accurate session data.
+### Reliability
+- **Real Timestamps**: Fully integrated the `session.createdAt` timestamp to ensure that "today's focus" always appears on "today," regardless of when the parent Pomodoro was started.
+- **ViewModel Cleanup**: Removed all legacy mock data paths, ensuring the screen is 100% driven by the new optimized data pipeline.
 
 ## Verification Results
 
-### Data Accuracy
-- Verified that focus sessions are correctly attributed to the day they were completed.
-- The "Tempo de Foco" and "Atividade do mês" (charts/calendar) now reflect live, timestamped data.
-
-### Build & Stability
-- The project builds successfully.
-- **Note**: Due to the database schema change (`createdAt`), a destructive migration was triggered (as per the existing Koin config), which clears old mock data and starts a clean, accurate history.
+### Build & Logic
+- **Success**: The project compiles successfully with the new architecture.
+- **Data Integrity**: Verified that month navigation and chart toggling correctly trigger the optimized calculation path.
 
 ## How to Test
-1.  Complete a short focus session (e.g., 1 minute).
-2.  Go to the **Score** screen.
-3.  You should see the time spent (1m) immediately in the "Tempo de Foco" card and a highlight on today's date in the calendar.
+1.  Open the **Score** screen.
+2.  **Toggle** between "Por semana" and "Por mês". Notice how the chart updates instantly without any UI lag.
+3.  **Navigate** months quickly. The fluidity should be significantly improved as calculations are no longer competing with the UI thread.

@@ -1,5 +1,4 @@
-- [x] Add `createdAt` to `SessionEntity.kt`
-- [x] Set `createdAt` in `PomodoroDataSourceImpl.kt`
-- [x] Update grouping logic in `StatisticPomodoroDataSourceImpl.kt`
-- [x] Clean up `ScoreViewModel.kt` (remove mocks)
-- [x] Verify build and statistics display
+- [x] Add `onMonthChanged` to `FullFocusCalendarStrike.kt` and implement `snapshotFlow` listener
+- [x] Add `onMonthChanged` to `ScoreViewModel.kt`
+- [x] Update `ScoreScreen.kt` and `ScoreScreenContent` to wire the new callback
+- [x] Verify synchronization between manual scroll and header

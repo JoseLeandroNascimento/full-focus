@@ -1,19 +1,14 @@
 package com.joseleandro.fullfocus.data.repository
 
-import com.joseleandro.fullfocus.data.datasource.StatisticPomodoroDataSource
-import com.joseleandro.fullfocus.domain.model.StatisticDomain
+import com.joseleandro.fullfocus.data.local.database.dao.PomodoroDao
+import com.joseleandro.fullfocus.data.local.database.model.PomodoroWithSessions
 import com.joseleandro.fullfocus.domain.repository.StatisticRepository
 import kotlinx.coroutines.flow.Flow
-import java.time.LocalDate
 
 class StatisticRepositoryImpl(
-    private val statisticDataSource: StatisticPomodoroDataSource
+    private val pomodoroDao: PomodoroDao
 ) : StatisticRepository {
-    override fun getStatistics(): Flow<StatisticDomain> {
-        return statisticDataSource.statistic
-    }
-
-    override fun getStatisticsByMonth(date: LocalDate): Flow<StatisticDomain> {
-        return statisticDataSource.getStatisticByMonth(date)
+    override fun getAllPomodorosWithSessions(): Flow<List<PomodoroWithSessions>> {
+        return pomodoroDao.getAllPomodorosWithSessions()
     }
 }
