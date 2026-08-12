@@ -1,41 +1,113 @@
 package com.joseleandro.fullfocus.ui.screen.score
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.joseleandro.fullfocus.R
-import com.joseleandro.fullfocus.ui.component.FullFocusAchievementSection
-import com.joseleandro.fullfocus.ui.component.FullFocusCalendarStrike
-import com.joseleandro.fullfocus.ui.component.FullFocusHeroStreakCard
-import com.joseleandro.fullfocus.ui.component.FullFocusMonthlyActivityCard
-import com.joseleandro.fullfocus.ui.component.FullFocusStatCard
-import com.joseleandro.fullfocus.ui.component.FullFocusWeeklyChart
-import com.joseleandro.fullfocus.ui.state.AchievementUiState
+import com.joseleandro.fullfocus.ui.event.ScoreEvent
 import com.joseleandro.fullfocus.ui.state.ScoreUiState
-import com.joseleandro.fullfocus.ui.state.WeeklyHistoryData
 import com.joseleandro.fullfocus.ui.theme.FullFocusTheme
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.data.columnModel
+import com.patrykandpatrick.vico.compose.cartesian.layer.CartesianLayerPadding
+import com.patrykandpatrick.vico.compose.cartesian.layer.ColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.ColumnCartesianLayerMarkerTarget
+import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.common.DashedShape
+import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.Insets
+import com.patrykandpatrick.vico.compose.common.MarkerCornerBasedShape
+import com.patrykandpatrick.vico.compose.common.component.ShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import org.koin.compose.viewmodel.koinViewModel
+import java.time.DayOfWeek
+import java.time.Instant
+import java.time.ZoneId
+import java.util.Locale
+import java.time.format.TextStyle as JavaTextStyle
+
+const val Y_DIVISOR = 60_000
+private val BottomAxisLabelKey = ExtraStore.Key<List<DayOfWeek>>()
+private val StartAxisValueFormatter = CartesianValueFormatter { _, value, _ ->
+    "${(value / Y_DIVISOR).toInt()} min"
+}
+private val BottomAxisValueFormatter = CartesianValueFormatter { context, x, _ ->
+    context.model.extraStore[BottomAxisLabelKey][x.toInt()].getDisplayName(
+        JavaTextStyle.SHORT,
+        Locale.getDefault()
+    )
+}
+private val MarkerValueFormatter =
+    DefaultCartesianMarker.ValueFormatter { _, targets ->
+        val column = (targets[0] as ColumnCartesianLayerMarkerTarget).columns[0]
+        buildAnnotatedString {
+            withStyle(SpanStyle(column.color)) {
+                val valueInMinutes = (column.entry.y / Y_DIVISOR).toInt()
+                append("$valueInMinutes min")
+            }
+        }
+    }
+
+@Composable
+fun rememberMarker(
+    valueFormatter: DefaultCartesianMarker.ValueFormatter = DefaultCartesianMarker.ValueFormatter.default(),
+): DefaultCartesianMarker {
+    val label = rememberTextComponent(
+        style = TextStyle(color = MaterialTheme.colorScheme.onSurface),
+        background = rememberShapeComponent(
+            fill = Fill(MaterialTheme.colorScheme.surface),
+            shape = MarkerCornerBasedShape(CircleShape as CornerBasedShape),
+        ),
+        padding = Insets(horizontal = 8.dp, vertical = 4.dp),
+    )
+    return remember(label, valueFormatter) {
+        DefaultCartesianMarker(
+            label = label,
+            valueFormatter = valueFormatter,
+            indicator = { color ->
+                ShapeComponent(fill = Fill(color), shape = CircleShape)
+            },
+        )
+    }
+}
 
 @Composable
 fun ScoreScreen() {
@@ -43,262 +115,191 @@ fun ScoreScreen() {
     val viewModel = koinViewModel<ScoreViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    ScoreScreenContent(
-        uiState = uiState,
-        onPreviousMonth = viewModel::onPreviousMonth,
-        onNextMonth = viewModel::onNextMonth,
-        onMonthChanged = viewModel::onMonthChanged,
-        onChartPeriodSelected = viewModel::onChartPeriodSelected
+    LaunchedEffect(Unit) {
+        viewModel.onEvent(event = ScoreEvent.OnLoad)
+    }
+
+    ScoreScreen(
+        uiState = uiState
     )
 }
 
-@Composable
-fun ScoreScreenContent(
-    uiState: ScoreUiState,
-    onPreviousMonth: () -> Unit = {},
-    onNextMonth: () -> Unit = {},
-    onMonthChanged: (java.time.YearMonth) -> Unit = {},
-    onChartPeriodSelected: (String) -> Unit = {}
-) {
-    Scaffold(
-        topBar = {
-            ScoreTopAppBar(
-                onMenuClick = {}
-            )
-        }
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-
-            item {
-                FullFocusHeroStreakCard(
-                    streak = uiState.dailyStreak,
-                    highestStreak = uiState.highestStreak
-                )
-            }
-
-            item {
-                StatsGrid(uiState = uiState)
-            }
-
-            item {
-                FullFocusMonthlyActivityCard(
-                    monthLabel = uiState.currentMonthLabel,
-                    calendarMonthName = uiState.calendarMonthName,
-                    monthlyStrikeLabel = uiState.monthlyStrikeLabel,
-                    daysFocused = uiState.monthlyGoalDays,
-                    totalDays = uiState.monthlyGoalTotal,
-                    onPreviousMonth = onPreviousMonth,
-                    onNextMonth = onNextMonth,
-                    calendarContent = {
-                        FullFocusCalendarStrike(
-                            showMonthHeader = false,
-                            daySize = 36.dp,
-                            focusedDates = uiState.focusedDates,
-                            currentMonth = uiState.currentYearMonth,
-                            onMonthChanged = onMonthChanged
-                        )
-                    }
-                )
-            }
-
-            item {
-                FullFocusWeeklyChart(
-                    activity = uiState.weeklyActivity,
-                    selectedPeriod = uiState.selectedChartPeriod,
-                    periodOptions = uiState.chartPeriodOptions,
-                    onPeriodSelected = onChartPeriodSelected
-                )
-            }
-
-            item {
-                FullFocusAchievementSection(
-                    achievements = uiState.achievements
-                )
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScoreTopAppBar(
-    onMenuClick: () -> Unit
+fun ScoreScreen(
+    uiState: ScoreUiState
 ) {
-    TopAppBar(
-        title = {
-            Column {
-                Text(
-                    text = stringResource(R.string.estat_sticas),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = stringResource(R.string.seu_foco_suas_evolucoes),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+
+    val modelProducer = remember { CartesianChartModelProducer() }
+
+    fun getDayOfWeek(timestamp: Long): DayOfWeek {
+        return Instant
+            .ofEpochMilli(timestamp)
+            .atZone(ZoneId.systemDefault())
+            .dayOfWeek
+    }
+
+    LaunchedEffect(uiState.dateTimeWithSessionGroup) {
+
+        if (uiState.dateTimeWithSessionGroup.isNotEmpty()) {
+
+            val grouped = uiState.dateTimeWithSessionGroup
+                .entries
+                .groupBy { (timestamp, _) -> getDayOfWeek(timestamp) }
+                .mapValues { (_, entries) ->
+                    entries.sumOf { (_, sessions) ->
+                        sessions.sumOf { it.elapsedTime }
+                    }
+                }
+
+            val daysSorted =
+                listOf(DayOfWeek.SUNDAY) + DayOfWeek.entries.filter { it != DayOfWeek.SUNDAY }
+
+            val data = daysSorted.associateWith { day ->
+                grouped[day] ?: 0L
             }
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = onMenuClick
+            modelProducer.runTransaction {
+                columnModel {
+                    series(data.values)
+                    extras { it[BottomAxisLabelKey] = data.keys.toList() }
+                }
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(
+                        onClick = {}
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.material_symbols_menu_rounded),
+                            contentDescription = null
+                        )
+                    }
+                }
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(state = rememberScrollState())
+                .padding(innerPadding)
+                .padding(top = 16.dp)
+        ) {
+
+            OutlinedCard(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                shape = MaterialTheme.shapes.large
             ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.material_symbols_menu_rounded),
-                    contentDescription = "Menu"
-                )
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "Tempo de Foco (Semanal)",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    CartesianChartHost(
+                        placeholder = {
+                            Text(
+                                modifier = Modifier.align(alignment = Alignment.Center),
+                                text = "Sem dados para mostrar"
+                            )
+                        },
+                        chart = rememberCartesianChart(
+                            rememberColumnCartesianLayer(
+                                columnProvider = ColumnCartesianLayer.ColumnProvider.series(
+                                    rememberLineComponent(
+                                        fill = Fill(MaterialTheme.colorScheme.primary),
+                                        thickness = 24.dp,
+                                        shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+                                    )
+                                ),
+                                dataLabel = rememberTextComponent(
+                                    style = TextStyle(
+                                        fontSize = 10.sp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    ),
+                                    padding = Insets(bottom = 2.dp)
+                                ),
+                                dataLabelValueFormatter = CartesianValueFormatter { _, value, _ ->
+                                    if (value > 0) "${(value / Y_DIVISOR).toInt()}" else ""
+                                }
+                            ),
+                            startAxis = VerticalAxis.rememberStart(
+                                valueFormatter = StartAxisValueFormatter,
+                                itemPlacer = VerticalAxis.ItemPlacer.step({ Y_DIVISOR.toDouble() }),
+                                label = rememberTextComponent(
+                                    style = TextStyle(
+                                        fontSize = 10.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ),
+                                guideline = rememberLineComponent(
+                                    fill = Fill(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)),
+                                    thickness = 1.dp,
+                                    shape = DashedShape(dashLength = 4.dp, gapLength = 4.dp)
+                                )
+                            ),
+                            bottomAxis = HorizontalAxis.rememberBottom(
+                                itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
+                                valueFormatter = BottomAxisValueFormatter,
+                                label = rememberTextComponent(
+                                    style = TextStyle(
+                                        fontSize = 10.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ),
+                                labelRotationDegrees = -45f
+                            ),
+                            marker = rememberMarker(MarkerValueFormatter),
+                            layerPadding = {
+                                CartesianLayerPadding(
+                                    scalableStart = 8.dp,
+                                    scalableEnd = 8.dp
+                                )
+                            },
+                        ),
+                        modelProducer = modelProducer
+                    )
+                }
             }
         }
-    )
-}
-
-@Composable
-private fun StatsGrid(uiState: ScoreUiState) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            FullFocusStatCard(
-                modifier = Modifier.weight(1f),
-                title = "Tempo de Foco",
-                value = uiState.totalHoursMonth,
-                iconRes = R.drawable.mingcute_time_line,
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-            FullFocusStatCard(
-                modifier = Modifier.weight(1f),
-                title = "Pomodoros",
-                value = uiState.pomodorosCompleted.toString(),
-                iconRes = R.drawable.boxicons_timer,
-                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f),
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            FullFocusStatCard(
-                modifier = Modifier.weight(1f),
-                title = "Meta Semanal",
-                value = uiState.weeklyGoalProgress,
-                iconRes = R.drawable.ri_target_fill,
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f),
-                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-            FullFocusStatCard(
-                modifier = Modifier.weight(1f),
-                title = "Consistência",
-                value = "${uiState.consistencyRate}%",
-                iconRes = R.drawable.game_icons_hiking,
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun ScoreScreenDarkPreview() {
-    FullFocusTheme(darkTheme = true, dynamicColor = false) {
-        ScoreScreenContent(
-            uiState = ScoreUiState(
-                totalHoursMonth = "48h 32m",
-                focusSessionsCompleted = 386,
-                pomodorosCompleted = 386,
-                dailyStreak = 12,
-                highestStreak = 21,
-                weeklyGoalProgress = "20/35",
-                monthlyGoalDays = 16,
-                monthlyGoalTotal = 31,
-                consistencyRate = 87,
-                currentMonthLabel = "Maio 2025",
-                weeklyActivity = listOf(
-                    WeeklyHistoryData("7-13", "Abr", 0.6f),
-                    WeeklyHistoryData("14-20", "Abr", 0.75f),
-                    WeeklyHistoryData("21-27", "Abr", 0.85f),
-                    WeeklyHistoryData("19-25", "Mai", 0.95f, "10h 45m")
-                ),
-                achievements = listOf(
-                    AchievementUiState(
-                        "1",
-                        "Primeira semana",
-                        "7 dias seguidos",
-                        R.drawable.fluent_emoji_flat_fire,
-                        true,
-                        0xFFFF8C00
-                    ),
-                    AchievementUiState(
-                        "2",
-                        "Um mês focado",
-                        "30 dias seguidos",
-                        R.drawable.mynaui_coffee,
-                        true,
-                        0xFFE91E63
-                    )
-                )
-            )
-        )
-    }
-}
-
-@Preview(showBackground = true)
+@Preview
 @Composable
 private fun ScoreScreenLightPreview() {
-    FullFocusTheme(darkTheme = false, dynamicColor = false) {
-        ScoreScreenContent(
-            uiState = ScoreUiState(
-                totalHoursMonth = "48h 32m",
-                focusSessionsCompleted = 386,
-                pomodorosCompleted = 386,
-                dailyStreak = 12,
-                highestStreak = 21,
-                weeklyGoalProgress = "20/35",
-                monthlyGoalDays = 16,
-                monthlyGoalTotal = 31,
-                consistencyRate = 87,
-                currentMonthLabel = "Maio 2025",
-                calendarMonthName = "Julho",
-                monthlyStrikeLabel = "12 dias",
-                selectedChartPeriod = "Por semana",
-                weeklyActivity = listOf(
-                    WeeklyHistoryData("Seg", "Abr", 0.4f),
-                    WeeklyHistoryData("Ter", "Abr", 0.6f),
-                    WeeklyHistoryData("Qua", "Abr", 0.85f),
-                    WeeklyHistoryData("Qui", "Mai", 0.55f),
-                    WeeklyHistoryData("Sex", "Mai", 0.65f),
-                    WeeklyHistoryData("Sáb", "Mai", 0.75f),
-                    WeeklyHistoryData("Dom", "Mai", 0.95f, "11h")
-                ),
-                achievements = listOf(
-                    AchievementUiState(
-                        "1",
-                        "Primeira semana",
-                        "7 dias seguidos",
-                        R.drawable.fluent_emoji_flat_fire,
-                        true,
-                        0xFFFF8C00
-                    ),
-                    AchievementUiState(
-                        "2",
-                        "Um mês focado",
-                        "30 dias seguidos",
-                        R.drawable.mynaui_coffee,
-                        true,
-                        0xFFE91E63
-                    )
-                )
-            )
+    FullFocusTheme(
+        dynamicColor = false,
+        darkTheme = false
+    ) {
+        ScoreScreen(
+            uiState = ScoreUiState()
         )
     }
 }
+
+@Preview
+@Composable
+private fun ScoreScreenDarkPreview() {
+    FullFocusTheme(
+        dynamicColor = false,
+        darkTheme = true
+    ) {
+        ScoreScreen(
+            uiState = ScoreUiState()
+        )
+    }
+}
+

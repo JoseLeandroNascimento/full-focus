@@ -19,7 +19,6 @@ import com.joseleandro.fullfocus.data.repository.StatisticRepositoryImpl
 import com.joseleandro.fullfocus.domain.repository.PomodoroRepository
 import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.domain.repository.StatisticRepository
-import com.joseleandro.fullfocus.domain.usecase.GetStatisticsUseCase
 import com.joseleandro.fullfocus.ui.screen.config_sound.ConfigSoundViewModel
 import com.joseleandro.fullfocus.ui.screen.notification_setting.NotificationSettingViewModel
 import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroViewModel
@@ -71,12 +70,6 @@ object KoinModule {
         single<StatisticRepository> {
             StatisticRepositoryImpl(
                 pomodoroDao = get()
-            )
-        }
-
-        single {
-            GetStatisticsUseCase(
-                repository = get()
             )
         }
 

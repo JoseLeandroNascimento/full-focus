@@ -46,6 +46,11 @@ dependencies {
     implementation("com.kizitonwose.calendar:compose:2.10.1")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 
+    implementation(libs.vico.compose)
+    implementation(libs.vico.compose.m2)
+    implementation(libs.vico.compose.m3)
+    implementation(libs.vico.compose.glance)
+
     implementation(libs.lottie)
     implementation(libs.lottie.compose)
 
