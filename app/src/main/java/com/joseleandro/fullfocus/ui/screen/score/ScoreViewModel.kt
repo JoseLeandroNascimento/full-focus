@@ -26,9 +26,13 @@ class ScoreViewModel(
     private val _uiState = MutableStateFlow(ScoreUiState())
     val uiState = _uiState.asStateFlow()
 
+
     fun onEvent(event: ScoreEvent) {
         when (event) {
             ScoreEvent.OnLoad -> load()
+            is ScoreEvent.OnDateSelected -> {
+                _uiState.update { it.copy(selectedHeatMapDate = event.date) }
+            }
         }
     }
 
@@ -41,7 +45,7 @@ class ScoreViewModel(
                 val endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
 
                 val allPomodoroCompleted = pomodoroWidthSessions.filter { it.pomodoro.completed }
-                
+
                 val allSessionsFocusCompleted = allPomodoroCompleted.flatMap { it.sessions }
                     .filter { it.state == PomodoroState.FOCUS && it.status == SessionStatus.COMPLETED }
 
@@ -63,16 +67,36 @@ class ScoreViewModel(
                                 .toEpochMilli()
                         }
 
+                val heatMapRawData = allSessionsFocusCompleted
+                    .groupBy { session ->
+                        Instant.ofEpochMilli(session.createdAt)
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDate()
+                    }
+                    .mapValues { (_, sessions) ->
+                        sessions.sumOf { it.elapsedTime } / 60_000
+                    }
+
+                val heatMapData = heatMapRawData.mapValues { (_, totalMinutes) ->
+                    when {
+                        totalMinutes <= 0 -> 0
+                        totalMinutes <= 25 -> 1
+                        totalMinutes <= 50 -> 2
+                        totalMinutes <= 75 -> 3
+                        else -> 4
+                    }
+                }
+
                 _uiState.update { state ->
                     state.copy(
-                        dateTimeWithSessionGroup = dateTimeWithSessionsGroup
+                        dateTimeWithSessionGroup = dateTimeWithSessionsGroup,
+                        heatMapData = heatMapData,
+                        heatMapMinutes = heatMapRawData
                     )
                 }
             }
         }
     }
-
-
 
     companion object {
     }
