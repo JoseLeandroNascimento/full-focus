@@ -1,11 +1,15 @@
 package com.joseleandro.fullfocus.ui.state
 
-import com.joseleandro.fullfocus.data.local.database.model.SessionEntity
+import androidx.compose.runtime.Immutable
+import com.joseleandro.fullfocus.domain.model.HeatMapDataDomain
+import com.joseleandro.fullfocus.ui.screen.score.WeekFocusTime
 import java.time.LocalDate
 
+@Immutable
 data class ScoreUiState(
-    val dateTimeWithSessionGroup: Map<Long, List<SessionEntity>> = emptyMap(),
-    val heatMapData: Map<LocalDate, Int> = emptyMap(),
-    val heatMapMinutes: Map<LocalDate, Long> = emptyMap(),
-    val selectedHeatMapDate: LocalDate? = null
+    val chartData: Map<String, Long> = emptyMap(),
+    val heatMapData: List<HeatMapDataDomain> = emptyList(),
+    val totalHours: String = "00h",
+    val weekFocusTime: WeekFocusTime = WeekFocusTime.WEEKLY,
+    val selectedDate: LocalDate? = null
 )

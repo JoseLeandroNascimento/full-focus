@@ -77,4 +77,15 @@
     <string name="atividade_do_mes">Atividade do mês %1$s</string>
     <string name="estat_sticas">Estatísticas</string>
     <string name="seu_foco_suas_evolucoes">Seu foco, suas evoluções.</string>
+    <string name="min">%1$d min</string>
+    <string name="menos">Menos</string>
+    <string name="mais">Mais</string>
+    <string name="sem_dados_para_mostrar">Sem dados para mostrar</string>
+    <string name="consistencia_de_atividade">Consistência de Atividade</string>
+    <string name="frequencia_de_sessoes_de_foco_ao_longo_do_ano">Frequência de sessões de foco ao longo do ano</string>
+    <string name="tempo_de_foco_semanal">Tempo de Foco Semanal</string>
+    <string name="duracao_total_acumulada_por_dia_em_minutos">Duração total acumulada por dia (em minutos)</string>
+    <string name="tempo_de_foco_mensal">Tempo de Foco Mensal</string>
+    <string name="duracao_total_acumulada_por_semana_em_minutos">Duração total acumulada por semana (em minutos)</string>
+    <string name="semana">Semana %1$d</string>
 </resources>
