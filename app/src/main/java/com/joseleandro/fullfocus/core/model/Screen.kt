@@ -25,4 +25,7 @@ sealed interface Screen {
     @Serializable
     data object NotificationSettingScreen : Screen
 
+    @Serializable
+    data object MetaScreen : Screen
+
 }

@@ -110,5 +110,6 @@ object KoinModule {
 
         viewModelOf(::ScoreViewModel)
 
+
     }
 }

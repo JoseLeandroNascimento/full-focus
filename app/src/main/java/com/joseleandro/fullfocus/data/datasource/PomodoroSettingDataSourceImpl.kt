@@ -155,4 +155,24 @@ class PomodoroSettingDataSourceImpl(
             )
         }
     }
+
+    override suspend fun updateDailyGoal(goal: Int) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    dailyGoal = goal
+                )
+            )
+        }
+    }
+
+    override suspend fun updateWeeklyGoal(goal: Int) {
+        context.dataStore.updateData { state ->
+            state.copy(
+                pomodoroSetting = state.pomodoroSetting.copy(
+                    weeklyGoal = goal
+                )
+            )
+        }
+    }
 }

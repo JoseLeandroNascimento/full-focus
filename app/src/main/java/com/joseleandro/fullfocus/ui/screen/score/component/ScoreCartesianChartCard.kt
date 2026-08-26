@@ -1,10 +1,12 @@
 package com.joseleandro.fullfocus.ui.screen.score.component
 
+import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +17,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -75,6 +78,12 @@ private val MarkerValueFormatter = DefaultCartesianMarker.ValueFormatter { _, ta
     }
 }
 
+data class DropdownItem(
+    val text: String,
+    @get:DrawableRes val icon: Int,
+    val value: WeekFocusTime
+)
+
 @Composable
 fun rememberMarker(
     valueFormatter: DefaultCartesianMarker.ValueFormatter = DefaultCartesianMarker.ValueFormatter.default(),
@@ -108,6 +117,24 @@ fun ScoreCartesianChartCard(
 
     var expandedDropdownMenu by remember { mutableStateOf(false) }
 
+    val optionsMenu = listOf(
+        DropdownItem(
+            text = stringResource(R.string.semanal),
+            icon = R.drawable.outline_calendar_view_week_24,
+            value = WeekFocusTime.WEEKLY
+        ),
+        DropdownItem(
+            text = stringResource(R.string.mensal),
+            icon = R.drawable.outline_calendar_view_month_24,
+            value = WeekFocusTime.MONTHLY
+        ),
+        DropdownItem(
+            text = stringResource(R.string.anual),
+            icon = R.drawable.outline_calendar_month_24,
+            value = WeekFocusTime.YEARLY
+        )
+    )
+
     OutlinedCard(
         modifier = modifier.padding(horizontal = 16.dp),
         border = BorderStroke(
@@ -127,20 +154,25 @@ fun ScoreCartesianChartCard(
                     modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.Center
                 ) {
+                    val title = when (weekFocusTime) {
+                        WeekFocusTime.WEEKLY -> R.string.tempo_de_foco_semanal
+                        WeekFocusTime.MONTHLY -> R.string.tempo_de_foco_mensal
+                        WeekFocusTime.YEARLY -> R.string.tempo_de_foco_anual
+                    }
+                    val subtitle = when (weekFocusTime) {
+                        WeekFocusTime.WEEKLY -> R.string.duracao_total_acumulada_por_dia_em_minutos
+                        WeekFocusTime.MONTHLY -> R.string.duracao_total_acumulada_por_semana_em_minutos
+                        WeekFocusTime.YEARLY -> R.string.duracao_total_acumulada_por_mes_em_minutos
+                    }
+
                     Text(
-                        text = if (weekFocusTime == WeekFocusTime.WEEKLY)
-                            stringResource(R.string.tempo_de_foco_semanal)
-                        else
-                            stringResource(R.string.tempo_de_foco_mensal),
+                        text = stringResource(title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = if (weekFocusTime == WeekFocusTime.WEEKLY)
-                            stringResource(R.string.duracao_total_acumulada_por_dia_em_minutos)
-                        else
-                            stringResource(R.string.duracao_total_acumulada_por_semana_em_minutos),
+                        text = stringResource(subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -161,46 +193,47 @@ fun ScoreCartesianChartCard(
 
                     DropdownMenu(
                         expanded = expandedDropdownMenu,
-                        onDismissRequest = {
-                            expandedDropdownMenu = false
-                        }
+                        onDismissRequest = { expandedDropdownMenu = false },
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        shape = MaterialTheme.shapes.extraLarge,
+                        tonalElevation = 4.dp,
+                        shadowElevation = 1.dp
                     ) {
-                        DropdownMenuItem(
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.outline_calendar_view_week_24),
-                                    contentDescription = null
-                                )
-                            },
-                            text = {
-                                Text(
-                                    text = "Semanal",
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            },
-                            onClick = {
-                                expandedDropdownMenu = false
-                                onWeekFocusTimeChange(WeekFocusTime.WEEKLY)
-                            }
-                        )
-                        DropdownMenuItem(
-                            leadingIcon = {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.outline_calendar_view_month_24),
-                                    contentDescription = null
-                                )
-                            },
-                            text = {
-                                Text(
-                                    text = "Mensal",
-                                    style = MaterialTheme.typography.labelMedium
-                                )
-                            },
-                            onClick = {
-                                expandedDropdownMenu = false
-                                onWeekFocusTimeChange(WeekFocusTime.MONTHLY)
-                            }
-                        )
+
+
+                        optionsMenu.forEach { (label, icon, mode) ->
+                            val isSelected = weekFocusTime == mode
+
+                            DropdownMenuItem(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .clip(shape = MaterialTheme.shapes.large),
+                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 2.dp),
+                                leadingIcon = {
+                                    Icon(
+                                        painter = painterResource(id = icon),
+                                        contentDescription = null,
+                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                },
+                                text = {
+                                    Text(
+                                        text = label,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                colors = MenuDefaults.itemColors(
+                                    leadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textColor = MaterialTheme.colorScheme.onSurface
+                                ),
+                                onClick = {
+                                    expandedDropdownMenu = false
+                                    onWeekFocusTimeChange(mode)
+                                }
+                            )
+                        }
                     }
                 }
 

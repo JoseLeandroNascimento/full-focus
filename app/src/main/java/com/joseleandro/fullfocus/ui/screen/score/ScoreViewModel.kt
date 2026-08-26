@@ -9,6 +9,7 @@ import com.joseleandro.fullfocus.data.local.database.model.SessionStatus
 import com.joseleandro.fullfocus.domain.model.HeatMapDataDomain
 import com.joseleandro.fullfocus.domain.model.HeatMapDomain
 import com.joseleandro.fullfocus.domain.repository.StatisticRepository
+import com.joseleandro.fullfocus.domain.repository.PomodoroSettingRepository
 import com.joseleandro.fullfocus.ui.event.ScoreEvent
 import com.joseleandro.fullfocus.ui.state.ScoreUiState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -19,14 +20,17 @@ import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Month
 import java.time.ZoneId
+import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
 import java.util.Locale
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ScoreViewModel(
-    private val statisticRepository: StatisticRepository
+    private val statisticRepository: StatisticRepository,
+    private val pomodoroSettingRepository: PomodoroSettingRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ScoreUiState())
@@ -46,36 +50,77 @@ class ScoreViewModel(
 
     private fun load() {
         viewModelScope.launch {
-            statisticRepository.getAllPomodorosWithSessions().collect { pomodoroWidthSessions ->
-                val today = LocalDate.now(ZoneId.systemDefault())
+            pomodoroSettingRepository.pomodoroSetting.collect { setting ->
+                _uiState.update { it.copy(weeklyGoal = setting.weeklyGoal) }
+                
+                statisticRepository.getAllPomodorosWithSessions().collect { pomodoroWidthSessions ->
+                    val today = LocalDate.now(ZoneId.systemDefault())
 
-                val allPomodoroCompleted = getAllPomodoroCompleted(data = pomodoroWidthSessions)
-                allSessionsFocusCompleted =
-                    getAllSessionsFocusCompleted(data = allPomodoroCompleted)
+                    val allPomodoroCompleted = getAllPomodoroCompleted(data = pomodoroWidthSessions)
+                    allSessionsFocusCompleted =
+                        getAllSessionsFocusCompleted(data = allPomodoroCompleted)
 
-                updateChartData(uiState.value.weekFocusTime)
+                    updateChartData(uiState.value.weekFocusTime)
 
-                val startOfMonth = today.withDayOfMonth(1)
-                val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
+                    val startOfMonth = today.withDayOfMonth(1)
+                    val endOfMonth = today.withDayOfMonth(today.lengthOfMonth())
 
-                val monthSessions = getAllSessionFocusByMonth(
-                    data = allSessionsFocusCompleted,
-                    startOfMonth = startOfMonth,
-                    endOfMonth = endOfMonth
-                )
-
-                val totalHours = monthSessions
-                    .map { session -> session.elapsedTime }
-                    .fold(0L) { acc, lng -> acc + lng }
-                    .formatMillisToHours()
-
-                val heatMapDataList = calcHeatMapDataList(data = allSessionsFocusCompleted)
-
-                _uiState.update { state ->
-                    state.copy(
-                        heatMapData = heatMapDataList,
-                        totalHours = totalHours
+                    val monthSessions = getAllSessionFocusByMonth(
+                        data = allSessionsFocusCompleted,
+                        startOfMonth = startOfMonth,
+                        endOfMonth = endOfMonth
                     )
+
+                    val totalHours = monthSessions
+                        .map { session -> session.elapsedTime }
+                        .fold(0L) { acc, lng -> acc + lng }
+                        .formatMillisToHours()
+
+                    val heatMapDataList = calcHeatMapDataList(data = allSessionsFocusCompleted)
+
+                    // Calculate Weekly Goal Progress
+                    val startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY))
+                    val endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY))
+                    
+                    val weeklyGoalCurrent = allPomodoroCompleted
+                        .filter { it.pomodoro.completed }
+                        .groupBy { 
+                            Instant.ofEpochMilli(it.pomodoro.createAt)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                        }
+                        .filter { (date, pomodoros) ->
+                            !date.isBefore(startOfWeek) && !date.isAfter(endOfWeek) && 
+                            pomodoros.size >= setting.dailyGoal
+                        }.size
+
+                    // Calculate Streak
+                    val datesWithGoalMet = allPomodoroCompleted
+                        .groupBy { 
+                             Instant.ofEpochMilli(it.pomodoro.createAt)
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDate()
+                        }
+                        .filter { it.value.size >= setting.dailyGoal }
+                        .keys
+                    
+                    var currentStreak = 0
+                    if (datesWithGoalMet.contains(today) || datesWithGoalMet.contains(today.minusDays(1))) {
+                        var tempDate = if (datesWithGoalMet.contains(today)) today else today.minusDays(1)
+                        while (datesWithGoalMet.contains(tempDate)) {
+                            currentStreak++
+                            tempDate = tempDate.minusDays(1)
+                        }
+                    }
+
+                    _uiState.update { state ->
+                        state.copy(
+                            heatMapData = heatMapDataList,
+                            totalHours = totalHours,
+                            weeklyGoalCurrent = weeklyGoalCurrent,
+                            dailyStreak = currentStreak
+                        )
+                    }
                 }
             }
         }
@@ -113,7 +158,7 @@ class ScoreViewModel(
                 )
 
                 daysSorted.associate { day ->
-                    day.getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault()) to
+                    day.getDisplayName(TextStyle.SHORT, Locale.getDefault()) to
                             (grouped[day]?.sumOf { it.elapsedTime } ?: 0L)
                 }
             }
@@ -142,6 +187,30 @@ class ScoreViewModel(
 
                 (1..maxWeek).associate { weekNumber ->
                     "Sem $weekNumber" to (grouped[weekNumber]?.sumOf { it.elapsedTime } ?: 0L)
+                }
+            }
+
+            WeekFocusTime.YEARLY -> {
+                val startOfYear = today.with(TemporalAdjusters.firstDayOfYear())
+                val endOfYear = today.with(TemporalAdjusters.lastDayOfYear())
+
+                val yearSessions = allSessionsFocusCompleted.filter { session ->
+                    val sessionDate = Instant.ofEpochMilli(session.createdAt)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                    !sessionDate.isBefore(startOfYear) && !sessionDate.isAfter(endOfYear)
+                }
+
+                val grouped = yearSessions.groupBy { session ->
+                    Instant.ofEpochMilli(session.createdAt)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                        .month
+                }
+
+                Month.entries.associate { month ->
+                    month.getDisplayName(TextStyle.SHORT, Locale.getDefault()) to
+                            (grouped[month]?.sumOf { it.elapsedTime } ?: 0L)
                 }
             }
         }

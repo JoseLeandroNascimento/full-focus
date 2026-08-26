@@ -9,8 +9,8 @@ import com.joseleandro.fullfocus.core.model.Screen
 import com.joseleandro.fullfocus.core.viewModel.FullFocusNavigationViewModel
 import com.joseleandro.fullfocus.ui.screen.config_sound.ConfigSoundScreen
 import com.joseleandro.fullfocus.ui.screen.main.MainScreen
+import com.joseleandro.fullfocus.ui.screen.meta.MetaScreen
 import com.joseleandro.fullfocus.ui.screen.notification_setting.NotificationSettingScreen
-import com.joseleandro.fullfocus.ui.screen.pomodoro.PomodoroScreen
 import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.ProgressTimeColorCustomizeScreen
 import com.joseleandro.fullfocus.ui.screen.progress_time_color_customize.ProgressTimeColorCustomizeViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -30,9 +30,7 @@ fun FullFocusApp() {
             entry<Screen.MainScreen> {
                 MainScreen()
             }
-            entry<Screen.PomodoroScreen> {
-                PomodoroScreen()
-            }
+
             entry<Screen.SittingSoundPomodoroScreen> {
 
                 ConfigSoundScreen(
@@ -54,6 +52,12 @@ fun FullFocusApp() {
 
             entry<Screen.NotificationSettingScreen> {
                 NotificationSettingScreen(
+                    onNavigateBack = onBack
+                )
+            }
+
+            entry<Screen.MetaScreen> {
+                MetaScreen(
                     onNavigateBack = onBack
                 )
             }

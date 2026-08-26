@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -54,7 +55,9 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
-fun ScoreScreen() {
+fun ScoreScreen(
+    openDrawer: () -> Unit
+) {
 
     val viewModel = koinViewModel<ScoreViewModel>()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -65,7 +68,8 @@ fun ScoreScreen() {
 
     ScoreScreen(
         uiState = uiState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        openDrawer = openDrawer
     )
 }
 
@@ -74,9 +78,9 @@ fun ScoreScreen() {
 @Composable
 fun ScoreScreen(
     uiState: ScoreUiState,
-    onEvent: (ScoreEvent) -> Unit
+    onEvent: (ScoreEvent) -> Unit,
+    openDrawer: () -> Unit
 ) {
-
 
     val modelProducer = remember { CartesianChartModelProducer() }
 
@@ -106,7 +110,7 @@ fun ScoreScreen(
                 title = { Text("") },
                 navigationIcon = {
                     IconButton(
-                        onClick = {}
+                        onClick = openDrawer
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.material_symbols_menu_rounded),
@@ -127,9 +131,9 @@ fun ScoreScreen(
         ) {
 
             ScoreWeeklyGoalCard(
-                current = 3,
-                total = 6,
-                streak = 4,
+                current = uiState.weeklyGoalCurrent,
+                total = uiState.weeklyGoal,
+                streak = uiState.dailyStreak,
                 totalHours = uiState.totalHours,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
@@ -194,6 +198,10 @@ fun ScoreScreen(
                     onEvent(ScoreEvent.OnWeekFocusTimeChange(it))
                 }
             )
+
+            Spacer(
+                modifier = Modifier.height(24.dp)
+            )
         }
     }
 }
@@ -211,7 +219,8 @@ private fun ScoreScreenLightPreview() {
                     chartData = dummyChartData,
                     heatMapData = dummyHeatMapData
                 ),
-                onEvent = {}
+                onEvent = {},
+                openDrawer = {}
             )
         }
     }
@@ -230,7 +239,8 @@ private fun ScoreScreenDarkPreview() {
                     chartData = dummyChartData,
                     heatMapData = dummyHeatMapData
                 ),
-                onEvent = {}
+                onEvent = {},
+                openDrawer = {}
             )
         }
     }

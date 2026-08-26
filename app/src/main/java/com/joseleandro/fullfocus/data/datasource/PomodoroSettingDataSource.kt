@@ -38,4 +38,8 @@ interface PomodoroSettingDataSource {
 
     suspend fun updateAlertSoundPause(sound: SoundAlarm?)
 
+    suspend fun updateDailyGoal(goal: Int)
+
+    suspend fun updateWeeklyGoal(goal: Int)
+
 }

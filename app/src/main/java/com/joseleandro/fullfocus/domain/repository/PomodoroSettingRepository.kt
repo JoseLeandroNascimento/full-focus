@@ -37,4 +37,8 @@ interface PomodoroSettingRepository {
     suspend fun updateAlertSoundFocus(sound: SoundAlarm?)
 
     suspend fun updateAlertSoundPause(sound: SoundAlarm?)
+
+    suspend fun updateDailyGoal(goal: Int)
+
+    suspend fun updateWeeklyGoal(goal: Int)
 }

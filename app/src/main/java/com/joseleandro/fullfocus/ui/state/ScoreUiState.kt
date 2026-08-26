@@ -11,5 +11,8 @@ data class ScoreUiState(
     val heatMapData: List<HeatMapDataDomain> = emptyList(),
     val totalHours: String = "00h",
     val weekFocusTime: WeekFocusTime = WeekFocusTime.WEEKLY,
-    val selectedDate: LocalDate? = null
+    val selectedDate: LocalDate? = null,
+    val weeklyGoal: Int = 0,
+    val weeklyGoalCurrent: Int = 0,
+    val dailyStreak: Int = 0
 )

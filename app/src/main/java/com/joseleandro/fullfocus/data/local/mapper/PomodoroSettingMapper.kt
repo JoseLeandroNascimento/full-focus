@@ -19,5 +19,7 @@ fun PomodoroSetting.toDomain(): PomodoroSettingDomain =
         isSoundEnabled = this.isSoundEnabled,
         alertSoundFocus = this.alertSoundFocus,
         alertSoundPause = this.alertSoundPause,
-        isVibrationEnabled = this.isVibrationEnabled
+        isVibrationEnabled = this.isVibrationEnabled,
+        dailyGoal = this.dailyGoal,
+        weeklyGoal = this.weeklyGoal
     )

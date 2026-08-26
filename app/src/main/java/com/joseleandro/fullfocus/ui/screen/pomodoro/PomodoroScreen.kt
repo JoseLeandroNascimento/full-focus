@@ -44,6 +44,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun PomodoroScreen(
+    openDrawer: () -> Unit
 ) {
 
     val viewModel = koinViewModel<PomodoroViewModel>()
@@ -51,7 +52,8 @@ fun PomodoroScreen(
 
     PomodoroScreen(
         uiState = uiState,
-        onEvent = viewModel::onEvent
+        onEvent = viewModel::onEvent,
+        openDrawer = openDrawer
     )
 }
 
@@ -60,7 +62,8 @@ fun PomodoroScreen(
 @Composable
 fun PomodoroScreen(
     uiState: PomodoroUiState,
-    onEvent: (PomodoroEvent) -> Unit
+    onEvent: (PomodoroEvent) -> Unit,
+    openDrawer: () -> Unit
 ) {
 
     Scaffold(
@@ -68,7 +71,7 @@ fun PomodoroScreen(
             CenterAlignedTopAppBar(
                 navigationIcon = {
                     IconButton(
-                        onClick = {}
+                        onClick = openDrawer
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.material_symbols_menu_rounded),
@@ -309,7 +312,8 @@ private fun PomodoroScreenLightPreview() {
             uiState = PomodoroUiState(
                 colorProgress = ColorStyle.fromColor(Color(0xFF25D9FF))
             ),
-            onEvent = {}
+            onEvent = {},
+            openDrawer = {}
         )
     }
 }
@@ -325,7 +329,8 @@ private fun PomodoroScreenDarkPreview() {
             uiState = PomodoroUiState(
                 colorProgress = ColorStyle.fromColor(Color(0xFF25D9FF))
             ),
-            onEvent = {}
+            onEvent = {},
+            openDrawer = {}
         )
     }
 }

@@ -22,5 +22,7 @@ data class PomodoroSetting(
     val isSoundEnabled: Boolean = true,
     val alertSoundFocus: SoundAlarm? = SoundAlarm.ALARM_1,
     val alertSoundPause: SoundAlarm? = SoundAlarm.ALARM_1,
-    val isVibrationEnabled: Boolean = true
+    val isVibrationEnabled: Boolean = true,
+    val dailyGoal: Int = 4,
+    val weeklyGoal: Int = 5
 )

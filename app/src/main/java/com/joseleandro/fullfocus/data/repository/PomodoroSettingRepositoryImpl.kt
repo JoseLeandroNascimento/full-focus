@@ -72,4 +72,12 @@ class PomodoroSettingRepositoryImpl(
     override suspend fun updateAlertSoundPause(sound: SoundAlarm?) {
         pomodoroSettingDataSource.updateAlertSoundPause(sound = sound)
     }
+
+    override suspend fun updateDailyGoal(goal: Int) {
+        pomodoroSettingDataSource.updateDailyGoal(goal = goal)
+    }
+
+    override suspend fun updateWeeklyGoal(goal: Int) {
+        pomodoroSettingDataSource.updateWeeklyGoal(goal = goal)
+    }
 }
